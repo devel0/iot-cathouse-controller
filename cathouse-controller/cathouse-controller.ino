@@ -7,6 +7,8 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+#include "Util.h"
+
 //------------------------------------------
 //
 // CHANGE AS NEEDED
@@ -15,7 +17,7 @@
 #include "/home/devel0/security/wifi.h"
 
 #define DEBUG // comment to disable serial output
-#define TEMPERATURE_INTERVAL_MS 5000
+#define TEMPERATURE_INTERVAL_MS 1000
 #define TEMPERATURE_DEVICE_COUNT 2
 #define ONE_WIRE_BUS D3
 
@@ -95,7 +97,7 @@ void SetupTemperatureDevices()
   ReadTemperatures();
 }
 
-long lastTemperatureRead;
+unsigned long lastTemperatureRead;
 
 void ReadTemperatures()
 {
@@ -127,7 +129,7 @@ void loop()
       if (client.available())
       {
         char c = client.read();
-        DEBUG_PRINTF("read char [%c]\n", c);
+        //DEBUG_PRINTF("read char [%c]\n", c);
         header += c;
         if (c == '\n')
         {
@@ -139,25 +141,25 @@ void loop()
             client.println();
 
             foundcmd = false;
-
-            String header_search;
-            header_search += "GET /";
+            
             if (temperatureDeviceCount > 0)
             {
               for (int i = 0; i < temperatureDeviceCount; ++i)
               {
                 String q = String("GET /temp/");
                 q.concat(i);
+                //DEBUG_PRINTF("Searching for [%s]", q.c_str());
                 if (header.indexOf(q) >= 0)
                 {
-                  DEBUG_PRINTF("client requesting temperature sensor %d\n", i);
+                  //DEBUG_PRINTF("client requesting temperature sensor %d with header [%s]\n", i, header.c_str());
                   client.printf("%f", temperatures[i]);
+                  client.stop();
                   break;
                 }
               }
             }
 
-            if (header.indexOf("/help") >= 0)
+            if (header.indexOf("GET /help") >= 0)
             {
               client.println("<html><body>");
               client.println("<h1>Api</h1>");
@@ -165,7 +167,7 @@ void loop()
               {
                 client.println("<h3>Temperature sensors</h3>");
                 client.printf("/temp/i ( read temperature of sensor i=0..%d )", temperatureDeviceCount - 1);
-              }              
+              }
               client.println("</body></html>");
             }
 
@@ -182,13 +184,14 @@ void loop()
         }
       }
     }
-  
+
     client.stop();
     DEBUG_PRINTLN("Client disconnected");
+    header = "";    
   }
   else
   {
-    if (millis() - lastTemperatureRead > TEMPERATURE_INTERVAL_MS)
+    if (TimeDiff(lastTemperatureRead, millis()) > TEMPERATURE_INTERVAL_MS)
     {
       ReadTemperatures();
     }
