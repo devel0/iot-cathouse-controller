@@ -16,13 +16,20 @@
 
 #include "/home/devel0/security/wifi.h"
 
-#define DEBUG // comment to disable serial output
+//#define DEBUG // comment to disable serial output
 #define TEMPERATURE_INTERVAL_MS 1000
 #define TEMPERATURE_DEVICE_COUNT 2
 #define ONE_WIRE_BUS D3
 
+#define RELAY_DEVICE_COUNT (sizeof(RELAY_PORTS) / sizeof(int))
+int RELAY_PORTS[] = {D5};
+
+#define LED_PORT D7
+
 //
 //------------------------------------------
+
+#define BUILTIN_LED D4
 
 #ifdef DEBUG
 #define DEBUG_PRINT(x) Serial.print(x)
@@ -36,16 +43,11 @@
 #define DEBUG_PRINTLN(x)
 #endif
 
-#define BUILTIN_LED D4
-
 char ssid[] = WIFI_SSID;
 char pass[] = WIFI_KEY;
 int status = WL_IDLE_STATUS;
 
 WiFiServer server(80);
-
-#define RELAY_ON LOW
-#define RELAY_OFF HIGH
 
 OneWire tempOneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&tempOneWire);
@@ -53,9 +55,17 @@ DeviceAddress tempDevAddress[TEMPERATURE_DEVICE_COUNT]; // DeviceAddress defined
 int temperatureDeviceCount = 0;
 float *temperatures = NULL;
 
+#define RELAY_ON LOW
+#define RELAY_OFF HIGH
+
+//
+// MAIN SETUP
+//
 void setup()
 {
+#if DEBUG
   Serial.begin(115200);
+#endif
 
   if (WiFi.status() == WL_NO_SHIELD)
   {
@@ -77,11 +87,16 @@ void setup()
   pinMode(BUILTIN_LED, OUTPUT);
   digitalWrite(BUILTIN_LED, LOW);
 
-  SetupTemperatureDevices();
-
   server.begin();
+
+  SetupTemperatureDevices();
+  SetupRelays();
+  SetupLed();
 }
 
+//
+// TEMPERATURE SETUP
+//
 void SetupTemperatureDevices()
 {
   DS18B20.begin();
@@ -99,6 +114,9 @@ void SetupTemperatureDevices()
 
 unsigned long lastTemperatureRead;
 
+//
+// TEMPERATURE READ
+//
 void ReadTemperatures()
 {
   //DEBUG_PRINTLN("reading temperatures");
@@ -112,9 +130,33 @@ void ReadTemperatures()
   lastTemperatureRead = millis();
 }
 
+//
+// SETUP RELAYS
+//
+void SetupRelays()
+{
+  for (int i = 0; i < RELAY_DEVICE_COUNT; ++i)
+  {
+    digitalWrite(RELAY_PORTS[i], RELAY_OFF);
+    pinMode(RELAY_PORTS[i], OUTPUT);
+  }
+}
+
+//
+// SETUP LED PORT
+//
+void SetupLed()
+{
+  digitalWrite(LED_PORT, LOW);
+  pinMode(LED_PORT, OUTPUT);
+}
+
 String header;
 bool foundcmd;
 
+//
+// MAIN LOOP
+//
 void loop()
 {
   auto client = server.available();
@@ -141,17 +183,18 @@ void loop()
             client.println();
 
             foundcmd = false;
-            
+
+            //--------------------------
+            // TEMPERATURE
+            //--------------------------
             if (temperatureDeviceCount > 0)
             {
               for (int i = 0; i < temperatureDeviceCount; ++i)
               {
                 String q = String("GET /temp/");
                 q.concat(i);
-                //DEBUG_PRINTF("Searching for [%s]", q.c_str());
                 if (header.indexOf(q) >= 0)
                 {
-                  //DEBUG_PRINTF("client requesting temperature sensor %d with header [%s]\n", i, header.c_str());
                   client.printf("%f", temperatures[i]);
                   client.stop();
                   break;
@@ -159,15 +202,126 @@ void loop()
               }
             }
 
-            if (header.indexOf("GET /help") >= 0)
+            //--------------------------
+            // RELAYS
+            //--------------------------
+            if (RELAY_DEVICE_COUNT > 0)
             {
+              for (int i = 0; i < RELAY_DEVICE_COUNT; ++i)
+              {
+                String q = String("GET /relay/");
+                q.concat(i);
+
+                String qon = String(q.c_str());
+                qon.concat("/on");
+
+                String qoff = String(q.c_str());
+                qoff.concat("/off");
+
+                String qquery = String(q.c_str());
+                qquery.concat("/query");
+
+                auto ron = header.indexOf(qon) >= 0;
+                auto roff = header.indexOf(qoff) >= 0;
+                auto rquery = header.indexOf(qquery) >= 0;
+
+                if (rquery)
+                {
+                  client.printf("%d", digitalRead(RELAY_PORTS[i]));
+                  client.stop();
+                  break;
+                }
+                else if (ron || roff)
+                {
+                  client.printf("triggering relay to [%s]", ron ? "ON" : "OFF");
+                  digitalWrite(RELAY_PORTS[i], ron ? RELAY_ON : RELAY_OFF);
+                  client.stop();
+                  break;
+                }
+              }
+            }
+
+            //--------------------------
+            // LED
+            //--------------------------
+            {
+              String q = String("GET /led");
+
+              String qon = String(q.c_str());
+              qon.concat("/on");
+
+              String qoff = String(q.c_str());
+              qoff.concat("/off");
+
+              String qquery = String(q.c_str());
+              qquery.concat("/query");
+
+              auto ron = header.indexOf(qon) >= 0;
+              auto roff = header.indexOf(qoff) >= 0;
+              auto rquery = header.indexOf(qquery) >= 0;
+
+              if (rquery)
+              {
+                client.printf("%d", digitalRead(LED_PORT));
+                client.stop();
+                break;
+              }
+              else if (ron || roff)
+              {
+                client.printf("triggering led to [%s]", ron ? "ON" : "OFF");
+                digitalWrite(LED_PORT, ron ? HIGH : LOW);
+                client.stop();
+                break;
+              }
+            }
+
+            //--------------------------
+            // HELP
+            //--------------------------
+            if (header.indexOf("GET /") >= 0)
+            {
+              client.println("<script>function httpGet(theUrl)");
+              client.println("{");
+              client.println("    var xmlHttp = new XMLHttpRequest();");
+              client.println("    xmlHttp.open( \"GET\", theUrl, false );");
+              client.println("    xmlHttp.send( null );");
+              client.println("    return xmlHttp.responseText;");
+              client.println("}</script>");
               client.println("<html><body>");
-              client.println("<h1>Api</h1>");
+
+              // interactive
+              client.println("<h1>Cathouse</h1>");
+              if (temperatureDeviceCount > 0)
+              {
+                client.println("<table><thead><tr><td><b>Temp Sensor</b></td><td><b>Value (C)</b></td><td><b>Action</b></td></tr></thead>");
+                client.println("<tbody>");
+                for (int i = 0; i < temperatureDeviceCount; ++i)
+                  client.printf("<tr><td>%d</td><td>%f</td><td><button onclick='location.reload();'>reload</button></td></tr>", i, temperatures[i]);
+                client.println("</tbody></table>");
+              }
+
+              client.println("<table><thead><tr><td><b>Device</b></td><td><b>Status</b></td><td><b>Action</b></td></tr></thead>");
+              client.println("<tbody>");
+              for (int i = 0; i < RELAY_DEVICE_COUNT; ++i)
+                client.printf("<tr><td>relay %d</td><td>%s</td><td><button onclick='httpGet(\"/relay/0/%s\");location.reload();'>trigger</button></td></tr>",
+                              i,
+                              digitalRead(RELAY_PORTS[i]) == LOW ? "ON" : "OFF",
+                              digitalRead(RELAY_PORTS[i]) == LOW ? "off" : "on");
+              client.printf("<tr><td>led</td><td>%s</td><td><button onclick='httpGet(\"/led/%s\");location.reload();'>trigger</button></td></tr>",
+                            digitalRead(LED_PORT) == LOW ? "OFF" : "ON",
+                            digitalRead(LED_PORT) == LOW ? "on" : "off");
+              client.println("</tbody></table>");
+
+              // api
+              client.println("<h3>Api</h3>");
               if (temperatureDeviceCount > 0)
               {
                 client.println("<h3>Temperature sensors</h3>");
-                client.printf("/temp/i ( read temperature of sensor i=0..%d )", temperatureDeviceCount - 1);
+                client.printf("<code>/temp/i</code> ( read temperature of sensor i=0..%d )<br/>", temperatureDeviceCount - 1);
               }
+              client.printf("<code>/relay/i/[on|off|query]</code> ( activate/disactivate/query relay i=0..%d )<br/>", RELAY_DEVICE_COUNT - 1);
+              client.printf("<code>/led/[on|off|query]</code><br/>");
+
               client.println("</body></html>");
             }
 
@@ -187,7 +341,7 @@ void loop()
 
     client.stop();
     DEBUG_PRINTLN("Client disconnected");
-    header = "";    
+    header = "";
   }
   else
   {
@@ -198,6 +352,7 @@ void loop()
   }
 }
 
+//
 void printWifiData()
 {
   auto ip = WiFi.localIP();
@@ -217,6 +372,7 @@ void printWifiData()
   }
 }
 
+//
 void printCurrentNet()
 {
   DEBUG_PRINTF("SSID: %s\n", WiFi.SSID().c_str());
