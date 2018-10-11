@@ -8,19 +8,13 @@
 
 ## compile
 
-- set your wifi ssid and ssid key in a separate header file and set the path into the sketch
+- set your wifi ssid and ssid key in a separate header file
 
-```c
-#include "/home/devel0/security/my-wifi-key.h"
+```
+mkdir ~/Arduino/libraries/security
+echo '#define WIFI_SSID "labwlan"' > ~/Arduino/libraries/security/wifikey.h
+echo '#define WIFI_KEY "wifipass"' >> ~/Arduino/libraries/security/wifikey.h
 ```
 
-`my-wifi-key.h` example:
-
-```c
-#define WIFI_SSID "labwlan"
-#define WIFI_KEY "something"
-```
-
-- tune `my-wifi-key.h` path into `c_cpp_properties.json`
 - ensure to have `dialout` group permission to access /dev/ttyUSBx devices ( eg. `usermod -a -G dialout user` )
 - choose board NodeMCU 1.0
