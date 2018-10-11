@@ -18,3 +18,10 @@ echo '#define WIFI_KEY "wifipass"' >> ~/Arduino/libraries/security/wifikey.h
 
 - ensure to have `dialout` group permission to access /dev/ttyUSBx devices ( eg. `usermod -a -G dialout user` )
 - choose board NodeMCU 1.0
+
+## debug
+
+```
+cd cathouse-controller
+code .
+```
