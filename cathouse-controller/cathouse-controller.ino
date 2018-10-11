@@ -43,7 +43,7 @@ float *temperatures = NULL;
 //
 void setup()
 {
-#ifdef DEBUG
+#ifdef SERIAL_DEBUG
   Serial.begin(115200);
 #endif
 
