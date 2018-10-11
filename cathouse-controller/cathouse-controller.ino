@@ -11,7 +11,7 @@ int RELAY_PORTS[] = {D5};
 
 //------------------------------------------
 
-#include <ESP8266WiFi.h>  
+#include <ESP8266WiFi.h>
 #include <WiFiServer.h>
 #include <ESP8266HTTPClient.h>
 #include <OneWire.h>
@@ -46,6 +46,8 @@ void setup()
 #ifdef SERIAL_DEBUG
   Serial.begin(115200);
 #endif
+
+  WiFi.begin(ssid, pass);
 
   if (WiFi.status() == WL_NO_SHIELD)
   {
