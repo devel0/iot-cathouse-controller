@@ -1,5 +1,4 @@
-#define SERIAL_DEBUG // comment to disable serial output
-#include <my-wifi-key.h>
+#include <Arduino.h>
 
 #define TEMPERATURE_INTERVAL_MS 1000
 #define TEMPERATURE_DEVICE_COUNT 2
@@ -12,14 +11,15 @@ int RELAY_PORTS[] = {D5};
 
 //------------------------------------------
 
-#include <Arduino.h>
-#include <ESP8266WiFi.h>
+#include <ESP8266WiFi.h>  
 #include <WiFiServer.h>
 #include <ESP8266HTTPClient.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#include "Util.h"
+#define SERIAL_DEBUG // comment to disable serial output
+#include <mywifikey.h>
+#include <arduino-utils.h>
 
 #define BUILTIN_LED D4
 
