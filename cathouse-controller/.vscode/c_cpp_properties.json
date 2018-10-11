@@ -2,13 +2,14 @@
     "configurations": [
         {
             "name": "Linux",
-            "includePath": [
-                "/home/devel0/.arduino15/packages/esp8266/hardware/esp8266/2.4.2/variants/nodemcu",
-                "/home/devel0/.arduino15/packages/esp8266/tools/**",
-                "/home/devel0/.arduino15/packages/esp8266/hardware/esp8266/2.4.2/**",
-                "${workspaceFolder}/**",
-                "/home/devel0/Arduino/libraries/**"
+            "includePath": [                
+                "${workspaceFolder}/**"
             ],
+            "browse": {                
+                "path": [
+                    "/home/devel0/security"
+                ]
+            },
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",

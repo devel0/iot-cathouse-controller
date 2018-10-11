@@ -1,4 +1,16 @@
-#define ARDUINO 10807
+#define SERIAL_DEBUG // comment to disable serial output
+#include <my-wifi-key.h>
+
+#define TEMPERATURE_INTERVAL_MS 1000
+#define TEMPERATURE_DEVICE_COUNT 2
+#define ONE_WIRE_BUS D3
+
+#define RELAY_DEVICE_COUNT (sizeof(RELAY_PORTS) / sizeof(int))
+int RELAY_PORTS[] = {D5};
+
+#define LED_PORT D7
+
+//------------------------------------------
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
@@ -9,39 +21,7 @@
 
 #include "Util.h"
 
-//------------------------------------------
-//
-// CHANGE AS NEEDED
-//
-
-#include "/home/devel0/security/wifi.h"
-
-//#define DEBUG // comment to disable serial output
-#define TEMPERATURE_INTERVAL_MS 1000
-#define TEMPERATURE_DEVICE_COUNT 2
-#define ONE_WIRE_BUS D3
-
-#define RELAY_DEVICE_COUNT (sizeof(RELAY_PORTS) / sizeof(int))
-int RELAY_PORTS[] = {D5};
-
-#define LED_PORT D7
-
-//
-//------------------------------------------
-
 #define BUILTIN_LED D4
-
-#ifdef DEBUG
-#define DEBUG_PRINT(x) Serial.print(x)
-#define DEBUG_PRINTHEX(x) Serial.print(x, HEX)
-#define DEBUG_PRINTF(x, args...) Serial.printf(x, args)
-#define DEBUG_PRINTLN(x) Serial.println(x)
-#else
-#define DEBUG_PRINT(x)
-#define DEBUG_PRINTF(x, args...)
-#define DEBUG_PRINTHEX(x)
-#define DEBUG_PRINTLN(x)
-#endif
 
 char ssid[] = WIFI_SSID;
 char pass[] = WIFI_KEY;
@@ -63,7 +43,7 @@ float *temperatures = NULL;
 //
 void setup()
 {
-#if DEBUG
+#ifdef DEBUG
   Serial.begin(115200);
 #endif
 
