@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #define TEMPERATURE_INTERVAL_MS 1000
-#define TEMPERATURE_DEVICE_COUNT 2
+#define TEMPERATURE_ADDRESS_BYTES 8
 #define ONE_WIRE_BUS D3
 
 #define RELAY_DEVICE_COUNT (sizeof(RELAY_PORTS) / sizeof(int))
@@ -17,7 +17,7 @@ int RELAY_PORTS[] = {D5};
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#define SERIAL_DEBUG // comment to disable serial output
+//#define SERIAL_DEBUG // comment to disable serial output
 #include <mywifikey.h>
 #include <arduino-utils.h>
 
@@ -31,9 +31,11 @@ WiFiServer server(80);
 
 OneWire tempOneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&tempOneWire);
-DeviceAddress tempDevAddress[TEMPERATURE_DEVICE_COUNT]; // DeviceAddress defined as uint8_t[8]
+
 int temperatureDeviceCount = 0;
 float *temperatures = NULL;
+DeviceAddress *tempDevAddress; // DeviceAddress defined as uint8_t[8]
+char **tempDevHexAddress;
 
 #define RELAY_ON LOW
 #define RELAY_OFF HIGH
@@ -85,11 +87,29 @@ void SetupTemperatureDevices()
   temperatureDeviceCount = DS18B20.getDeviceCount();
   DEBUG_PRINTF("temperature device count = %d\n", temperatureDeviceCount);
   if (temperatureDeviceCount > 0)
-    temperatures = new float[temperatureDeviceCount];
-  for (int i = 0; i < temperatureDeviceCount; ++i)
   {
-    DS18B20.getAddress(tempDevAddress[i], i);
-    DS18B20.setResolution(12);
+    temperatures = new float[temperatureDeviceCount];
+    tempDevAddress = new DeviceAddress[temperatureDeviceCount];
+    tempDevHexAddress = (char **)malloc(sizeof(char *) * temperatureDeviceCount);
+
+    for (int i = 0; i < temperatureDeviceCount; ++i)
+    {
+      tempDevHexAddress[i] = (char *)malloc(sizeof(char) * (TEMPERATURE_ADDRESS_BYTES * 2 + 1));
+      DS18B20.getAddress(tempDevAddress[i], i);
+      sprintf(tempDevHexAddress[i], "%02x%02x%02x%02x%02x%02x%02x%02x",
+              tempDevAddress[i][0],
+              tempDevAddress[i][1],
+              tempDevAddress[i][2],
+              tempDevAddress[i][3],
+              tempDevAddress[i][4],
+              tempDevAddress[i][5],
+              tempDevAddress[i][6],
+              tempDevAddress[i][7]);
+
+      DEBUG_PRINTF("sensor [%d] address = %s\n", i, tempDevHexAddress[i]);
+
+      DS18B20.setResolution(12);
+    }
   }
   ReadTemperatures();
 }
@@ -106,7 +126,7 @@ void ReadTemperatures()
   for (int i = 0; i < temperatureDeviceCount; ++i)
   {
     auto temp = DS18B20.getTempC(tempDevAddress[i]);
-    DEBUG_PRINTF("temperature sensor %d = %f\n", i, temp);
+    //DEBUG_PRINTF("temperature sensor %d = %f\n", i, temp);
     temperatures[i] = temp;
   }
   lastTemperatureRead = millis();
@@ -171,16 +191,29 @@ void loop()
             //--------------------------
             if (temperatureDeviceCount > 0)
             {
-              for (int i = 0; i < temperatureDeviceCount; ++i)
+
+              String q = String("GET /temp/");
+              if (header.indexOf(q) >= 0)
               {
-                String q = String("GET /temp/");
-                q.concat(i);
-                if (header.indexOf(q) >= 0)
+                bool found = false;
+                if (header.length() - q.length() >= 8)
                 {
-                  client.printf("%f", temperatures[i]);
-                  client.stop();
-                  break;
+                  for (int i = 0; i < temperatureDeviceCount; ++i)
+                  {
+                    if (strncmp(header.c_str() + q.length(), tempDevHexAddress[i],
+                                2 * TEMPERATURE_ADDRESS_BYTES) == 0)
+                    {
+                      client.printf("%f", temperatures[i]);
+                      found = true;
+                      break;
+                    }
+                  }
                 }
+                if (!found)
+                  client.print("not found");
+
+                client.stop();
+                break;
               }
             }
 
@@ -278,7 +311,7 @@ void loop()
                 client.println("<table><thead><tr><td><b>Temp Sensor</b></td><td><b>Value (C)</b></td><td><b>Action</b></td></tr></thead>");
                 client.println("<tbody>");
                 for (int i = 0; i < temperatureDeviceCount; ++i)
-                  client.printf("<tr><td>%d</td><td>%f</td><td><button onclick='location.reload();'>reload</button></td></tr>", i, temperatures[i]);
+                  client.printf("<tr><td>%s</td><td>%f</td><td><button onclick='location.reload();'>reload</button></td></tr>", tempDevHexAddress[i], temperatures[i]);
                 client.println("</tbody></table>");
               }
 
@@ -298,8 +331,7 @@ void loop()
               client.println("<h3>Api</h3>");
               if (temperatureDeviceCount > 0)
               {
-                client.println("<h3>Temperature sensors</h3>");
-                client.printf("<code>/temp/i</code> ( read temperature of sensor i=0..%d )<br/>", temperatureDeviceCount - 1);
+                client.printf("<code>/temp/address</code> ( read temperature of sensor by given 8 hex address )<br/>", temperatureDeviceCount - 1);
               }
               client.printf("<code>/relay/i/[on|off|query]</code> ( activate/disactivate/query relay i=0..%d )<br/>", RELAY_DEVICE_COUNT - 1);
               client.printf("<code>/led/[on|off|query]</code><br/>");
