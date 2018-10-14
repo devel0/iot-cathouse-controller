@@ -331,7 +331,7 @@ void loop()
               client.println("<h3>Api</h3>");
               if (temperatureDeviceCount > 0)
               {
-                client.printf("<code>/temp/address</code> ( read temperature of sensor by given 8 hex address )<br/>", temperatureDeviceCount - 1);
+                client.print("<code>/temp/address</code> ( read temperature of sensor by given 8 hex address )<br/>");
               }
               client.printf("<code>/relay/i/[on|off|query]</code> ( activate/disactivate/query relay i=0..%d )<br/>", RELAY_DEVICE_COUNT - 1);
               client.printf("<code>/led/[on|off|query]</code><br/>");
