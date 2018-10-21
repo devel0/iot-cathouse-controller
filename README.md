@@ -3,7 +3,7 @@
 ## requirements
 
 - [nodemcu](http://nodemcu.com/index_en.html)
-- [vscode arduino](https://github.com/devel0/knowledge/blob/master/arduino/vscode-arduino.md)
+- [vscode arduino](https://github.com/devel0/knowledge/blob/master/electronics/vscode-arduino.md)
 - [esp8266 board plugin](https://github.com/esp8266/Arduino#installing-with-boards-manager)
 
 ## compile
