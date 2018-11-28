@@ -49,7 +49,7 @@ void setup()
   Serial.begin(115200);
 #endif
 
-  WiFi.begin(ssid, pass);
+  WiFi.begin(ssid, pass);  
 
   if (WiFi.status() == WL_NO_SHIELD)
   {
