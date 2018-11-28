@@ -1,81 +1,137 @@
+#define ARDUINO 18070
+
+//==============================================================================
+//
+//-------------------- PLEASE REVIEW FOLLOW VARIABLES ------------------
+//
+// SECURITY WARNING : uncomment ENABLE_CORS=0 in production!
+//---------------------
+// I used CORS policy to allow me write index.htm and app.js outside atmega controller from pc
+// using atmega webapis
+//
+#define ENABLE_CORS 1
+
+// choose one of follow two interface
+#define USE_ENC28J60
+//#define USE_W5500
+
+#define MACADDRESS 0x33, 0xcf, 0x8d, 0x9f, 0x5b, 0x89
+#define MYIPADDR 10, 10, 4, 111
+#define MYIPMASK 255, 255, 255, 0
+#define MYDNS 10, 10, 0, 6
+#define MYGW 10, 10, 0, 1
+#define LISTENPORT 80
+#define MAX_HEADER_SIZE 80
+#define ONE_WIRE_BUS 3
+// EDIT DebugMacros to set SERIAL_SPEED and enable/disable DPRINT_SERIAL
+
+// tune follow watching at /info api "history_size"
+// example
+// - history_size=132 if want to keep last 36 hours then
+// - TEMPERATURE_HISTORY_INTERVAL_SEC = 36 * 60 * 60 / 132 = 982
+// this mean that a sample will be recorded each 982 seconds = 16min ( foreach temp device )
+#define TEMPERATURE_HISTORY_INTERVAL_SEC 982
+
+//
+//==============================================================================
+
 #include <Arduino.h>
 
-#define TEMPERATURE_INTERVAL_MS 1000
-#define TEMPERATURE_ADDRESS_BYTES 8
-#define ONE_WIRE_BUS D3
+unsigned long lastTemperatureHistoryRecord;
+uint8_t temperatureHistoryFillCnt = 0;
+#define TEMPERATURE_HISTORY_FREERAM_THRESHOLD 200
+uint16_t TEMPERATURE_HISTORY_SIZE = 0;
 
-#define RELAY_DEVICE_COUNT (sizeof(RELAY_PORTS) / sizeof(int))
-int RELAY_PORTS[] = {D5};
+#define TEMPERATURE_INTERVAL_MS 5000
+unsigned long lastTemperatureRead;
 
-#define LED_PORT D7
+//-------------------------
 
-//------------------------------------------
-
-#include <ESP8266WiFi.h>
-#include <WiFiServer.h>
-#include <ESP8266HTTPClient.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-
-//#define SERIAL_DEBUG // comment to disable serial output
 #include <mywifikey.h>
-#include <arduino-utils.h>
 
-#define BUILTIN_LED D4
+#ifdef USE_ENC28J60
+#include <UIPEthernet.h>
+// edit UIPEthernet/utility/uipethernet-conf.h to customize
+// - define UIP_CONF_UDP=0 to reduce flash size
+#endif
 
-char ssid[] = WIFI_SSID;
-char pass[] = WIFI_KEY;
-int status = WL_IDLE_STATUS;
+#ifdef USE_W5500
+#include <Ethernet.h>
+#endif
 
-WiFiServer server(80);
+#include <DPrint.h>
+#include <Util.h>
+using namespace SearchAThing::Arduino;
+
+unsigned char *header;
+EthernetServer server = EthernetServer(LISTENPORT);
+
+#define TEMPERATURE_ADDRESS_BYTES 8
 
 OneWire tempOneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&tempOneWire);
 
 int temperatureDeviceCount = 0;
-float *temperatures = NULL;
+float *temperatures = NULL;    // current temp
 DeviceAddress *tempDevAddress; // DeviceAddress defined as uint8_t[8]
 char **tempDevHexAddress;
 
-#define RELAY_ON LOW
-#define RELAY_OFF HIGH
+// stored as signed int8 ( ie. float rounded to int8 )
+int8_t **temperatureHistory = NULL;
+uint16_t temperatureHistoryOff = 0;
+
+void printFreeram()
+{
+  DPrintF(F("Freeram : "));
+  DPrintLongln(FreeMemorySum());
+}
 
 //
-// MAIN SETUP
+// SETUP
 //
 void setup()
 {
-#ifdef SERIAL_DEBUG
-  Serial.begin(115200);
-#endif
+  pinMode(4, OUTPUT);
+  digitalWrite(4, HIGH);
 
-  WiFi.begin(ssid, pass);  
+  pinMode(10, OUTPUT);
+  digitalWrite(10, HIGH);
+  delay(1);
 
-  if (WiFi.status() == WL_NO_SHIELD)
-  {
-    DEBUG_PRINTLN("WiFi shield not present");
-    while (true)
-      ;
-  }
+  header = (unsigned char *)malloc(MAX_HEADER_SIZE + 1);
 
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    DEBUG_PRINT(".");
-  }
+  DPrintFln(F("STARTUP"));
 
-  printCurrentNet();
-  printWifiData();
+  lastTemperatureRead = lastTemperatureHistoryRecord = millis();
 
-  DEBUG_PRINTLN("Startup server");
-  pinMode(BUILTIN_LED, OUTPUT);
-  digitalWrite(BUILTIN_LED, LOW);
-
-  server.begin();
+  printFreeram();
 
   SetupTemperatureDevices();
-  SetupRelays();
-  SetupLed();
+
+  uint8_t mac[6] = {MACADDRESS};
+  uint8_t myIP[4] = {MYIPADDR};
+  uint8_t myMASK[4] = {MYIPMASK};
+  uint8_t myDNS[4] = {MYDNS};
+  uint8_t myGW[4] = {MYGW};
+
+  // dhcp
+  //Ethernet.begin(mac);
+
+  // static
+  Ethernet.begin(mac, myIP, myDNS, myGW, myMASK);
+
+  DPrintF(F("my ip : "));
+  for (int i = 0; i < 4; ++i)
+  {
+    DPrintInt16(Ethernet.localIP()[i]);
+    if (i != 3)
+      DPrintChar('.');
+  }
+  DPrintln();
+
+  server.begin();
 }
 
 //
@@ -85,7 +141,8 @@ void SetupTemperatureDevices()
 {
   DS18B20.begin();
   temperatureDeviceCount = DS18B20.getDeviceCount();
-  DEBUG_PRINTF("temperature device count = %d\n", temperatureDeviceCount);
+  DPrintF(F("temperature device count = "));
+  DPrintInt16ln(temperatureDeviceCount);
   if (temperatureDeviceCount > 0)
   {
     temperatures = new float[temperatureDeviceCount];
@@ -106,302 +163,306 @@ void SetupTemperatureDevices()
               tempDevAddress[i][6],
               tempDevAddress[i][7]);
 
-      DEBUG_PRINTF("sensor [%d] address = %s\n", i, tempDevHexAddress[i]);
+      DPrintF(F("sensor ["));
+      DPrintInt16(i);
+      DPrintF(F("] address = "));
+      DPrintStr(tempDevHexAddress[i]);
+      DPrintln();
 
       DS18B20.setResolution(12);
     }
+
+    printFreeram();
+    auto freeram = FreeMemorySum();
+    TEMPERATURE_HISTORY_SIZE = (freeram - TEMPERATURE_HISTORY_FREERAM_THRESHOLD) / temperatureDeviceCount;
+
+    auto required_size = sizeof(int8_t) * temperatureDeviceCount * TEMPERATURE_HISTORY_SIZE;
+
+    temperatureHistory = (int8_t **)malloc(sizeof(int8_t *) * temperatureDeviceCount);
+
+    DPrintF(F("temperature history size: "));
+    DPrintUInt16(TEMPERATURE_HISTORY_SIZE);
+    DPrintF(F(" = "));
+    DPrintULong((unsigned long)TEMPERATURE_HISTORY_SIZE * (TEMPERATURE_HISTORY_INTERVAL_SEC) / 60 / 60);
+    DPrintFln(F(" hours"));
+    for (int i = 0; i < temperatureDeviceCount; ++i)
+    {
+      temperatureHistory[i] = (int8_t *)malloc(sizeof(int8_t) * TEMPERATURE_HISTORY_SIZE);
+    }
+    printFreeram();
   }
   ReadTemperatures();
 }
-
-unsigned long lastTemperatureRead;
 
 //
 // TEMPERATURE READ
 //
 void ReadTemperatures()
 {
-  //DEBUG_PRINTLN("reading temperatures");
   DS18B20.requestTemperatures();
   for (int i = 0; i < temperatureDeviceCount; ++i)
   {
     auto temp = DS18B20.getTempC(tempDevAddress[i]);
-    //DEBUG_PRINTF("temperature sensor %d = %f\n", i, temp);
+    DPrintF(F("temperature sensor ["));
+    DPrintInt16(i);
+    DPrintF(F("] = "));
+    DPrintFloatln(temp, 4);
     temperatures[i] = temp;
   }
+
   lastTemperatureRead = millis();
 }
 
-//
-// SETUP RELAYS
-//
-void SetupRelays()
+#define CCTYPE_HTML 0
+#define CCTYPE_JSON 1
+#define CCTYPE_TEXT 2
+#define CCTYPE_JS 3
+
+void clientOk(EthernetClient &client, int type)
 {
-  for (int i = 0; i < RELAY_DEVICE_COUNT; ++i)
+  client.println("HTTP/1.1 200 OK");
+  switch (type)
   {
-    digitalWrite(RELAY_PORTS[i], RELAY_OFF);
-    pinMode(RELAY_PORTS[i], OUTPUT);
+  case CCTYPE_HTML:
+    client.println("Content-Type: text/html");
+    break;
+
+  case CCTYPE_JSON:
+    client.println("Content-Type: application/json");
+    break;
+
+  case CCTYPE_TEXT:
+    client.println("Content-Type: text/plain");
+    break;
+
+  case CCTYPE_JS:
+    client.println("Content-Type: text/javascript");
+    break;
   }
+
+#if ENABLE_CORS == 1
+  client.println("Access-Control-Allow-Origin: *");
+#endif
+
+  client.println();
 }
 
 //
-// SETUP LED PORT
-//
-void SetupLed()
-{
-  digitalWrite(LED_PORT, LOW);
-  pinMode(LED_PORT, OUTPUT);
-}
-
-String header;
-bool foundcmd;
-
-//
-// MAIN LOOP
+// LOOP
 //
 void loop()
 {
-  auto client = server.available();
+  size_t size;
 
-  if (client)
+  if (EthernetClient client = server.available())
   {
-    DEBUG_PRINTLN("new client");
-    String currentLine = "";
 
-    while (client.connected())
+    while ((size = client.available()) > 0)
     {
-      if (client.available())
+      header[0] = 0;
       {
-        char c = client.read();
-        //DEBUG_PRINTF("read char [%c]\n", c);
-        header += c;
-        if (c == '\n')
+        int i = 0;
+        DPrintF(F("SZ:"));
+        DPrintInt16ln(size);
+        auto lim = min(MAX_HEADER_SIZE, size);
+        while (i < lim)
         {
-          if (currentLine.length() == 0)
+          char c = (char)client.read();
+
+          if (c == '\r')
           {
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:text/html");
-            client.println("Connection: close");
-            client.println();
-
-            foundcmd = false;
-
-            //--------------------------
-            // TEMPERATURE
-            //--------------------------
-            if (temperatureDeviceCount > 0)
-            {
-
-              String q = String("GET /temp/");
-              if (header.indexOf(q) >= 0)
-              {
-                bool found = false;
-                if (header.length() - q.length() >= 8)
-                {
-                  for (int i = 0; i < temperatureDeviceCount; ++i)
-                  {
-                    if (strncmp(header.c_str() + q.length(), tempDevHexAddress[i],
-                                2 * TEMPERATURE_ADDRESS_BYTES) == 0)
-                    {
-                      client.printf("%f", temperatures[i]);
-                      found = true;
-                      break;
-                    }
-                  }
-                }
-                if (!found)
-                  client.print("not found");
-
-                client.stop();
-                break;
-              }
-            }
-
-            //--------------------------
-            // RELAYS
-            //--------------------------
-            if (RELAY_DEVICE_COUNT > 0)
-            {
-              for (int i = 0; i < RELAY_DEVICE_COUNT; ++i)
-              {
-                String q = String("GET /relay/");
-                q.concat(i);
-
-                String qon = String(q.c_str());
-                qon.concat("/on");
-
-                String qoff = String(q.c_str());
-                qoff.concat("/off");
-
-                String qquery = String(q.c_str());
-                qquery.concat("/query");
-
-                auto ron = header.indexOf(qon) >= 0;
-                auto roff = header.indexOf(qoff) >= 0;
-                auto rquery = header.indexOf(qquery) >= 0;
-
-                if (rquery)
-                {
-                  client.printf("%d", digitalRead(RELAY_PORTS[i]));
-                  client.stop();
-                  break;
-                }
-                else if (ron || roff)
-                {
-                  client.printf("triggering relay to [%s]", ron ? "ON" : "OFF");
-                  digitalWrite(RELAY_PORTS[i], ron ? RELAY_ON : RELAY_OFF);
-                  client.stop();
-                  break;
-                }
-              }
-            }
-
-            //--------------------------
-            // LED
-            //--------------------------
-            {
-              String q = String("GET /led");
-
-              String qon = String(q.c_str());
-              qon.concat("/on");
-
-              String qoff = String(q.c_str());
-              qoff.concat("/off");
-
-              String qquery = String(q.c_str());
-              qquery.concat("/query");
-
-              auto ron = header.indexOf(qon) >= 0;
-              auto roff = header.indexOf(qoff) >= 0;
-              auto rquery = header.indexOf(qquery) >= 0;
-
-              if (rquery)
-              {
-                client.printf("%d", digitalRead(LED_PORT));
-                client.stop();
-                break;
-              }
-              else if (ron || roff)
-              {
-                client.printf("triggering led to [%s]", ron ? "ON" : "OFF");
-                digitalWrite(LED_PORT, ron ? HIGH : LOW);
-                client.stop();
-                break;
-              }
-            }
-
-            //--------------------------
-            // HELP
-            //--------------------------
-            if (header.indexOf("GET /") >= 0)
-            {
-              client.println("<script>function httpGet(theUrl)");
-              client.println("{");
-              client.println("    var xmlHttp = new XMLHttpRequest();");
-              client.println("    xmlHttp.open( \"GET\", theUrl, false );");
-              client.println("    xmlHttp.send( null );");
-              client.println("    return xmlHttp.responseText;");
-              client.println("}</script>");
-              client.println("<html><body>");
-
-              // interactive
-              client.println("<h1>Cathouse</h1>");
-              if (temperatureDeviceCount > 0)
-              {
-                client.println("<table><thead><tr><td><b>Temp Sensor</b></td><td><b>Value (C)</b></td><td><b>Action</b></td></tr></thead>");
-                client.println("<tbody>");
-                for (int i = 0; i < temperatureDeviceCount; ++i)
-                  client.printf("<tr><td>%s</td><td>%f</td><td><button onclick='location.reload();'>reload</button></td></tr>", tempDevHexAddress[i], temperatures[i]);
-                client.println("</tbody></table>");
-              }
-
-              client.println("<table><thead><tr><td><b>Device</b></td><td><b>Status</b></td><td><b>Action</b></td></tr></thead>");
-              client.println("<tbody>");
-              for (int i = 0; i < RELAY_DEVICE_COUNT; ++i)
-                client.printf("<tr><td>relay %d</td><td>%s</td><td><button onclick='httpGet(\"/relay/0/%s\");location.reload();'>trigger</button></td></tr>",
-                              i,
-                              digitalRead(RELAY_PORTS[i]) == LOW ? "ON" : "OFF",
-                              digitalRead(RELAY_PORTS[i]) == LOW ? "off" : "on");
-              client.printf("<tr><td>led</td><td>%s</td><td><button onclick='httpGet(\"/led/%s\");location.reload();'>trigger</button></td></tr>",
-                            digitalRead(LED_PORT) == LOW ? "OFF" : "ON",
-                            digitalRead(LED_PORT) == LOW ? "on" : "off");
-              client.println("</tbody></table>");
-
-              // api
-              client.println("<h3>Api</h3>");
-              if (temperatureDeviceCount > 0)
-              {
-                client.print("<code>/temp/address</code> ( read temperature of sensor by given 8 hex address )<br/>");
-              }
-              client.printf("<code>/relay/i/[on|off|query]</code> ( activate/disactivate/query relay i=0..%d )<br/>", RELAY_DEVICE_COUNT - 1);
-              client.printf("<code>/led/[on|off|query]</code><br/>");
-
-              client.println("</body></html>");
-            }
-
             break;
           }
-          else
+          header[i++] = c;
+        }
+        header[i] = 0;
+      }    
+      while (client.available()) client.read(); // consume remaining header  
+      
+
+      if (strlen(header) < 5 || strncmp(header, "GET /", 5) < 0)
+      {
+        client.stop();
+        break;
+      }
+
+      //--------------------------
+      // /tempdevices
+      //--------------------------
+      if (strncmp(header, "GET /tempdevices", 16) == 0)
+      {
+        DPrintFln(F("temp devices"));
+        clientOk(client, CCTYPE_JSON);
+
+        client.print(F("{\"tempdevices\":["));
+        for (int i = 0; i < temperatureDeviceCount; ++i)
+        {
+          client.print('"');
+          client.print(tempDevHexAddress[i]);
+          client.print('"');
+
+          if (i != temperatureDeviceCount - 1)
+            client.print(',');
+        }
+        client.print("]}");
+
+        client.stop();
+        break;
+      }
+
+      //--------------------------
+      // /temp/{id}
+      //--------------------------
+      if (strncmp(header, "GET /temp/", 10) == 0)
+      {
+        auto hbasesize = 10; // "GET /temp/"
+        bool found = false;
+
+        if (strlen(header) - hbasesize >= 8)
+        {
+          clientOk(client, CCTYPE_TEXT);
+
+          for (int i = 0; i < temperatureDeviceCount; ++i)
           {
-            currentLine = "";
+            if (strncmp(header + hbasesize, tempDevHexAddress[i],
+                        2 * TEMPERATURE_ADDRESS_BYTES) == 0)
+            {
+              char tmp[20];
+              FloatToString(tmp, temperatures[i], 6);
+
+              client.print(tmp);
+
+              found = true;
+              break;
+            }
           }
         }
-        else if (c != '\r')
+        if (!found)
+          client.print(F("not found"));
+
+        client.stop();
+        break;
+      }
+
+      //--------------------------
+      // /temphistory
+      //--------------------------
+      if (strncmp(header, "GET /temphistory", 16) == 0)
+      {
+        clientOk(client, CCTYPE_JSON);
+
+        DPrintF(F("temperatureHistoryFillCnt:"));
+        DPrintInt16ln(temperatureHistoryFillCnt);
+        DPrintF(F("temperatureHistoryOff:"));
+        DPrintUInt16ln(temperatureHistoryOff);
+
+        client.print('[');
+        for (int i = 0; i < temperatureDeviceCount; ++i)
         {
-          currentLine += c;
+          client.print(F("{\""));
+          client.print(tempDevHexAddress[i]);
+          client.print(F("\":["));
+          auto j = (temperatureHistoryFillCnt == TEMPERATURE_HISTORY_SIZE) ? temperatureHistoryOff : 0;
+          auto size = min(temperatureHistoryFillCnt, TEMPERATURE_HISTORY_SIZE);
+          for (int k = 0; k < size; ++k)
+          {
+            if (j == TEMPERATURE_HISTORY_SIZE)
+              j = 0;
+            client.print(temperatureHistory[i][j++]);
+            if (k < size - 1)
+              client.print(',');
+          }
+          client.print(F("]}"));
+          if (i != temperatureDeviceCount - 1)
+            client.print(',');
         }
+        client.print(']');
+
+        client.stop();
+        break;
+      }
+
+      //--------------------------
+      // /info
+      //--------------------------
+      if (strncmp(header, "GET /info", 9) == 0)
+      {
+        clientOk(client, CCTYPE_JSON);
+
+        client.print('{');
+
+        client.print(F("\"freeram\":"));
+        client.print((long)FreeMemorySum());
+
+        client.print(F(", \"history_size\":"));
+        client.print(TEMPERATURE_HISTORY_SIZE);
+
+        client.print(F(", \"history_interval_sec\":"));
+        client.print(TEMPERATURE_HISTORY_INTERVAL_SEC);
+
+        client.print('}');
+
+        client.stop();
+        break;
+      }
+
+      //--------------------------
+      // /app.js
+      //--------------------------
+      if (strncmp(header, "GET /app.js", 11) == 0)
+      {
+        DPrintFln(F("serving app.js"));
+
+        clientOk(client, CCTYPE_JS);
+
+        client.print(
+#include "app.js.h"
+        );
+
+        client.stop();
+        break;
+      }
+
+      //--------------------------
+      // /
+      //--------------------------
+      if (strncmp(header, "GET / ", 6) == 0 || strncmp(header, "GET /index.htm", 14) == 0)
+      {
+        DPrintFln(F("serving index.htm"));
+
+        clientOk(client, CCTYPE_HTML);
+
+        client.print(
+#include "index.htm.h"
+        );
+
+        client.stop();
+        break;
       }
     }
-
-    client.stop();
-    DEBUG_PRINTLN("Client disconnected");
-    header = "";
   }
-  else
+
+  if (TimeDiff(lastTemperatureRead, millis()) > TEMPERATURE_INTERVAL_MS)
   {
-    if (TimeDiff(lastTemperatureRead, millis()) > TEMPERATURE_INTERVAL_MS)
+    printFreeram();
+    ReadTemperatures();
+  }
+
+  if (temperatureHistory != NULL &&
+      (TimeDiff(lastTemperatureHistoryRecord, millis()) > 1000UL * TEMPERATURE_HISTORY_INTERVAL_SEC))
+  {
+    if (temperatureHistoryFillCnt < TEMPERATURE_HISTORY_SIZE)
+      ++temperatureHistoryFillCnt;
+
+    if (temperatureHistoryOff == TEMPERATURE_HISTORY_SIZE)
+      temperatureHistoryOff = 0;
+
+    for (int i = 0; i < temperatureDeviceCount; ++i)
     {
-      ReadTemperatures();
+      int8_t t = trunc(round(temperatures[i]));
+      temperatureHistory[i][temperatureHistoryOff] = t;
     }
+    ++temperatureHistoryOff;
+    lastTemperatureHistoryRecord = millis();
   }
-}
-
-//
-void printWifiData()
-{
-  auto ip = WiFi.localIP();
-  DEBUG_PRINT("IP Address: ");
-  DEBUG_PRINTLN(ip);
-
-  byte mac[6];
-  WiFi.macAddress(mac);
-  DEBUG_PRINT("MAC address: ");
-  for (int i = 0; i < 6; ++i)
-  {
-    DEBUG_PRINTHEX(mac[i]);
-    if (i != 5)
-      DEBUG_PRINT(":");
-    else
-      DEBUG_PRINTLN();
-  }
-}
-
-//
-void printCurrentNet()
-{
-  DEBUG_PRINTF("SSID: %s\n", WiFi.SSID().c_str());
-
-  auto bssid = WiFi.BSSID();
-  DEBUG_PRINT("BSSID: ");
-  for (int i = 0; i < 6; ++i)
-  {
-    DEBUG_PRINTHEX(bssid[i]);
-    if (i != 5)
-      DEBUG_PRINT(":");
-    else
-      DEBUG_PRINTLN();
-  }
-
-  auto rssi = WiFi.RSSI();
-  DEBUG_PRINTF("signal strength (RSSI): %ld\n", rssi);
 }
