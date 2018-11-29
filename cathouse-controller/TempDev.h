@@ -22,6 +22,6 @@ extern uint16_t TEMPERATURE_HISTORY_INTERVAL_SEC;
 
 void SetupTemperatureDevices();
 void ReadTemperatures();
-bool manageTemp();
+void manageTemp();
 
 #endif

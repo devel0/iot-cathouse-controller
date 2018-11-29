@@ -10,7 +10,7 @@
 extern WiFiServer server;
 
 void reconnectWifi();
-bool manageWifi();
+void manageWifi();
 
 void printWifiData();
 void printCurrentNet();

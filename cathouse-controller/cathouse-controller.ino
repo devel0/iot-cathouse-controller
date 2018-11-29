@@ -63,8 +63,9 @@ void setup()
 
 void loop()
 {
-  if (manageWifi()) return;
-  if (manageTemp()) return;
+  manageWifi();
+  
+  manageTemp();
 
   if (Serial.available())
   {

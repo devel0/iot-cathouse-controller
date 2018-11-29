@@ -168,7 +168,7 @@ void clientWriteBinaryF(WiFiClient &client, const unsigned char arr[], unsigned 
 String header;
 
 //
-bool manageWifi()
+void manageWifi()
 {
   WiFiClient client = server.available();
 
@@ -393,11 +393,8 @@ bool manageWifi()
     }
 
     Serial.println("---> client stop");
-    client.stop();
-
-    return true;
-  }
-  return false;
+    client.stop();    
+  }  
 }
 
 //

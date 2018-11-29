@@ -79,13 +79,10 @@ void ReadTemperatures()
     lastTemperatureRead = millis();
 }
 
-bool manageTemp()
+void manageTemp()
 {
-    if (TimeDiff(lastTemperatureRead, millis()) > TEMPERATURE_INTERVAL_MS)
-    {
-        ReadTemperatures();
-        return true;
-    }
+    if (TimeDiff(lastTemperatureRead, millis()) > TEMPERATURE_INTERVAL_MS)    
+        ReadTemperatures();    
 
     if (temperatureHistory != NULL &&
         (TimeDiff(lastTemperatureHistoryRecord, millis()) > 1000UL * TEMPERATURE_HISTORY_INTERVAL_SEC))
@@ -96,15 +93,10 @@ bool manageTemp()
         if (temperatureHistoryOff == TEMPERATURE_HISTORY_SIZE)
             temperatureHistoryOff = 0;
 
-        for (int i = 0; i < temperatureDeviceCount; ++i)
-        {
-            int8_t t = trunc(round(temperatures[i]));
-            temperatureHistory[i][temperatureHistoryOff] = t;
-        }
+        for (int i = 0; i < temperatureDeviceCount; ++i)                    
+            temperatureHistory[i][temperatureHistoryOff] = temperatures[i];
+        
         ++temperatureHistoryOff;
-        lastTemperatureHistoryRecord = millis();
-        return true;
-    }
-
-    return false;
+        lastTemperatureHistoryRecord = millis();        
+    }    
 }

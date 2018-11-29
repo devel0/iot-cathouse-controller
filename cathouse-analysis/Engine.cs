@@ -77,7 +77,7 @@ namespace cathouse_analysis
         {
             var timediff = TimeSpan.FromSeconds(0);
 
-            var qnow = await client.GetStringAsync($"http://cathouse.searchathing.com/port/get/{PortNumber}") == "1";            
+            var qnow = await client.GetStringAsync($"http://cathouse.searchathing.com/port/get/{PortNumber}") == "1";
             if (qnow)
             {
                 if (IsOn && lastRead.HasValue)
@@ -103,6 +103,7 @@ namespace cathouse_analysis
 
             System.Console.Write($"port {PortNumber} {(on ? "ON" : "OFF")} => ");
             var res = await client.GetStringAsync($"http://cathouse.searchathing.com/port/set/{PortNumber}/{(on ? "1" : "0")}");
+            if (res == "OK") IsOn = on;
             System.Console.WriteLine(res);
             if (!on) SecOn = 0;
         }
@@ -196,16 +197,10 @@ namespace cathouse_analysis
                         System.Console.WriteLine(Invariant($"Total Wh={ports.Sum(p => p.Wh)} W={ports.Sum(p => p.W(runtimeHr))}"));
                         System.Console.WriteLine();
 
-                        /*System.Console.WriteLine(string.Format("{0} bottom:{1,-8} ambient:{2,-8} wood:{3,-8} extern:{4,-8} power(wH):{5,-8:0.00} pmean(w):{6,-8:0.00} runtime(hr):{7,-8:0.000}",
-                        dtstr, tbottom, tambient, twood, textern,
-                        wH,
-                        runtime >= 1.0 ? wH / runtime : wH,
-                        runtime));*/
-
                         if ((DateTime.Now - dt).TotalSeconds >= 60) // flush data recording
                         {
-                            /* sw.WriteLine(str);
-                            sw.Flush();*/
+                            sw.WriteLine(str);
+                            sw.Flush();
                             dt = DateTime.Now;
                         }
 
