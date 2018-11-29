@@ -7,9 +7,22 @@
 // add a description to your sensors here
 //
 var sensorDesc = [{
-    id: "28af8123070000e2",
-    description: "test"
-}];
+        id: "28b03724070000c8",
+        description: "bottom"
+    },
+    {
+        id: "28f00a3b05000038",
+        description: "ambient"
+    },
+    {
+        id: "28e2cc23070000d8",
+        description: "wood"
+    },
+    {
+        id: "28d12b5b0500001c",
+        description: "extern"
+    }
+];
 
 // automatic replaced to debug = false during compilation
 // this is used to debug page index.htm locally
@@ -25,7 +38,7 @@ requirejs.config({
 var history_interval_sec = 10;
 
 var baseurl = '';
-if (debug) baseurl = 'http://10.10.4.111';
+if (debug) baseurl = 'http://10.10.3.9';
 
 async function reloadTemp(addr) {
     $('.j-spin').removeClass('collapse');

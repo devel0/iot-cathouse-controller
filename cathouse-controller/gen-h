@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# set to 1 to generate PROGMEM image flash version
+FLASH_VERSION=1
+
 # this script will invoked as prebuild ( see .vscode/arduino.json )
 
 echo "================================================"
@@ -54,3 +57,16 @@ echo '/* GENERATED FILE BY gen-h UTIL - DO NOT EDIT THIS */' > "$dst"
 echo -n 'F("' > "$dst"
 cat "$exdir/app.js" | sed 's/debug = true/debug = false/g' | removetrailingnewlines | removejscomment | removeleadingspaces | removetrailingspaces | sed 's/\\\"/\\\\\"/g' | sed 's/\"/\\\"/g' | processnewline >> "$dst"
 echo '")' >> "$dst"
+
+# generate png byte array
+#src="$exdir/image.png"
+#dst="$exdir/image.h"
+#if [ "$FLASH_VERSION" == "1" ]; then
+#    flashopt="const PROGMEM"
+#else
+#    flashopt=""
+#fi
+#echo -n "$flashopt unsigned char image[] = {" > "$dst"
+#cat "$src" | xxd -i >> "$dst"
+#echo -n "};" >> "$dst"
+#echo "unsigned int image_len = $(stat --printf="%s" "$src");" >> "$dst"
