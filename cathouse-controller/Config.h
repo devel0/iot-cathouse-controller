@@ -10,6 +10,7 @@
 #define ONEWIRE_PIN D3
 #define BUILTIN_LED D4
 #define LED_PIN D5
+#define FAN_PIN D0
 
 #define MOSFET_P1 D1
 #define MOSFET_P2 D2

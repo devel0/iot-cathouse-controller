@@ -311,8 +311,8 @@ void manageWifi()
             client.print('}');
           }
           //--------------------------
-          // /port/get/{1,2,3,4,5}
-          // note: 5 is led
+          // /port/get/{1,2,3,4,5,6}
+          // note: 5 is led, 6 is fan
           //--------------------------
           else if (header.indexOf("GET /port/get/") >= 0)
           {
@@ -337,10 +337,13 @@ void manageWifi()
 
             else if (port == "5")
               client.print(digitalRead(LED_PIN));
+
+            else if (port == "6")
+              client.print(digitalRead(FAN_PIN));
           }
           //--------------------------
           // /port/set/{1,2,3,4,5}/{0,1}
-          // note: 5 is led
+          // note: 5 is led, 6 is fan
           //--------------------------
           else if (header.indexOf("GET /port/set/") >= 0)
           {
@@ -350,7 +353,7 @@ void manageWifi()
 
             auto str = header.substring(14);
             auto port = str.substring(0, str.indexOf("/"));
-            auto mode = str.substring(str.indexOf("/") + 1, str.indexOf(" "));            
+            auto mode = str.substring(str.indexOf("/") + 1, str.indexOf(" "));
 
             Serial.printf("setting port [%s] to [%s]\n", port.c_str(), mode.c_str());
 
@@ -376,6 +379,9 @@ void manageWifi()
             case 5:
               portpin = LED_PIN;
               break;
+            case 6:
+              portpin = FAN_PIN;
+              break;
             }
 
             if (modenr)
@@ -383,7 +389,7 @@ void manageWifi()
             else
               digitalWrite(portpin, LOW);
 
-              client.print("OK");
+            client.print("OK");
           }
 
           header = "";
@@ -393,8 +399,8 @@ void manageWifi()
     }
 
     Serial.println("---> client stop");
-    client.stop();    
-  }  
+    client.stop();
+  }
 }
 
 //
