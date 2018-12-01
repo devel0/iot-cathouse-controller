@@ -21,16 +21,20 @@ namespace cathouse_analysis
 
         public const double TWOOD_LIMIT = 50d;
 
-        public const double TAMBIENT_VS_EXTERN_TARGET = 10.0d;
+        public const double TAMBIENT_LIMIT = 17d;
+
+        public const double TBOTTOM_GTE_FANON = 30d;
+
+        public const double TBOTTOM_LTE_FANOFF = 25d;
 
         /// <summary>
         /// min extern temperature to enable at least 1 port
         /// </summary>
-        public const double TEXTERN_MIN = 10d;
+        public const double TEXTERN_GTE_SYSOFF = 10d;
 
         //public const double TBOTTOM_TARGET = 20d;
 
-        public const double W_TARGET = 33d;
+        //public const double W_TARGET = 33d;
 
         public Engine()
         {
@@ -65,11 +69,14 @@ namespace cathouse_analysis
         public async Task Run()
         {
             System.Console.WriteLine("RUN");
-            var p2 = new PortInfo(client, 2, preference: 1.0);            
+            var p2 = new PortInfo(client, 2, preference: 1.0);
             var p4 = new PortInfo(client, 4, preference: .9);
             var p1 = new PortInfo(client, 1, preference: .8);
             var p3 = new PortInfo(client, 3, preference: .7);
-            var targetTempMaxDistanceActivators = new[] { 0, 1, 2, 3 };
+
+            var fan = new PortInfo(client, 6);
+
+            //var targetTempMaxDistanceActivators = new[] { 0, 1, 2, 3 };
             var ports = new List<PortInfo>() { p1, p2, p3, p4 };
 
             foreach (var x in ports)
@@ -100,10 +107,13 @@ namespace cathouse_analysis
                         var twood = await GetTWood();
                         var textern = await GetTExtern();
 
-                        var tambient_target = textern + TAMBIENT_VS_EXTERN_TARGET;
+                        var TAMBIENT_GTE_SYSOFF = textern + 14d;
+                        var TAMBIENT_LTE_SYSON = textern + 13d;
+
+                        //var tambient_target = textern + TAMBIENT_VS_EXTERN_TARGET;
 
                         var dtstr = DateTime.Now.ToString("O");
-                        var catinthere = false;
+                        //var catinthere = false;
 
                         foreach (var p in ports) await p.Verify();
 
@@ -130,13 +140,24 @@ namespace cathouse_analysis
                             dt = DateTime.Now;
                         }
 
-                        if (!dtCooldownStarted.HasValue ||
-                            (dtCooldownStarted.HasValue && (DateTime.Now - dtCooldownStarted.Value >= COOLDOWN_TIME)))
+                        // control fan based on bottom temp
+                        if (tbottom >= TBOTTOM_GTE_FANON)
+                            await fan.Write(true);
+                        else if (tbottom <= TBOTTOM_LTE_FANOFF)
+                            await fan.Write(false);
+
+                        if (textern > TEXTERN_GTE_SYSOFF) // disable system if extern temp hot
+                        {
+                            foreach (var p in ports) await p.Write(false);
+                            await fan.Write(false);
+                        }
+                        else if (!dtCooldownStarted.HasValue ||
+                             (dtCooldownStarted.HasValue && (DateTime.Now - dtCooldownStarted.Value >= COOLDOWN_TIME)))
                         {
                             dtCooldownStarted = null;
 
                             // if temp exceed disable all ports and enter cooldown mode
-                            if (tbottom >= TBOTTOM_LIMIT || twood >= TWOOD_LIMIT || (tambient >= tambient_target && textern > TEXTERN_MIN))
+                            if (tbottom >= TBOTTOM_LIMIT || twood >= TWOOD_LIMIT || tambient >= TAMBIENT_LIMIT)
                             {
                                 dtCooldownStarted = DateTime.Now;
                                 foreach (var x in ports) await x.Write(false, force: true);
@@ -144,32 +165,16 @@ namespace cathouse_analysis
                             // run ports to increase tambient
                             else
                             {
-                                var tdifftgt = "ambient";
-                                var tdiff = tambient_target - tambient;
-
+                                if (tambient <= TAMBIENT_LTE_SYSON)
                                 {
-                                    var ordered_ports = ports.OrderByDescending(w => w.Preference).ToList();
-                                    var boosted = false;
-                                    for (int i = 0; i < ordered_ports.Count; ++i)
-                                    {
-                                        var p = ordered_ports[i];
-
-                                        var state = tdiff >= targetTempMaxDistanceActivators[i];
-
-                                        if (!boosted && !state && W < W_TARGET && tdiff > .05d)
-                                        {
-                                            state = true;
-                                            boosted = true;
-                                        }
-
-                                        if (textern <= TEXTERN_MIN && i == 0)
-                                            state = true;
-
-                                        await ordered_ports[i].Write(state);
-                                    }
+                                    foreach (var p in ports) await p.Write(true);
+                                }
+                                else if (tambient >= TAMBIENT_GTE_SYSOFF)
+                                {
+                                    foreach (var p in ports) await p.Write(false);
                                 }
 
-                                System.Console.WriteLine($"tdiff [{tdifftgt}] from target = {tdiff}C   tambtgt = {tambient_target}C    enabled ports = {ports.Count(p => p.IsOn)}");
+                                System.Console.WriteLine($"FAN={fan.IsOn}");
                             }
                         }
                     }

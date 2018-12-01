@@ -274,11 +274,11 @@ void manageWifi()
               client.print(F("{\""));
               client.print(tempDevHexAddress[i]);
               client.print(F("\":["));
-              auto j = (temperatureHistoryFillCnt == TEMPERATURE_HISTORY_SIZE) ? temperatureHistoryOff : 0;
-              auto size = min((int)temperatureHistoryFillCnt, (int)(TEMPERATURE_HISTORY_SIZE));
+              auto j = (temperatureHistoryFillCnt == temperatureHistorySize) ? temperatureHistoryOff : 0;
+              auto size = min(temperatureHistoryFillCnt, temperatureHistorySize);
               for (int k = 0; k < size; ++k)
               {
-                if (j == TEMPERATURE_HISTORY_SIZE)
+                if (j == temperatureHistorySize)
                   j = 0;
                 client.print(temperatureHistory[i][j++]);
                 if (k < size - 1)
@@ -303,10 +303,51 @@ void manageWifi()
             client.print((long)FreeMemorySum());
 
             client.print(F(", \"history_size\":"));
-            client.print(TEMPERATURE_HISTORY_SIZE);
+            client.print(temperatureHistorySize);
 
             client.print(F(", \"history_interval_sec\":"));
-            client.print(TEMPERATURE_HISTORY_INTERVAL_SEC);
+            client.print(temperatureHistoryIntervalSec);
+
+            client.print(F(", \"temperatureHistoryFillCnt\":"));
+            client.print(temperatureHistoryFillCnt);
+
+            client.print(F(", \"temperatureHistoryOff\":"));
+            client.print(temperatureHistoryOff);
+
+            for (int i = 0; i < 4; ++i)
+            {
+              client.printf(", \"p%d\": ", i + 1);
+              auto port = MOSFET_P1;
+              switch (i)
+              {
+              case 0:
+                port = MOSFET_P1;
+                break;
+              case 1:
+                port = MOSFET_P2;
+                break;
+              case 2:
+                port = MOSFET_P3;
+                break;
+              case 3:
+                port = MOSFET_P4;
+                break;
+              }
+              if (digitalRead(port) == HIGH)
+                client.print("true");
+              else
+                client.print("false");
+            }
+
+            if (digitalRead(LED_PIN) == HIGH)
+              client.printf(", \"led\": true");
+            else
+              client.printf(", \"led\": false");
+
+            if (digitalRead(FAN_PIN) == HIGH)
+              client.printf(", \"fan\": true");
+            else
+              client.printf(", \"fan\": false");
 
             client.print('}');
           }

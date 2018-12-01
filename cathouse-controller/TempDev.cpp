@@ -7,18 +7,18 @@ int temperatureDeviceCount = 0;
 DeviceAddress *tempDevAddress; // DeviceAddress defined as uint8_t[8]
 char **tempDevHexAddress;
 
+float *temperatures = NULL; // current temp
 #define TEMPERATURE_INTERVAL_MS 5000
 unsigned long lastTemperatureRead;
-float *temperatures = NULL; // current temp
 
-unsigned long lastTemperatureHistoryRecord;
-uint8_t temperatureHistoryFillCnt = 0;
 // each sensor history for 48hour each 1 min record data
-
-uint16_t TEMPERATURE_HISTORY_SIZE = 0; // computed
+uint16_t temperatureHistorySize = 0; // computed
 float **temperatureHistory = NULL;
 uint16_t temperatureHistoryOff = 0;
-uint16_t TEMPERATURE_HISTORY_INTERVAL_SEC = 5 * 60; // computed
+uint16_t temperatureHistoryFillCnt = 0;
+
+unsigned long lastTemperatureHistoryRecord;
+uint16_t temperatureHistoryIntervalSec = 5 * 60; // computed
 
 OneWire tempOneWire(ONEWIRE_PIN);
 DallasTemperature DS18B20(&tempOneWire);
@@ -55,13 +55,15 @@ void SetupTemperatureDevices()
 
         temperatureHistory = (float **)malloc(sizeof(float *) * temperatureDeviceCount);
 
-        auto ramsize = FreeMemorySum() - TEMPERATURE_HISTORY_FREERAM_THRESHOLD - 3*1024; // 3 kb diff for wifi
-        TEMPERATURE_HISTORY_SIZE = ramsize / temperatureDeviceCount / sizeof(float);
+        auto ramsize = FreeMemorySum() - TEMPERATURE_HISTORY_FREERAM_THRESHOLD - 3 * 1024; // 3 kb diff for wifi
+        temperatureHistorySize = ramsize / temperatureDeviceCount / sizeof(float);
 
-        TEMPERATURE_HISTORY_INTERVAL_SEC = TEMPERATURE_HISTORY_BACKLOG_HOURS * 60 * 60 / TEMPERATURE_HISTORY_SIZE;
+        temperatureHistoryIntervalSec = TEMPERATURE_HISTORY_BACKLOG_HOURS * 60 * 60 / temperatureHistorySize;
 
         for (int i = 0; i < temperatureDeviceCount; ++i)
-            temperatureHistory[i] = (float *)malloc(sizeof(float) * TEMPERATURE_HISTORY_SIZE);
+            temperatureHistory[i] = (float *)malloc(sizeof(float) * temperatureHistorySize);
+
+        lastTemperatureHistoryRecord = millis();
     }
     ReadTemperatures();
 }
@@ -81,22 +83,22 @@ void ReadTemperatures()
 
 void manageTemp()
 {
-    if (TimeDiff(lastTemperatureRead, millis()) > TEMPERATURE_INTERVAL_MS)    
-        ReadTemperatures();    
+    if (TimeDiff(lastTemperatureRead, millis()) > TEMPERATURE_INTERVAL_MS)
+        ReadTemperatures();
 
     if (temperatureHistory != NULL &&
-        (TimeDiff(lastTemperatureHistoryRecord, millis()) > 1000UL * TEMPERATURE_HISTORY_INTERVAL_SEC))
+        (TimeDiff(lastTemperatureHistoryRecord, millis()) > 1000UL * temperatureHistoryIntervalSec))
     {
-        if (temperatureHistoryFillCnt < TEMPERATURE_HISTORY_SIZE)
+        if (temperatureHistoryFillCnt < temperatureHistorySize)
             ++temperatureHistoryFillCnt;
 
-        if (temperatureHistoryOff == TEMPERATURE_HISTORY_SIZE)
+        if (temperatureHistoryOff == temperatureHistorySize)
             temperatureHistoryOff = 0;
 
-        for (int i = 0; i < temperatureDeviceCount; ++i)                    
+        for (int i = 0; i < temperatureDeviceCount; ++i)
             temperatureHistory[i][temperatureHistoryOff] = temperatures[i];
-        
+
         ++temperatureHistoryOff;
-        lastTemperatureHistoryRecord = millis();        
-    }    
+        lastTemperatureHistoryRecord = millis();
+    }
 }

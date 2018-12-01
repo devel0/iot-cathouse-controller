@@ -52,12 +52,62 @@ async function reloadTemp(addr) {
             });
             finished = true;
         } catch (e) {
-
+            sleep(1000);
         }
     }
     $('.j-spin').addClass('collapse');
     $('#t' + addr)[0].innerText = res;
 }
+
+async function reloadInfo() {
+    $('.j-spin').removeClass('collapse');
+    let finished = false;
+    let res = null;
+    while (!finished) {
+        try {
+            res = await $.ajax({
+                url: baseurl + '/info',
+                type: 'GET'
+            });
+            finished = true;
+        } catch (e) {
+            sleep(1000);
+        }
+    }
+    $('.j-spin').addClass('collapse');
+    $('#info')[0].innerHTML = JSON.stringify(res, null, 2);
+
+    if (res["p1"] == true)
+        $('.port-p1').addClass('port-on');
+    else
+        $('.port-p1').removeClass('port-on');
+
+    if (res["p2"] == true)
+        $('.port-p2').addClass('port-on');
+    else
+        $('.port-p2').removeClass('port-on');
+
+    if (res["p3"] == true)
+        $('.port-p3').addClass('port-on');
+    else
+        $('.port-p3').removeClass('port-on');
+
+    if (res["p4"] == true)
+        $('.port-p4').addClass('port-on');
+    else
+        $('.port-p4').removeClass('port-on');
+
+    if (res["led"] == true)
+        $('.port-led').addClass('port-on');
+    else
+        $('.port-led').removeClass('port-on');
+
+    if (res["fan"] == true)
+        $('.port-fan').addClass('port-on');
+    else
+        $('.port-fan').removeClass('port-on');
+}
+
 var reload_enabled = false;
 setInterval(autoreload, 10000);
 
@@ -73,9 +123,9 @@ function sleep(ms) {
 async function reloadall() {
     $('.tempdev').each(async function (idx) {
         let v = this.innerText;
-        console.log('addr=[' + v + ']');
         await reloadTemp(v);
     });
+    await reloadInfo();
 
     let finished = false;
 
@@ -88,7 +138,7 @@ async function reloadall() {
             });
             finished = true;
         } catch (e) {
-
+            sleep(1000);
         }
     }
 
@@ -110,6 +160,18 @@ async function reloadall() {
         else color = colors[i];
 
         valcnt = data[id].length;
+
+        let trend = '<i class="fas fa-equals"></i>';
+        if (valcnt > 1) {
+            var last = data[id][valcnt - 1];
+            var lastbut1 = data[id][valcnt - 2];
+            if (last > lastbut1)
+                trend = '<i style="color:red" class="fas fa-arrow-up"></i>';
+            else if (last < lastbut1)
+                trend = '<i style="color:blue" class="fas fa-arrow-down"></i>';
+        }
+        $('#trend' + id)[0].innerHTML = trend;
+
 
         dts = [];
         $.each(data[id], function (idx, val) {
@@ -156,17 +218,35 @@ async function myfn() {
     // retrieve temperature devices and populate table
 
     $('.j-spin').removeClass('collapse');
-    const res = await $.ajax({
-        url: baseurl + '/tempdevices',
-        type: 'GET'
-    });
-    const resnfo = await $.ajax({
-        url: baseurl + '/info',
-        type: 'GET'
-    });
-    history_interval_sec = resnfo.history_interval_sec;
-    console.log('history_interval_sec = ' + history_interval_sec);
+    let res = null;
+    let finished = false;
+    while (!finished) {
+        try {
+            res = await $.ajax({
+                url: baseurl + '/tempdevices',
+                type: 'GET'
+            });
+            finished = true;
+        } catch (e) {
+            sleep(1000);
+        }
+    }
 
+    finished = false;
+    let resnfo = null;
+    while (!finished) {
+        try {
+            resnfo = await $.ajax({
+                url: baseurl + '/info',
+                type: 'GET'
+            });
+            finished = true;
+        } catch (e) {
+            sleep(1000);
+        }
+    }
+
+    history_interval_sec = resnfo.history_interval_sec;
     $('.j-spin').addClass('collapse');
 
     var h = "";
@@ -191,21 +271,19 @@ async function myfn() {
         h += "<td><span id='t" + tempId + "'>";
         h += "</span></td>";
 
+        // trend
+        h += "<td><span id='trend" + tempId + "'>";
+        h += "</span></td>";
+
         // action
-        h += "<td><button class='btn btn-primary' onclick='reloadTemp(\"" + res.tempdevices[i] + "\")'>reload</button></td>";
+        //h += "<td><button class='btn btn-primary' onclick='reloadTemp(\"" + res.tempdevices[i] + "\")'>reload</button></td>";
 
         h += "</tr>";
     }
 
     $('#tbody-temp')[0].innerHTML = h;
 
-    const res2 = await $.ajax({
-        url: baseurl + '/info',
-        type: 'GET'
-    });
-    $('#info')[0].innerHTML = JSON.stringify(res2, null, 2);
-
-    reloadall();
+    await reloadall();
 }
 
 myfn();

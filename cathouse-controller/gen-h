@@ -29,7 +29,7 @@ function removetrailingspaces
 
 function processnewline
 {
-    sed -z 's/\n/\\\n/g'
+    sed -z 's/\n/ \\\n/g'
 }
 
 function removejscomment
