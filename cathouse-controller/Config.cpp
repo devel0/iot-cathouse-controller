@@ -6,11 +6,13 @@ Config config;
 void saveConfig()
 {
     EEWrite(&config);
+    Serial.println("config saved");
 }
 
 void loadConfig()
 {
     EERead(&config);
+    Serial.println("config laoded");
 }
 
 int heatPortIndexToPin(int idx)
