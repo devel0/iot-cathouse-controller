@@ -151,24 +151,24 @@ async function reloadConfig() {
 
     $('#config-firmwareVersion')[0].innerText = res["firmwareVersion"];
     $('#config-wifiSSID')[0].innerText = res["wifiSSID"];
-    $('#config-temperatureHistoryFreeramThreshold')[0].value = res["temperatureHistoryFreeramThreshold"];
+    $('#config-temperatureHistoryFreeramThreshold-kb')[0].value = res["temperatureHistoryFreeramThreshold"] / 1024.0;
     $('#config-temperatureHistoryBacklogHours')[0].value = res["temperatureHistoryBacklogHours"];
-    $('#config-updateConsumptionIntervalMs')[0].value = res["updateConsumptionIntervalMs"];
-    $('#config-updateFreeramIntervalMs')[0].value = res["updateFreeramIntervalMs"];
-    $('#config-updateTemperatureIntervalMs')[0].value = res["updateTemperatureIntervalMs"];
+    $('#config-updateConsumptionIntervalMs-sec')[0].value = res["updateConsumptionIntervalMs"] / 1000.0;
+    $('#config-updateFreeramIntervalMs-sec')[0].value = res["updateFreeramIntervalMs"] / 1000.0;
+    $('#config-updateTemperatureIntervalMs-sec')[0].value = res["updateTemperatureIntervalMs"] / 1000.0;
     $('#config-tbottomLimit')[0].value = res["tbottomLimit"];
     $('#config-twoodLimit')[0].value = res["twoodLimit"];
     $('#config-tambientLimit')[0].value = res["tambientLimit"];
-    $('#config-cooldownTimeMs')[0].value = res["cooldownTimeMs"];
+    $('#config-cooldownTimeMs-min')[0].value = res["cooldownTimeMs"] / 1000.0 / 60.0;
     $('#config-tambientVsExternGTESysOff')[0].value = res["tambientVsExternGTESysOff"];
     $('#config-tambientVsExternLTESysOn')[0].value = res["tambientVsExternLTESysOn"];
     $('#config-tbottomGTEFanOn')[0].value = res["tbottomGTEFanOn"];
     $('#config-tbottomLTEFanOff')[0].value = res["tbottomLTEFanOff"];
     $('#config-autoactivateWoodBottomDeltaGTESysOn')[0].value = res["autoactivateWoodBottomDeltaGTESysOn"];
     $('#config-autodeactivateWoodDeltaLT')[0].value = res["autodeactivateWoodDeltaLT"];
-    $('#config-autodeactivateInhibitAutoactivateMinMs')[0].value = res["autodeactivateInhibitAutoactivateMinMs"];
+    $('#config-autodeactivateInhibitAutoactivateMinMs-min')[0].value = res["autodeactivateInhibitAutoactivateMinMs"] / 1000.0 / 60.0;
     $('#config-autodeactivateExcursionSampleCount')[0].value = res["autodeactivateExcursionSampleCount"];
-    $('#config-autodeactivateExcursionSampleTotalMs')[0].value = res["autodeactivateExcursionSampleTotalMs"];
+    $('#config-autodeactivateExcursionSampleTotalMs-min')[0].value = res["autodeactivateExcursionSampleTotalMs"] / 1000.0 / 60.0;
     $('#config-texternGTESysOff')[0].value = res["texternGTESysOff"];
 }
 
@@ -178,24 +178,24 @@ async function saveConfig() {
     let res = null;
 
     let config = {
-        temperatureHistoryFreeramThreshold: parseInt($('#config-temperatureHistoryFreeramThreshold')[0].value),
+        temperatureHistoryFreeramThreshold: parseFloat($('#config-temperatureHistoryFreeramThreshold-kb')[0].value) * 1024,
         temperatureHistoryBacklogHours: parseInt($('#config-temperatureHistoryBacklogHours')[0].value),
-        updateConsumptionIntervalMs: parseInt($('#config-updateConsumptionIntervalMs')[0].value),
-        updateFreeramIntervalMs: parseInt($('#config-updateFreeramIntervalMs')[0].value),
-        updateTemperatureIntervalMs: parseInt($('#config-updateTemperatureIntervalMs')[0].value),
+        updateConsumptionIntervalMs: parseFloat($('#config-updateConsumptionIntervalMs-sec')[0].value) * 1000,
+        updateFreeramIntervalMs: parseFloat($('#config-updateFreeramIntervalMs-sec')[0].value) * 1000,
+        updateTemperatureIntervalMs: parseFloat($('#config-updateTemperatureIntervalMs-sec')[0].value) * 1000,
         tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value),
         twoodLimit: parseFloat($('#config-twoodLimit')[0].value),
         tambientLimitxx: parseFloat($('#config-tambientLimit')[0].value),
-        cooldownTimeMs: parseInt($('#config-cooldownTimeMs')[0].value),
+        cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60,
         tambientVsExternGTESysOff: parseFloat($('#config-tambientVsExternGTESysOff')[0].value),
         tambientVsExternLTESysOn: parseFloat($('#config-tambientVsExternLTESysOn')[0].value),
         tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value),
         tbottomLTEFanOff: parseFloat($('#config-tbottomLTEFanOff')[0].value),
         autoactivateWoodBottomDeltaGTESysOn: parseFloat($('#config-autoactivateWoodBottomDeltaGTESysOn')[0].value),
         autodeactivateWoodDeltaLT: parseFloat($('#config-autodeactivateWoodDeltaLT')[0].value),
-        autodeactivateInhibitAutoactivateMinMs: parseInt($('#config-autodeactivateInhibitAutoactivateMinMs')[0].value),
+        autodeactivateInhibitAutoactivateMinMs: parseFloat($('#config-autodeactivateInhibitAutoactivateMinMs-min')[0].value) * 1000 * 60,
         autodeactivateExcursionSampleCount: parseInt($('#config-autodeactivateExcursionSampleCount')[0].value),
-        autodeactivateExcursionSampleTotalMs: parseInt($('#config-autodeactivateExcursionSampleTotalMs')[0].value),
+        autodeactivateExcursionSampleTotalMs: parseFloat($('#config-autodeactivateExcursionSampleTotalMs-min')[0].value) * 1000 * 60,
         texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value)
     };
 

@@ -481,7 +481,7 @@ void manageWifi()
             Serial.printf("freeram = %d\n", freeMemorySum());
             String s;
 
-            while (client.peek() != -1)
+            while (client.peek() != -1) // read all frames
             {
               while (client.available())
               {

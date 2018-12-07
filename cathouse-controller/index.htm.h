@@ -134,8 +134,8 @@ crossorigin=\"anonymous\"> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Temperature History freeram threshold</td> \
-<td><input type='number' step='1' class='form-control' id='config-temperatureHistoryFreeramThreshold'></input></td> \
-<td class='align-middle'>bytes</td> \
+<td><input type='number' step='0.001' class='form-control' id='config-temperatureHistoryFreeramThreshold-kb'></input></td> \
+<td class='align-middle'>kb</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Temperature History backlog size</td> \
@@ -144,18 +144,18 @@ crossorigin=\"anonymous\"> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Consumption update interval</td> \
-<td><input type='number' step='1' class='form-control' id='config-updateConsumptionIntervalMs'></input></td> \
-<td class='align-middle'>ms</td> \
+<td><input type='number' step='0.1' class='form-control' id='config-updateConsumptionIntervalMs-sec'></input></td> \
+<td class='align-middle'>sec</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Freeram update interval</td> \
-<td><input type='number' step='1' class='form-control' id='config-updateFreeramIntervalMs'></input></td> \
-<td class='align-middle'>ms</td> \
+<td><input type='number' step='0.1' class='form-control' id='config-updateFreeramIntervalMs-sec'></input></td> \
+<td class='align-middle'>sec</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Temperature update interval</td> \
-<td><input type='number' step='1' class='form-control' id='config-updateTemperatureIntervalMs'></input></td> \
-<td class='align-middle'>ms</td> \
+<td><input type='number' step='1' class='form-control' id='config-updateTemperatureIntervalMs-sec'></input></td> \
+<td class='align-middle'>sec</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Bottom temperature limit</td> \
@@ -174,8 +174,8 @@ crossorigin=\"anonymous\"> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Cooldown time</td> \
-<td><input type='number' step='1' class='form-control' id='config-cooldownTimeMs'></input></td> \
-<td class='align-middle'>ms</td> \
+<td><input type='number' step='0.01' class='form-control' id='config-cooldownTimeMs-min'></input></td> \
+<td class='align-middle'>min</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Ambient >= Extern sys OFF</td> \
@@ -209,8 +209,8 @@ crossorigin=\"anonymous\"> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Inhibit activate after deactivation min time</td> \
-<td><input type='number' step='1' class='form-control' id='config-autodeactivateInhibitAutoactivateMinMs'></input></td> \
-<td class='align-middle'>ms</td> \
+<td><input type='number' step='0.01' class='form-control' id='config-autodeactivateInhibitAutoactivateMinMs-min'></input></td> \
+<td class='align-middle'>min</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Wood excursion sample slots count</td> \
@@ -219,8 +219,8 @@ crossorigin=\"anonymous\"> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Wood excursion analysis total time interval</td> \
-<td><input type='number' step='1' class='form-control' id='config-autodeactivateExcursionSampleTotalMs'></input></td> \
-<td class='align-middle'>ms</td> \
+<td><input type='number' step='0.01' class='form-control' id='config-autodeactivateExcursionSampleTotalMs-min'></input></td> \
+<td class='align-middle'>min</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Extern >= T sys OFF</td> \
