@@ -2,64 +2,65 @@
 
 #include <EEPROM.h>
 
+int EE_SIZE = sizeof(Config);
+
 void EEInit()
 {
-    EEPROM.begin(EE_SIZE);
-}
-
-void readWifiSSID(String &res)
-{
-    res = "";
-    for (int i = EE_WIFI_SSID_OFF; i < EE_WIFI_SSID_OFF + EE_WIFI_SSID_SIZE; ++i)
+    if (sizeof(Config) > EE_SIZE_MAX)
     {
-        auto c = EEPROM.read(i);
-        if (c == 0)
-            break;
-        res.concat((char)c);
+        Serial.printf("EEData size %d > EESIZE_MAX %d\n", sizeof(Config), EE_SIZE_MAX);
+        while (true)
+            ;
     }
-    Serial.printf("readed ssid [%s] from eeprom\n", res.c_str());
-}
-
-void readWifiPWD(String &res)
-{
-    res = "";
-    for (int i = EE_WIFI_PWD_OFF; i < EE_WIFI_PWD_OFF + EE_WIFI_PWD_SIZE; ++i)
+    EEPROM.begin(sizeof(Config));
+    loadConfig();
+    auto fwverlen = strnlen(config.firmwareVersion, CONFIG_FIRMWARE_STR_SIZE);
+    // future: fw upgrade ( config.firmwareVersion != EEFD_firmwareVersion )
+    if (fwverlen == CONFIG_FIRMWARE_STR_SIZE || strcmp(config.firmwareVersion, EEFD_firmwareVersion) != 0)
     {
-        auto c = EEPROM.read(i);
-        if (c == 0)
-            break;
-        res.concat((char)c);
+        Serial.println("eeprom reset to factory defaults");
+        EEResetToFactoryDefault(&config);
+        saveConfig();
     }
 }
 
-void writeWifiSSID(String str)
+void EEResetToFactoryDefault(Config *data)
 {
-    auto l = str.length();
-    int j = 0;
-    int i = EE_WIFI_SSID_OFF;
-    while (j < l && i < EE_WIFI_SSID_OFF + EE_WIFI_SSID_SIZE)
+    data->temperatureHistoryFreeramThreshold = EEFD_temperatureHistoryFreeramThreshold;
+    data->temperatureHistoryBacklogHours = EEFD_temperatureHistoryBacklogHours;
+    data->updateConsumptionIntervalMs = EEFD_updateConsumptionIntervalMs;
+    data->updateFreeramIntervalMs = EEFD_updateFreeramIntervalMs;
+    data->tbottomLimit = EEFD_tbottomLimit;
+    data->twoodLimit = EEFD_twoodLimit;
+    data->tambientLimit = EEFD_tambientLimit;
+    data->cooldownTimeMs = EEFD_cooldownTimeMs;
+    data->tambientVsExternGTESysOff = EEFD_tambientVsExternGTESysOff;
+    data->tambientVsExternLTESysOn = EEFD_tambientVsExternLTESysOn;
+    data->tbottomGTEFanOn = EEFD_tbottomGTEFanOn;
+    data->tbottomLTEFanOff = EEFD_tbottomLTEFanOff;
+    data->autoactivateWoodBottomDeltaGTESysOn = EEFD_autoactivateWoodBottomDeltaGTESysOn;
+    data->autodeactivateWoodDeltaLT = EEFD_autodeactivateWoodDeltaLT;
+    data->autodeactivateInhibitAutoactivateMinMs = EEFD_autodeactivateInhibitAutoactivateMinMs;
+    data->autodeactivateExcursionSampleCount = EEFD_autodeactivateExcursionSampleCount;
+    data->autodeactivateExcursionSampleTotalMs = EEFD_autodeactivateExcursionSampleTotalMs;
+    data->texternGTESysOff = EEFD_texternGTESysOff;
+}
+
+void EERead(Config *data)
+{
+    auto ptr = (uint8_t *)data;
+    for (int i = 0; i < EE_SIZE; ++i)
     {
-        auto c = (uint8_t)str[j++];
-        EEPROM.write(i++, c);
+        ptr[i] = EEPROM.read(i);
     }
-    EEPROM.write(i, 0);
+}
+
+void EEWrite(Config *data)
+{
+    auto ptr = (uint8_t *)data;
+    for (int i = 0; i < EE_SIZE; ++i)
+    {
+        EEPROM.write(i, ptr[i]);
+    }
     EEPROM.commit();
-
-    Serial.printf("saved ssid [%s] to eeprom\n", str.c_str());
-}
-
-void writeWifiPWD(String str)
-{
-    auto l = str.length();
-    int j = 0;
-    int i = EE_WIFI_PWD_OFF;
-    while (j < l && i < EE_WIFI_PWD_OFF + EE_WIFI_PWD_SIZE)
-    {
-        auto c = (uint8_t)str[j++];
-        EEPROM.write(i++, c);
-    }
-    EEPROM.write(i, 0);
-    EEPROM.commit();
-
-    Serial.printf("saved pwd to eeprom\n");
 }

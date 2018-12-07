@@ -29,6 +29,8 @@ crossorigin=\"anonymous\"> \
 <canvas id=\"myChart\" height=\"80\"></canvas> \
 </div> \
 <div class=\"col-auto\"> \
+<div class=\"row\"> \
+<div class=\"col-auto\"> \
 <h2>Ports</h2> \
 <div class=\"port-p1\">P1</div> \
 <div class=\"port-p2\">P2</div> \
@@ -36,6 +38,13 @@ crossorigin=\"anonymous\"> \
 <div class=\"port-p4\">P4</div> \
 <div class=\"port-led\">LED</div> \
 <div class=\"port-fan\">FAN</div> \
+</div> \
+</div> \
+<div class=\"row mt-3\"> \
+<div class=\"col-auto\"> \
+<span class='h2 mean-power'></span><span class='h2'> W</span> \
+</div> \
+</div> \
 </div> \
 </div> \
 <div class=\"row\"> \

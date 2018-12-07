@@ -9,11 +9,6 @@ namespace cathouse_analysis
     {
 
         /// <summary>
-        /// measured 107W with all 4 ports enabled
-        /// </summary>
-        public const double POWER_W = 107d / 4;
-
-        /// <summary>
         /// min time for which a port still off to avoid bouncing
         /// </summary>
         public TimeSpan COOLDOWN_TIMESPAN { get; private set; } = TimeSpan.FromSeconds(60);
@@ -97,39 +92,6 @@ namespace cathouse_analysis
             {
                 if (IsOn) return TimeSpan.FromSeconds(0);
                 return DateTime.Now - OnOffTimestamp;
-            }
-        }
-
-        /// <summary>
-        /// total running time ( either on/off )
-        /// </summary>
-        public TimeSpan Runtime
-        {
-            get
-            {
-                return DateTime.Now - InitTime;
-            }
-        }
-
-        /// <summary>
-        /// total power consumption
-        /// </summary>
-        public double Wh
-        {
-            get
-            {
-                return POWER_W * OnTimeTotal.TotalHours;
-            }
-        }
-
-        /// <summary>
-        /// mean power
-        /// </summary>
-        public double W
-        {
-            get
-            {
-                return Wh / Runtime.TotalHours;
             }
         }
 

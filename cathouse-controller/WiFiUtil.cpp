@@ -3,8 +3,8 @@
 #include "SerialOS.h"
 #include "TempDev.h"
 #include "Util.h"
-
 #include "Config.h"
+#include "Stats.h"
 
 WiFiServer server(WEB_PORT);
 
@@ -12,17 +12,11 @@ WiFiServer server(WEB_PORT);
 void reconnectWifi()
 {
   if (server.status() != CLOSED)
-    server.stop();
+    server.stop();  
 
-  String ssid = "";
-  String pass = "";
+  Serial.printf("Trying connecting SSID:[%s]\n", config.wifiSSID);
 
-  readWifiSSID(ssid);
-  readWifiPWD(pass);
-
-  Serial.printf("Trying connecting SSID:[%s]\n", ssid.c_str());
-
-  WiFi.begin(ssid.c_str(), pass.c_str());
+  WiFi.begin(config.wifiSSID, config.wifiPwd);
 
   // check for the presence of the shield:
   if (WiFi.status() == WL_NO_SHIELD)
@@ -300,7 +294,10 @@ void manageWifi()
             client.print('{');
 
             client.print(F("\"freeram\":"));
-            client.print((long)FreeMemorySum());
+            client.print(freeram);
+
+            client.print(F("\"freeram_min\":"));
+            client.print(freeram_min);
 
             client.print(F(", \"history_size\":"));
             client.print(temperatureHistorySize);
@@ -317,22 +314,7 @@ void manageWifi()
             for (int i = 0; i < 4; ++i)
             {
               client.printf(", \"p%d\": ", i + 1);
-              auto port = MOSFET_P1;
-              switch (i)
-              {
-              case 0:
-                port = MOSFET_P1;
-                break;
-              case 1:
-                port = MOSFET_P2;
-                break;
-              case 2:
-                port = MOSFET_P3;
-                break;
-              case 3:
-                port = MOSFET_P4;
-                break;
-              }
+              auto port = heatPortIndexToPin(i);
               if (digitalRead(port) == HIGH)
                 client.print("true");
               else
@@ -348,6 +330,9 @@ void manageWifi()
               client.printf(", \"fan\": true");
             else
               client.printf(", \"fan\": false");
+
+            client.printf(", \"runtime_hr\": %f", runtime_hr);
+            client.printf(", \"Wh\": %f", Wh);
 
             client.print('}');
           }

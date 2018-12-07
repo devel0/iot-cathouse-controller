@@ -16,8 +16,9 @@
 #include "SerialOS.h"
 #include "Util.h"
 #include "TempDev.h"
+#include "Stats.h"
 
-void SetupPorts()
+void setupPorts()
 {
   pinMode(MOSFET_P1, OUTPUT);
   digitalWrite(MOSFET_P1, LOW);
@@ -51,13 +52,15 @@ void setup()
   while (Serial.available())
     Serial.read();
 
-  EEInit();  
+  EEInit();
 
-  SetupPorts();
+  statsInit();
 
-  reconnectWifi();  
+  setupPorts();
 
-  SetupTemperatureDevices();
+  reconnectWifi();
+
+  setupTemperatureDevices();
 }
 
 //=============================================================
@@ -66,8 +69,10 @@ void setup()
 
 void loop()
 {
+  statsUpdate();
+
   manageWifi();
-  
+
   manageTemp();
 
   if (Serial.available())

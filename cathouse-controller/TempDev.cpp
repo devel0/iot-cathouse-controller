@@ -23,7 +23,7 @@ uint16_t temperatureHistoryIntervalSec = 5 * 60; // computed
 OneWire tempOneWire(ONEWIRE_PIN);
 DallasTemperature DS18B20(&tempOneWire);
 
-void SetupTemperatureDevices()
+void setupTemperatureDevices()
 {
     DS18B20.begin();
     temperatureDeviceCount = DS18B20.getDeviceCount();
@@ -55,20 +55,20 @@ void SetupTemperatureDevices()
 
         temperatureHistory = (float **)malloc(sizeof(float *) * temperatureDeviceCount);
 
-        auto ramsize = FreeMemorySum() - TEMPERATURE_HISTORY_FREERAM_THRESHOLD - 3 * 1024; // 3 kb diff for wifi
+        auto ramsize = freeMemorySum() - config.temperatureHistoryFreeramThreshold - 3 * 1024; // 3 kb diff for wifi
         temperatureHistorySize = ramsize / temperatureDeviceCount / sizeof(float);
 
-        temperatureHistoryIntervalSec = TEMPERATURE_HISTORY_BACKLOG_HOURS * 60 * 60 / temperatureHistorySize;
+        temperatureHistoryIntervalSec = config.temperatureHistoryBacklogHours * 60 * 60 / temperatureHistorySize;
 
         for (int i = 0; i < temperatureDeviceCount; ++i)
             temperatureHistory[i] = (float *)malloc(sizeof(float) * temperatureHistorySize);
 
         lastTemperatureHistoryRecord = millis();
     }
-    ReadTemperatures();
+    readTemperatures();
 }
 
-void ReadTemperatures()
+void readTemperatures()
 {
     DS18B20.requestTemperatures();
     for (int i = 0; i < temperatureDeviceCount; ++i)
@@ -83,11 +83,11 @@ void ReadTemperatures()
 
 void manageTemp()
 {
-    if (TimeDiff(lastTemperatureRead, millis()) > TEMPERATURE_INTERVAL_MS)
-        ReadTemperatures();
+    if (timeDiff(lastTemperatureRead, millis()) > config.updateTemperatureIntervalMs)
+        readTemperatures();
 
     if (temperatureHistory != NULL &&
-        (TimeDiff(lastTemperatureHistoryRecord, millis()) > 1000UL * temperatureHistoryIntervalSec))
+        (timeDiff(lastTemperatureHistoryRecord, millis()) > 1000UL * temperatureHistoryIntervalSec))
     {
         if (temperatureHistoryFillCnt < temperatureHistorySize)
             ++temperatureHistoryFillCnt;

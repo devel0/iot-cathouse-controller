@@ -95,6 +95,11 @@ if (res[\"fan\"] == true) \
 $('.port-fan').addClass('port-on'); \
 else \
 $('.port-fan').removeClass('port-on'); \
+ \
+let Wh = res.Wh; \
+let runtime_hr = res.runtime_hr; \
+ \
+$('.mean-power')[0].innerText = (Wh / runtime_hr).toFixed(0) \
 } \
  \
 var reload_enabled = false; \
@@ -135,7 +140,6 @@ var colors = ['orange', 'yellow', 'green', 'blue', 'violet', 'black', 'red']; \
 var ctx = document.getElementById(\"myChart\").getContext('2d'); \
  \
 var dtnow = moment(); \
-console.log('moment now = ' + dtnow.format()); \
  \
 var i = 0; \
 var dss = []; \
