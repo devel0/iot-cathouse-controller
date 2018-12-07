@@ -30,7 +30,7 @@ void processSerialCmd()
   if (serialInput.indexOf("set wifi ssid ") == 0)
   {
     strncpy(config.wifiSSID, serialInput.substring(14).c_str(), CONFIG_WIFI_SSID_STR_SIZE);
-    saveConfig();    
+    saveConfig();
   }
   else if (serialInput.indexOf("set wifi pwd ") == 0)
   {

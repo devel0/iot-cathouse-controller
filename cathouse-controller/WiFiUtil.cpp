@@ -5,6 +5,7 @@
 #include "Util.h"
 #include "Config.h"
 #include "Stats.h"
+//#include <ArduinoJson.h>
 
 WiFiServer server(WEB_PORT);
 
@@ -12,7 +13,7 @@ WiFiServer server(WEB_PORT);
 void reconnectWifi()
 {
   if (server.status() != CLOSED)
-    server.stop();  
+    server.stop();
 
   Serial.printf("Trying connecting SSID:[%s]\n", config.wifiSSID);
 
@@ -57,6 +58,23 @@ void reconnectWifi()
 #define CCTYPE_JS 3
 #define CCTYPE_PNG 4
 
+void clientEnd(WiFiClient &client)
+{
+#if ENABLE_CORS == 1
+  client.println("Access-Control-Allow-Origin: *");
+#endif
+
+  client.println("Connection: close");
+  client.println();
+}
+
+void clientError(WiFiClient &client)
+{
+  client.println("HTTP/1.1 400 Bad Request");
+
+  clientEnd(client);
+}
+
 void clientOk(WiFiClient &client, int type)
 {
   client.println("HTTP/1.1 200 OK");
@@ -88,12 +106,7 @@ void clientOk(WiFiClient &client, int type)
     break;
   }
 
-#if ENABLE_CORS == 1
-  client.println("Access-Control-Allow-Origin: *");
-#endif
-
-  client.println("Connection: close");
-  client.println();
+  clientEnd(client);
 }
 
 #define FSTRBUFSZ 80
@@ -180,8 +193,21 @@ void manageWifi()
         else
         {
           Serial.printf("header [%s]\n", header.c_str());
-          while (client.available())
-            client.read(); // discard rest of header
+          int newlinecnt = 0;
+          while (client.available() || newlinecnt != 2) // discard rest of header
+          {
+            c = client.read();
+
+            if (c == '\n')
+            {
+              if (newlinecnt == 1)
+                break;
+              else
+                newlinecnt = 1;
+            }
+            else if (c != '\r')
+              newlinecnt = 0;
+          }
 
           //--------------------------------
           // /
@@ -296,7 +322,7 @@ void manageWifi()
             client.print(F("\"freeram\":"));
             client.print(freeram);
 
-            client.print(F("\"freeram_min\":"));
+            client.print(F(", \"freeram_min\":"));
             client.print(freeram_min);
 
             client.print(F(", \"history_size\":"));
@@ -416,6 +442,107 @@ void manageWifi()
               digitalWrite(portpin, LOW);
 
             client.print("OK");
+          }
+          //
+          // /getconfig
+          else if (header.indexOf("GET /getconfig ") >= 0)
+          {
+            clientOk(client, CCTYPE_JSON);
+
+            client.print("{");
+            client.printf("\"%s\": \"%s\",", CSTR_firmwareVersion, config.firmwareVersion);
+            client.printf("\"%s\": \"%s\",", CSTR_wifiSSID, config.wifiSSID);
+            client.printf("\"%s\": %d,", CSTR_temperatureHistoryFreeramThreshold, config.temperatureHistoryFreeramThreshold);
+            client.printf("\"%s\": %d,", CSTR_temperatureHistoryBacklogHours, config.temperatureHistoryBacklogHours);
+            client.printf("\"%s\": %lu,", CSTR_updateConsumptionIntervalMs, config.updateConsumptionIntervalMs);
+            client.printf("\"%s\": %lu,", CSTR_updateFreeramIntervalMs, config.updateFreeramIntervalMs);
+            client.printf("\"%s\": %lu,", CSTR_updateTemperatureIntervalMs, config.updateTemperatureIntervalMs);
+            client.printf("\"%s\": %f,", CSTR_tbottomLimit, config.tbottomLimit);
+            client.printf("\"%s\": %f,", CSTR_twoodLimit, config.twoodLimit);
+            client.printf("\"%s\": %f,", CSTR_tambientLimit, config.tambientLimit);
+            client.printf("\"%s\": %lu,", CSTR_cooldownTimeMs, config.cooldownTimeMs);
+            client.printf("\"%s\": %f,", CSTR_tambientVsExternGTESysOff, config.tambientVsExternGTESysOff);
+            client.printf("\"%s\": %f,", CSTR_tambientVsExternLTESysOn, config.tambientVsExternLTESysOn);
+            client.printf("\"%s\": %f,", CSTR_tbottomGTEFanOn, config.tbottomGTEFanOn);
+            client.printf("\"%s\": %f,", CSTR_tbottomLTEFanOff, config.tbottomLTEFanOff);
+            client.printf("\"%s\": %f,", CSTR_autoactivateWoodBottomDeltaGTESysOn, config.autoactivateWoodBottomDeltaGTESysOn);
+            client.printf("\"%s\": %f,", CSTR_autodeactivateWoodDeltaLT, config.autodeactivateWoodDeltaLT);
+            client.printf("\"%s\": %f,", CSTR_autodeactivateInhibitAutoactivateMinMs, config.autodeactivateInhibitAutoactivateMinMs);
+            client.printf("\"%s\": %d,", CSTR_autodeactivateExcursionSampleCount, config.autodeactivateExcursionSampleCount);
+            client.printf("\"%s\": %lu,", CSTR_autodeactivateExcursionSampleTotalMs, config.autodeactivateExcursionSampleTotalMs);
+            client.printf("\"%s\": %f", CSTR_texternGTESysOff, config.texternGTESysOff);
+
+            client.print("}");
+          }
+          //
+          // /saveconfig
+          else if (header.indexOf("POST /saveconfig ") >= 0)
+          {
+            Serial.printf("freeram = %d\n", freeMemorySum());
+            String s;
+
+            while (client.peek() != -1)
+            {
+              while (client.available())
+              {
+                auto c = (char)client.read();
+                s.concat(c);
+              }
+              client.flush();              
+            }
+
+            Serial.printf("saving config [%s]\n", s.c_str());
+            int i = 0;
+            int len = s.length();
+            const char *str = s.c_str();
+            while (i < len && str[i++] != '{')
+              ;
+            while (i < len)
+            {
+              while (i < len && str[i++] != '"')
+                ;
+              String name;
+              while (i < len && str[i] != '"')
+                name.concat(str[i++]);
+              String value;
+              while (i < len && str[i++] != ':')
+                ;
+              while (i < len && str[i] != ',' && str[i] != '}')
+                value.concat(str[i++]);
+              Serial.printf("name = [%s] value = [%s]\n", name.c_str(), value.c_str());
+
+              if (strcmp(name.c_str(), CSTR_temperatureHistoryFreeramThreshold) == 0)
+                config.temperatureHistoryFreeramThreshold = atoi(value.c_str());
+
+              else if (strcmp(name.c_str(), CSTR_temperatureHistoryBacklogHours) == 0)
+                config.temperatureHistoryBacklogHours = atoi(value.c_str());
+
+              else if (strcmp(name.c_str(), CSTR_updateConsumptionIntervalMs) == 0)
+                config.updateConsumptionIntervalMs = atoi(value.c_str());
+
+              else if (strcmp(name.c_str(), CSTR_updateFreeramIntervalMs) == 0)
+                config.updateFreeramIntervalMs = atoi(value.c_str());
+
+              else if (strcmp(name.c_str(), CSTR_updateTemperatureIntervalMs) == 0)
+                config.updateTemperatureIntervalMs = atoi(value.c_str());
+
+              else if (strcmp(name.c_str(), CSTR_tbottomLimit) == 0)
+                config.tbottomLimit = atof(value.c_str());
+            }
+            auto err = false;
+            if (i == 0 || str[i - 1] != '}')
+              err = true;
+
+            if (!err)
+            {
+              saveConfig();
+
+              clientOk(client, CCTYPE_JSON);
+            }
+            else
+            {
+              clientError(client);
+            }
           }
 
           header = "";

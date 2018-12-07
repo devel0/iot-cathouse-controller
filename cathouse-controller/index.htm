@@ -6,6 +6,11 @@
         .port-on {
             background-color: yellow;
         }
+        .cfg-lbl {
+            color: gray;
+            font-style: italic;
+            text-align: right;
+        }
     </style>
 </head>
 
@@ -16,11 +21,23 @@
 
 <body>
     <div class="container">
+        <div class="row">
+            <div class="col-auto">
+                <div class="btn-group" role="group">
+                    <button class="btn btn-link" onclick='showHome()'>Home</button>
+                    <button class="btn btn-link" onclick='showConfig()'>Config</button>
+                    <div class="col"><i class="fas fa-spin fa-spinner j-spin collapse"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOME -->
+    <div class="container j-containers j-home">
         <div class="row mt-3">
             <div class="col-auto">
                 <h1>Temperature sensors</h1>
             </div>
-            <div class="col"><i class="fas fa-spin fa-spinner j-spin collapse"></i></div>
         </div>
         <div class="row">
             <div class="col">
@@ -77,8 +94,145 @@
         <div class="row mt-3">
             <div class="col">
                 <h3>Misc</h3>
-                <a href="https://github.com/devel0/iot-cathouse-controller">API</a>
-                <span> - </span>Info : <code id='info'></code>
+                <ul>
+                    <li>
+                        <a href="https://github.com/devel0/iot-cathouse-controller">API</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="container j-containers j-config collapse">
+        <div class="row mt-3">
+            <div class="col-auto">
+                <h1>Config</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-auto">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th style='text-align:right'><b>Var</b></th>
+                            <th><b>Value</b></th>
+                            <th><b>Unit</b></th>
+                        </tr>
+                    </thead>
+                    <tbody id="config-tbl">
+                        <tr>
+                            <td class='cfg-lbl'>firmware ver</td>
+                            <td><span id='config-firmwareVersion'></span></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl'>WiFi SSID</td>
+                            <td><span id='config-wifiSSID'></span></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Temperature History freeram threshold</td>
+                            <td><input type='number' step='1' class='form-control' id='config-temperatureHistoryFreeramThreshold'></input></td>
+                            <td class='align-middle'>bytes</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Temperature History backlog size</td>
+                            <td><input type='number' step='1' class='form-control' id='config-temperatureHistoryBacklogHours'></input></td>
+                            <td class='align-middle'>hours</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Consumption update interval</td>
+                            <td><input type='number' step='1' class='form-control' id='config-updateConsumptionIntervalMs'></input></td>
+                            <td class='align-middle'>ms</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Freeram update interval</td>
+                            <td><input type='number' step='1' class='form-control' id='config-updateFreeramIntervalMs'></input></td>
+                            <td class='align-middle'>ms</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Temperature update interval</td>
+                            <td><input type='number' step='1' class='form-control' id='config-updateTemperatureIntervalMs'></input></td>
+                            <td class='align-middle'>ms</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Bottom temperature limit</td>
+                            <td><input type='number' step='0.1' class='form-control' id='config-tbottomLimit'></input></td>
+                            <td class='align-middle'>C</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Wood temperature limit</td>
+                            <td><input type='number' step='0.1' class='form-control' id='config-twoodLimit'></input></td>
+                            <td class='align-middle'>C</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Ambient temperature limit</td>
+                            <td><input type='number' step='0.1' class='form-control' id='config-tambientLimit'></input></td>
+                            <td class='align-middle'>C</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Cooldown time</td>
+                            <td><input type='number' step='1' class='form-control' id='config-cooldownTimeMs'></input></td>
+                            <td class='align-middle'>ms</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Ambient >= Extern sys OFF</td>
+                            <td><input type='number' step='0.1' class='form-control' id='config-tambientVsExternGTESysOff'></input></td>
+                            <td class='align-middle'>C</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Ambient &lt;= Extern sys ON</td>
+                            <td><input type='number' step='0.1' class='form-control' id='config-tambientVsExternLTESysOn'></input></td>
+                            <td class='align-middle'>C</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Bottom >= T fan ON</td>
+                            <td><input type='number' step='0.1' class='form-control' id='config-tbottomGTEFanOn'></input></td>
+                            <td class='align-middle'>C</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Bottom &lt;= T fan ON</td>
+                            <td><input type='number' step='0.1' class='form-control' id='config-tbottomLTEFanOff'></input></td>
+                            <td class='align-middle'>C</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>(Wood - Bottom) >= T sys ON</td>
+                            <td><input type='number' step='0.1' class='form-control' id='config-autoactivateWoodBottomDeltaGTESysOn'></input></td>
+                            <td class='align-middle'>C</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Wood excursion &lt;= T sys OFF</td>
+                            <td><input type='number' step='0.1' class='form-control' id='config-autodeactivateWoodDeltaLT'></input></td>
+                            <td class='align-middle'>C</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Inhibit activate after deactivation min time</td>
+                            <td><input type='number' step='1' class='form-control' id='config-autodeactivateInhibitAutoactivateMinMs'></input></td>
+                            <td class='align-middle'>ms</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Wood excursion sample slots count</td>
+                            <td><input type='number' step='1' class='form-control' id='config-autodeactivateExcursionSampleCount'></input></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Wood excursion analysis total time interval</td>
+                            <td><input type='number' step='1' class='form-control' id='config-autodeactivateExcursionSampleTotalMs'></input></td>
+                            <td class='align-middle'>ms</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Extern >= T sys OFF</td>
+                            <td><input type='number' step='0.1' class='form-control' id='config-texternGTESysOff'></input></td>
+                            <td class='align-middle'>C</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-auto">
+                <button class="btn btn-primary" onclick='saveConfig()'>Save config</button>
             </div>
         </div>
     </div>

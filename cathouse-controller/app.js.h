@@ -24,13 +24,31 @@ requirejs.config({ \
 \"moment\": \"://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js\" \
 }); \
  \
+function showSpin() { \
+$('.j-spin').removeClass(\"collapse\"); \
+} \
+ \
+function hideSpin() { \
+$('.j-spin').addClass(\"collapse\"); \
+} \
+ \
+function showHome() { \
+$('.j-containers').addClass('collapse'); \
+$('.j-home').removeClass('collapse'); \
+} \
+ \
+function showConfig() { \
+$('.j-containers').addClass('collapse'); \
+$('.j-config').removeClass('collapse'); \
+} \
+ \
 var history_interval_sec = 10; \
  \
 var baseurl = ''; \
-if (debug) baseurl = 'http://10.10.3.9'; \
+if (debug) baseurl = 'http://10.10.3.11'; \
  \
 async function reloadTemp(addr) { \
-$('.j-spin').removeClass('collapse'); \
+showSpin(); \
 let finished = false; \
 let res = null; \
 while (!finished) { \
@@ -44,12 +62,12 @@ finished = true; \
 sleep(1000); \
 } \
 } \
-$('.j-spin').addClass('collapse'); \
+hideSpin(); \
 $('#t' + addr)[0].innerText = res; \
 } \
  \
 async function reloadInfo() { \
-$('.j-spin').removeClass('collapse'); \
+showSpin(); \
 let finished = false; \
 let res = null; \
 while (!finished) { \
@@ -63,8 +81,7 @@ finished = true; \
 sleep(1000); \
 } \
 } \
-$('.j-spin').addClass('collapse'); \
-$('#info')[0].innerHTML = JSON.stringify(res, null, 2); \
+hideSpin(); \
  \
 if (res[\"p1\"] == true) \
 $('.port-p1').addClass('port-on'); \
@@ -99,7 +116,102 @@ $('.port-fan').removeClass('port-on'); \
 let Wh = res.Wh; \
 let runtime_hr = res.runtime_hr; \
  \
-$('.mean-power')[0].innerText = (Wh / runtime_hr).toFixed(0) \
+$('.mean-power')[0].innerText = (Wh / runtime_hr).toFixed(0); \
+} \
+ \
+async function reloadConfig() { \
+showSpin(); \
+let finished = false; \
+let res = null; \
+while (!finished) { \
+try { \
+res = await $.ajax({ \
+url: baseurl + '/getconfig', \
+type: 'GET' \
+}); \
+finished = true; \
+} catch (e) { \
+sleep(1000); \
+} \
+} \
+hideSpin(); \
+ \
+$('#config-firmwareVersion')[0].innerText = res[\"firmwareVersion\"]; \
+$('#config-wifiSSID')[0].innerText = res[\"wifiSSID\"]; \
+$('#config-temperatureHistoryFreeramThreshold')[0].value = res[\"temperatureHistoryFreeramThreshold\"]; \
+$('#config-temperatureHistoryBacklogHours')[0].value = res[\"temperatureHistoryBacklogHours\"]; \
+$('#config-updateConsumptionIntervalMs')[0].value = res[\"updateConsumptionIntervalMs\"]; \
+$('#config-updateFreeramIntervalMs')[0].value = res[\"updateFreeramIntervalMs\"]; \
+$('#config-updateTemperatureIntervalMs')[0].value = res[\"updateTemperatureIntervalMs\"]; \
+$('#config-tbottomLimit')[0].value = res[\"tbottomLimit\"]; \
+$('#config-twoodLimit')[0].value = res[\"twoodLimit\"]; \
+$('#config-tambientLimit')[0].value = res[\"tambientLimit\"]; \
+$('#config-cooldownTimeMs')[0].value = res[\"cooldownTimeMs\"]; \
+$('#config-tambientVsExternGTESysOff')[0].value = res[\"tambientVsExternGTESysOff\"]; \
+$('#config-tambientVsExternLTESysOn')[0].value = res[\"tambientVsExternLTESysOn\"]; \
+$('#config-tbottomGTEFanOn')[0].value = res[\"tbottomGTEFanOn\"]; \
+$('#config-tbottomLTEFanOff')[0].value = res[\"tbottomLTEFanOff\"]; \
+$('#config-autoactivateWoodBottomDeltaGTESysOn')[0].value = res[\"autoactivateWoodBottomDeltaGTESysOn\"]; \
+$('#config-autodeactivateWoodDeltaLT')[0].value = res[\"autodeactivateWoodDeltaLT\"]; \
+$('#config-autodeactivateInhibitAutoactivateMinMs')[0].value = res[\"autodeactivateInhibitAutoactivateMinMs\"]; \
+$('#config-autodeactivateExcursionSampleCount')[0].value = res[\"autodeactivateExcursionSampleCount\"]; \
+$('#config-autodeactivateExcursionSampleTotalMs')[0].value = res[\"autodeactivateExcursionSampleTotalMs\"]; \
+$('#config-texternGTESysOff')[0].value = res[\"texternGTESysOff\"]; \
+} \
+ \
+async function saveConfig() { \
+showSpin(); \
+let finished = false; \
+let res = null; \
+ \
+let config = { \
+temperatureHistoryFreeramThreshold: parseInt($('#config-temperatureHistoryFreeramThreshold')[0].value), \
+temperatureHistoryBacklogHours: parseInt($('#config-temperatureHistoryBacklogHours')[0].value), \
+updateConsumptionIntervalMs: parseInt($('#config-updateConsumptionIntervalMs')[0].value), \
+updateFreeramIntervalMs: parseInt($('#config-updateFreeramIntervalMs')[0].value), \
+updateTemperatureIntervalMs: parseInt($('#config-updateTemperatureIntervalMs')[0].value), \
+tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value), \
+twoodLimit: parseFloat($('#config-twoodLimit')[0].value), \
+tambientLimitxx: parseFloat($('#config-tambientLimit')[0].value), \
+cooldownTimeMs: parseInt($('#config-cooldownTimeMs')[0].value), \
+tambientVsExternGTESysOff: parseFloat($('#config-tambientVsExternGTESysOff')[0].value), \
+tambientVsExternLTESysOn: parseFloat($('#config-tambientVsExternLTESysOn')[0].value), \
+tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value), \
+tbottomLTEFanOff: parseFloat($('#config-tbottomLTEFanOff')[0].value), \
+autoactivateWoodBottomDeltaGTESysOn: parseFloat($('#config-autoactivateWoodBottomDeltaGTESysOn')[0].value), \
+autodeactivateWoodDeltaLT: parseFloat($('#config-autodeactivateWoodDeltaLT')[0].value), \
+autodeactivateInhibitAutoactivateMinMs: parseInt($('#config-autodeactivateInhibitAutoactivateMinMs')[0].value), \
+autodeactivateExcursionSampleCount: parseInt($('#config-autodeactivateExcursionSampleCount')[0].value), \
+autodeactivateExcursionSampleTotalMs: parseInt($('#config-autodeactivateExcursionSampleTotalMs')[0].value), \
+texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value) \
+}; \
+ \
+while (!finished) { \
+try { \
+res = await $.ajax({ \
+url: baseurl + '/saveconfig', \
+type: 'POST', \
+data: JSON.stringify(config), \
+dataType: 'JSON', \
+error: function (e) { \
+if (e.statusText == \"OK\") { \
+hideSpin(); \
+finished = true; \
+return 0; \
+} else if (e.statusText == \"error\") { \
+hideSpin(); \
+alert('failed'); \
+finished = true; \
+return 0; \
+} \
+} \
+}); \
+finished = true; \
+} catch (e) { \
+sleep(1000); \
+} \
+} \
+hideSpin(); \
 } \
  \
 var reload_enabled = false; \
@@ -209,7 +321,7 @@ position: 'bottom' \
  \
 async function myfn() { \
  \
-$('.j-spin').removeClass('collapse'); \
+hideSpin(); \
 let res = null; \
 let finished = false; \
 while (!finished) { \
@@ -238,8 +350,10 @@ sleep(1000); \
 } \
 } \
  \
+await reloadConfig(); \
+ \
 history_interval_sec = resnfo.history_interval_sec; \
-$('.j-spin').addClass('collapse'); \
+hideSpin(); \
  \
 var h = \"\"; \
  \

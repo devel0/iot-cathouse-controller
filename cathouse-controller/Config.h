@@ -132,4 +132,26 @@ void loadConfig();
 //
 //-----------
 
+extern const char *CSTR_firmwareVersion;
+extern const char *CSTR_wifiSSID;
+extern const char *CSTR_temperatureHistoryFreeramThreshold;
+extern const char *CSTR_temperatureHistoryBacklogHours;
+extern const char *CSTR_updateConsumptionIntervalMs;
+extern const char *CSTR_updateFreeramIntervalMs;
+extern const char *CSTR_updateTemperatureIntervalMs;
+extern const char *CSTR_tbottomLimit;
+extern const char *CSTR_twoodLimit;
+extern const char *CSTR_tambientLimit;
+extern const char *CSTR_cooldownTimeMs;
+extern const char *CSTR_tambientVsExternGTESysOff;
+extern const char *CSTR_tambientVsExternLTESysOn;
+extern const char *CSTR_tbottomGTEFanOn;
+extern const char *CSTR_tbottomLTEFanOff;
+extern const char *CSTR_autoactivateWoodBottomDeltaGTESysOn;
+extern const char *CSTR_autodeactivateWoodDeltaLT;
+extern const char *CSTR_autodeactivateInhibitAutoactivateMinMs;
+extern const char *CSTR_autodeactivateExcursionSampleCount;
+extern const char *CSTR_autodeactivateExcursionSampleTotalMs;
+extern const char *CSTR_texternGTESysOff;
+
 #endif
