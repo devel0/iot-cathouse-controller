@@ -26,6 +26,7 @@ void EEInit()
 
 void EEResetToFactoryDefault(Config *data)
 {
+    strcpy(data->firmwareVersion, EEFD_firmwareVersion);
     data->temperatureHistoryFreeramThreshold = EEFD_temperatureHistoryFreeramThreshold;
     data->temperatureHistoryBacklogHours = EEFD_temperatureHistoryBacklogHours;
     data->updateConsumptionIntervalMs = EEFD_updateConsumptionIntervalMs;

@@ -54,6 +54,8 @@ void setup()
 
   EEInit();
 
+  Serial.printf("fw ver [%s]\n", config.firmwareVersion);
+
   statsInit();
 
   setupPorts();

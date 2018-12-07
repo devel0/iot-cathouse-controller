@@ -5,12 +5,12 @@ Config config;
 
 void saveConfig()
 {
-    EERead(&config);
+    EEWrite(&config);
 }
 
 void loadConfig()
 {
-    EEWrite(&config);
+    EERead(&config);
 }
 
 int heatPortIndexToPin(int idx)
