@@ -205,7 +205,7 @@ bool manageWifi()
           }
           //--------------------------
           // /port/get/{1,2,3,4,5,6,7}
-          // note: 5 is led, 6 is fan
+          // note: 5 is led, 6 is fan, 7 is weight (0-1023 adc)
           //--------------------------
           else if (header.indexOf("GET /port/get/") >= 0)
           {
@@ -301,7 +301,19 @@ bool manageWifi()
           //-----------------------------------------------
           else if (header.indexOf("POST /api/saveconfig ") >= 0)
           {
-            eeJsonConfig.SaveToEEProm();
+            String s;
+            while (client.peek() != -1) // read all frames
+            {
+              while (client.available())
+              {
+                auto c = (char)client.read();
+                s.concat(c);
+              }
+              client.flush();
+            }
+            Serial.printf("saving config [%s]\n", s.c_str());
+
+            //eeJsonConfig.SaveToEEProm();
           }
 
           header = "";

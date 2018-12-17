@@ -80,9 +80,7 @@ void loop()
 
   if (!serialOsActivated) statsUpdate();
 
-  if (!serialOsActivated) manageTemp();
-
-  if (!serialOsActivated) manageWeight();
+  if (!serialOsActivated) manageTemp();  
 
   if (Serial.available())
   {
