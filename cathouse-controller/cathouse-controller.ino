@@ -75,16 +75,19 @@ bool systemIsOn = false;
 
 void loop()
 {
-  statsUpdate();
+  if (manageWifi())
+    return;
 
-  manageWifi();
+  if (!serialOsActivated) statsUpdate();
 
-  manageTemp();
+  if (!serialOsActivated) manageTemp();
 
-  manageWeight();
+  if (!serialOsActivated) manageWeight();
 
   if (Serial.available())
   {
+    builtinLedOff();
+
     auto c = (char)Serial.read();
     if ((int)c != 255)
     {
@@ -97,5 +100,7 @@ void loop()
       else
         serialInput.concat(c);
     }
+
+    builtinLedOn();
   }
 }
