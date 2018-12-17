@@ -21,7 +21,7 @@ void statsUpdate()
 {
     {
         auto tdelta = timeDiff(freeram_lastupdate, millis());
-        if (tdelta >= eeJsonConfig.updateFreeramIntervalMs)
+        if (tdelta >= eeJsonConfig.updateFreeramIntervalMs && tdelta >= FREERAM_UPDATE_INTERVAL_MIN_MS)
         {
             freeram = freeMemorySum();
             freeram_min = min(freeram, freeram_min);
@@ -31,7 +31,7 @@ void statsUpdate()
 
     {
         auto tdelta = timeDiff(lastConsumptionUpdate, millis());
-        if (tdelta >= eeJsonConfig.updateConsumptionIntervalMs)
+        if (tdelta >= eeJsonConfig.updateConsumptionIntervalMs && tdelta >= CONSUMPTION_UPDATE_INTERVAL_MIN_MS)
         {
             auto hr = ((double)tdelta) / ((double)1000.0 * 60 * 60);
 

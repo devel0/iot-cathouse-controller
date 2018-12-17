@@ -1,7 +1,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define FIRMWARE_VER "cathouse-0.82"
+#define FIRMWARE_VER "cathouse-0.83"
 
 #include <Arduino.h>
 
@@ -25,5 +25,9 @@
 #define W_PORT 26.75
 
 int heatPortIndexToPin(int idx);
+
+#define FREERAM_UPDATE_INTERVAL_MIN_MS 1000
+#define CONSUMPTION_UPDATE_INTERVAL_MIN_MS 1000
+#define UPDATE_TEMPERATURE_INTERVAL_MIN_MS 1000
 
 #endif

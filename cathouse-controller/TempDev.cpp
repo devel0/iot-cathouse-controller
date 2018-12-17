@@ -98,8 +98,12 @@ void readTemperatures()
 
 void manageTemp()
 {
-    if (timeDiff(lastTemperatureRead, millis()) > eeJsonConfig.updateTemperatureIntervalMs)
-        readTemperatures();
+    {
+        auto delta = timeDiff(lastTemperatureRead, millis());
+        if (delta > eeJsonConfig.updateTemperatureIntervalMs &&
+            delta > UPDATE_TEMPERATURE_INTERVAL_MIN_MS)
+            readTemperatures();
+    }
 
     if (temperatureHistory != NULL &&
         (timeDiff(lastTemperatureHistoryRecord, millis()) > 1000UL * temperatureHistoryIntervalSec))
