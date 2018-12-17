@@ -30,6 +30,7 @@ void reconnectWifi()
         if (Serial.available() && Serial.read() == 3)
         {
             printSyntaxHelp();
+            serialOsActivated = true;
             return;
         }
     }
