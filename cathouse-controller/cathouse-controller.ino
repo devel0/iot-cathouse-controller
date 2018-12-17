@@ -92,7 +92,10 @@ void loop()
     if ((int)c != 255)
     {
       if (c == '?' && serialInput.length() == 0)
+      {
         printSyntaxHelp();
+        serialOsActivated = true;
+      }
       else if (c == '\r')
         processSerialCmd();
       else if (c == 8) // backspace
