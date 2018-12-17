@@ -288,19 +288,23 @@ bool manageWifi()
             client.print("OK");
           }
           //-----------------------------------------------
-          // /api/getconfig
+          // /getconfig
           //-----------------------------------------------
-          else if (header.indexOf("GET /api/getconfig ") >= 0)
-          {
+          else if (header.indexOf("GET /getconfig ") >= 0)
+          {            
+            //WiFiPrinter prn(client);
+
             clientOk(client, JSON);
 
-            eeJsonConfig.Save(client);
+            eeJsonConfig.Save(client);            
           }
           //-----------------------------------------------
-          // /api/saveconfig
+          // /saveconfig
           //-----------------------------------------------
-          else if (header.indexOf("POST /api/saveconfig ") >= 0)
+          else if (header.indexOf("POST /saveconfig ") >= 0)
           {
+            clientOk(client, TEXT);
+
             String s;
             while (client.peek() != -1) // read all frames
             {
@@ -312,6 +316,9 @@ bool manageWifi()
               client.flush();
             }
             Serial.printf("saving config [%s]\n", s.c_str());
+
+            eeJsonConfig.Load(s.c_str());
+            eeJsonConfig.SaveToEEProm();
 
             //eeJsonConfig.SaveToEEProm();
           }

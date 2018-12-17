@@ -19,18 +19,16 @@
 EEJsonConfig eeJsonConfig;
 
 void EEJsonConfig::Save(Print &prn)
-{
-    String output;
+{    
+    String output;    
     StringStream stream(output);
     JsonWriter json(&stream);
 
-    json.beginObject();
-
     json.beginObject()
-        .property("tbottomID", tbottomID.c_str())
-        .property("twoodID", tbottomID.c_str())
-        .property("tambientID", tbottomID.c_str())
-        .property("texternID", tbottomID.c_str())
+        .property("tbottomId", tbottomId)
+        .property("twoodId", twoodId)
+        .property("tambientId", tambientId)
+        .property("texternId", texternId)
         .property("temperatureHistoryFreeramThreshold", temperatureHistoryFreeramThreshold)
         .property("temperatureHistoryBacklogHours", temperatureHistoryBacklogHours)
         .property("updateConsumptionIntervalMs", updateConsumptionIntervalMs)
@@ -54,14 +52,16 @@ void EEJsonConfig::Save(Print &prn)
 
     Serial.printf("saving eeJsonConfig [%s]\n", output.c_str());
 
-    prn.print(output.c_str());
+    prn.print(output);
 }
 
 void EEJsonConfig::SaveToEEProm()
-{
+{    
     EEPrinter prn(EE_JSON_CONFIG_OFFSET);
     Save(prn);
     prn.commit();
+
+    Save(Serial);
 }
 
 void EEJsonConfig::Load(const char *json)
@@ -193,14 +193,14 @@ void EEJsonConfigParseListener::key(String key)
 
 void EEJsonConfigParseListener::value(String value)
 {
-    if (lastKey == "tbottomID")
-        eeJsonConfig.tbottomID = value;
-    else if (lastKey == "twoodID")
-        eeJsonConfig.twoodID = value;
-    else if (lastKey == "tambientID")
-        eeJsonConfig.tambientID = value;
-    else if (lastKey == "texternID")
-        eeJsonConfig.texternID = value;
+    if (lastKey == "tbottomId")
+        eeJsonConfig.tbottomId = value;
+    else if (lastKey == "twoodId")
+        eeJsonConfig.twoodId = value;
+    else if (lastKey == "tambientId")
+        eeJsonConfig.tambientId = value;
+    else if (lastKey == "texternId")
+        eeJsonConfig.texternId = value;
     else if (lastKey == "temperatureHistoryFreeramThreshold")
         eeJsonConfig.temperatureHistoryFreeramThreshold = atoi(value.c_str());
     else if (lastKey == "temperatureHistoryBacklogHours")

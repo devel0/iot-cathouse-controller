@@ -56,10 +56,17 @@ void setupTemperatureDevices()
 
         temperatureHistory = (float **)malloc(sizeof(float *) * temperatureDeviceCount);
 
-        auto ramsize = freeMemorySum() - eeJsonConfig.temperatureHistoryFreeramThreshold - 3 * 1024; // 3 kb diff for wifi
+        auto threshold = eeJsonConfig.temperatureHistoryFreeramThreshold;
+        if (threshold < FREERAM_THRESHOLD_MIN_BYTES)
+            threshold = FREERAM_THRESHOLD_MIN_BYTES;
+
+        auto ramsize = freeMemorySum() - threshold - 3 * 1024; // 3 kb diff for wifi
         temperatureHistorySize = ramsize / temperatureDeviceCount / sizeof(float);
 
-        temperatureHistoryIntervalSec = eeJsonConfig.temperatureHistoryBacklogHours * 60 * 60 / temperatureHistorySize;
+        auto backloghr = eeJsonConfig.temperatureHistoryBacklogHours;
+        if (backloghr < TEMPERATURE_HISTORY_BACKLOG_HOURS_MIN)
+            backloghr = TEMPERATURE_HISTORY_BACKLOG_HOURS_MIN;
+        temperatureHistoryIntervalSec = backloghr * 60 * 60 / temperatureHistorySize;
 
         for (int i = 0; i < temperatureDeviceCount; ++i)
             temperatureHistory[i] = (float *)malloc(sizeof(float) * temperatureHistorySize);
@@ -79,13 +86,13 @@ void readTemperatures()
         auto id = (char *)tempDevAddress[i];
         auto temp = DS18B20.getTempC(tempDevAddress[i]);
 
-        if (strncmp(id, eeJsonConfig.tbottomID.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+        if (strncmp(id, eeJsonConfig.tbottomId.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
             tbottom = temp;
-        else if (strncmp(id, eeJsonConfig.twoodID.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+        else if (strncmp(id, eeJsonConfig.twoodId.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
             twood = temp;
-        else if (strncmp(id, eeJsonConfig.tambientID.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+        else if (strncmp(id, eeJsonConfig.tambientId.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
             tambient = temp;
-        else if (strncmp(id, eeJsonConfig.texternID.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+        else if (strncmp(id, eeJsonConfig.texternId.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
             textern = temp;
 
         //Serial.printf("temperature sensor [%d] = %f\n", i, temp);

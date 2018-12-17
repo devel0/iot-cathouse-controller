@@ -8,19 +8,23 @@
 
 class StringStream : public Stream
 {
-public:
-    StringStream(String &s) : string(s), position(0) { }
+  public:
+    StringStream(String &s) : str(s), position(0) {}
 
     // Stream methods
-    virtual int available() { return string.length() - position; }
-    virtual int read() { return position < string.length() ? string[position++] : -1; }
-    virtual int peek() { return position < string.length() ? string[position] : -1; }
-    virtual void flush() { };
+    virtual int available() { return str.length() - position; }
+    virtual int read() { return position < str.length() ? str[position++] : -1; }
+    virtual int peek() { return position < str.length() ? str[position] : -1; }
+    virtual void flush(){};
     // Print methods
-    virtual size_t write(uint8_t c) { string += (char)c; return 1;};
+    virtual size_t write(uint8_t c)
+    {
+        str += (char)c;        
+        return 1;
+    };
 
-private:
-    String &string;
+  private:
+    String &str;
     unsigned int length;
     unsigned int position;
 };

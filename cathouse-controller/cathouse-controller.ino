@@ -49,11 +49,15 @@ void setupPorts()
 
 void setup()
 {
+delay(3000);
+
   Serial.println("Setup serial");
   Serial.begin(SERIAL_SPEED);
   //  Serial.swap(); // use D8(TX) - D7(RX)
 
   initEEStaticConfig();
+
+  eeJsonConfig.LoadFromEEProm();
 
   statsInit();
 
@@ -80,7 +84,7 @@ void loop()
 
   if (!serialOsActivated) statsUpdate();
 
-  if (!serialOsActivated) manageTemp();  
+  if (!serialOsActivated) manageTemp();
 
   if (Serial.available())
   {

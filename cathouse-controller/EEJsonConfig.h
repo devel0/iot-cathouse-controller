@@ -17,10 +17,10 @@
 class EEJsonConfig
 {
 public:
-  String tbottomID;
-  String twoodID;
-  String tambientID;
-  String texternID;  
+  String tbottomId;
+  String twoodId;
+  String tambientId;
+  String texternId;  
 
   // allocate temperature history so that it can hold temperatureHistoryBacklogHours hours
   // leaving temperatureHistoryFreeramThreshold free ram bytes
