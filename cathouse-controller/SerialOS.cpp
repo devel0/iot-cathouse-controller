@@ -44,6 +44,7 @@ void processSerialCmd()
   else if (serialInput == "reconnect")
   {
     reconnectWifi();
+    serialOsActivated = false;
   }
   else if (serialInput == "exit")
   {

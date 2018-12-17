@@ -31,6 +31,7 @@ void reconnectWifi()
         {
             printSyntaxHelp();
             serialOsActivated = true;
+            Serial.println("SerialOs activated");
             return;
         }
     }

@@ -38,7 +38,7 @@ void loadEEStaticConfig()
 }
 
 void saveEEStaticConfig()
-{
+{    
     auto ptr = (uint8_t *)&eeStaticConfig;
     auto l = sizeof(EEStaticConfig);
     for (int i = 0; i < l; ++i)
