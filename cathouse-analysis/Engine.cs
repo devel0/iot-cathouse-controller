@@ -25,15 +25,15 @@ namespace cathouse_analysis
 
         // 14d -> 70W
 
-        public const double TAMBIENT_VS_EXTERN_GTE_SYSOFF = 11d;
+        public const double TAMBIENT_VS_EXTERN_GTE_SYSOFF = 12d;
 
-        public const double TAMBIENT_VS_EXTERN_LTE_SYSON = 10d;
+        public const double TAMBIENT_VS_EXTERN_LTE_SYSON = 4d;
 
-        public const double TBOTTOM_GTE_FANON = 30d;
+        /*        public const double TBOTTOM_GTE_FANON = 35d;
 
-        public const double TBOTTOM_LTE_FANOFF = 25d;
+                public const double TBOTTOM_LTE_FANOFF = 25d;*/
 
-        public const double AUTOACTIVATE_WOOD_BOTTOM_DELTA = 3d;
+        public const double AUTOACTIVATE_WOOD_BOTTOM_DELTA = 2d;
 
         //public const double AUTOACTIVATE_
 
@@ -43,9 +43,9 @@ namespace cathouse_analysis
         /// record AUTODEACTIVATE_MEAN_SAMPLE_COUNT in AUTODEACTIVATE_MEAN_SAMPLE_TOTAL_TIMESPAN given timespan
         /// for example in 50 min reocord 5 values of mean temperature to estimate mean temperature in 50 min
         /// </summary>        
-        public TimeSpan AUTODEACTIVATE_EXCURSION_SAMPLE_TOTAL_TIMESPAN = TimeSpan.FromMinutes(30);
+        public TimeSpan AUTODEACTIVATE_EXCURSION_SAMPLE_TOTAL_TIMESPAN = TimeSpan.FromMinutes(90);
 
-        public double AUTODEACTIVATE_WOOD_DELTA_LT = 8.5d;
+        public double AUTODEACTIVATE_BOTTOM_DELTA_LT = 8.5d;
 
         /// <summary>
         /// minimum timespan from deactivation of system to allow wood tend to bottom temperature
@@ -145,16 +145,6 @@ namespace cathouse_analysis
                         var twood = await GetTWood();
                         var textern = await GetTExtern();
 
-                        #region fan control
-                        {
-                            // control fan based on bottom temp
-                            if (tbottom >= TBOTTOM_GTE_FANON)
-                                await fan.Write(true);
-                            else if (tbottom <= TBOTTOM_LTE_FANOFF)
-                                await fan.Write(false);
-                        }
-                        #endregion
-
                         #region logdata
                         {
                             var dtstr = DateTime.Now.ToString("O");
@@ -236,18 +226,18 @@ namespace cathouse_analysis
                                     // if this sample set expired create new one and if count exceed excursionSamplesMaxCount
                                     // - eval delta to understand if cat in there
                                     // - remove oldest                            
-                                    if (!es.Add(twood))
+                                    if (!es.Add(tbottom))
                                     {
                                         es = new ExcursionSample(excursionSampleMaxAge);
-                                        es.Add(twood);
+                                        es.Add(tbottom);
 
                                         if (excursionSamples.Count > excursionSamplesMaxCount)
                                         {
-                                            var min = Min(excursionSamples.Min(w => w.Min), twood);
-                                            var max = Max(excursionSamples.Max(w => w.Max), twood);
+                                            var min = Min(excursionSamples.Min(w => w.Min), tbottom);
+                                            var max = Max(excursionSamples.Max(w => w.Max), tbottom);
                                             var delta = max - min;
 
-                                            if (delta < AUTODEACTIVATE_WOOD_DELTA_LT)
+                                            if (delta < AUTODEACTIVATE_BOTTOM_DELTA_LT)
                                             {
                                                 dtDeactivateStarted = DateTime.Now;
                                             }
@@ -271,8 +261,8 @@ namespace cathouse_analysis
                                     }
 
                                     {
-                                        var min = Min(excursionSamples.Min(w => w.Min), twood);
-                                        var max = Max(excursionSamples.Max(w => w.Max), twood);
+                                        var min = Min(excursionSamples.Min(w => w.Min), tbottom);
+                                        var max = Max(excursionSamples.Max(w => w.Max), tbottom);
                                         var delta = max - min;
                                         System.Console.WriteLine($"es slots cnt={excursionSamples.Count} esidx={excursionSamples.IndexOf(es)} : last excursion sample count={es.Count} age={es.Age} maxAge={es.MaxAge} min={es.Min} max={es.Max} delta={es.Max - es.Min} oldest sample timestamp = {es.OldestSampleTimestamp}");
                                         System.Console.WriteLine($"all excursion slots min={min} max={max} delta={delta}");
@@ -319,6 +309,18 @@ namespace cathouse_analysis
                                     System.Console.WriteLine($"FAN={fan.IsOn}");
                                 }
                             }
+                        }
+                        #endregion
+
+                        #region fan control
+                        {
+                            if (ports.Any(w => w.IsOn))
+                                // control fan based on bottom temp
+                                //                            if (tbottom >= TBOTTOM_GTE_FANON && ((tambient - textern) <= TAMBIENT_VS_EXTERN_GTE_SYSOFF))
+                                await fan.Write(true);
+                            else
+                                //else //if (tbottom <= TBOTTOM_LTE_FANOFF)
+                                await fan.Write(false);
                         }
                         #endregion
                     }

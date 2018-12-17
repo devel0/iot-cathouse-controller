@@ -1,6 +1,7 @@
 #include "Stats.h"
 #include "Util.h"
 #include "Config.h"
+#include "EEJsonConfig.h"
 
 double runtime_hr = 0.0;
 double Wh = 0.0;
@@ -20,7 +21,7 @@ void statsUpdate()
 {
     {
         auto tdelta = timeDiff(freeram_lastupdate, millis());
-        if (tdelta >= config.updateFreeramIntervalMs)
+        if (tdelta >= eeJsonConfig.updateFreeramIntervalMs)
         {
             freeram = freeMemorySum();
             freeram_min = min(freeram, freeram_min);
@@ -30,7 +31,7 @@ void statsUpdate()
 
     {
         auto tdelta = timeDiff(lastConsumptionUpdate, millis());
-        if (tdelta >= config.updateConsumptionIntervalMs)
+        if (tdelta >= eeJsonConfig.updateConsumptionIntervalMs)
         {
             auto hr = ((double)tdelta) / ((double)1000.0 * 60 * 60);
 

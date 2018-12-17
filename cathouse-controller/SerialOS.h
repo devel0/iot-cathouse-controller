@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 extern String serialInput;
+extern bool serialOsActivated;
 
 void printSyntaxHelp();
 void processSerialCmd();

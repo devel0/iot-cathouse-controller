@@ -119,7 +119,7 @@
                     <thead>
                         <tr>
                             <th width="30%" style='text-align:right'><b>Var</b></th>
-                            <th width="15%"><b>Value</b></th>
+                            <th width="20%"><b>Value</b></th>
                             <th width="5%"><b>Unit</b></th>
                             <td width="60%"><b>Notes</b></td>
                         </tr>
@@ -136,6 +136,30 @@
                             <td><span id='config-wifiSSID'></span></td>
                             <td></td>
                             <td></td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Temperature sensor ID ( bottom )</td>
+                            <td><input type='text' maxlength="16" class='form-control' id='config-tbottomId'></input></td>
+                            <td></td>
+                            <td class='cfg-notes'>bottom temperature sensor id</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Temperature sensor ID ( wood )</td>
+                            <td><input type='text' maxlength="16" class='form-control' id='config-twoodId'></input></td>
+                            <td></td>
+                            <td class='cfg-notes'>wood temperature sensor id</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Temperature sensor ID ( ambient )</td>
+                            <td><input type='text' maxlength="16" class='form-control' id='config-tambientId'></input></td>
+                            <td></td>
+                            <td class='cfg-notes'>ambient temperature sensor id</td>
+                        </tr>
+                        <tr>
+                            <td class='cfg-lbl align-middle'>Temperature sensor ID ( extern )</td>
+                            <td><input type='text' maxlength="16" class='form-control' id='config-texternId'></input></td>
+                            <td></td>
+                            <td class='cfg-notes'>extern temperature sensor id</td>
                         </tr>
                         <tr>
                             <td class='cfg-lbl align-middle'>Temperature History freeram threshold</td>

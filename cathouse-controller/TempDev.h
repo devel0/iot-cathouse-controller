@@ -24,4 +24,6 @@ void setupTemperatureDevices();
 void readTemperatures();
 void manageTemp();
 
+extern float tbottom, twood, tambient, textern;
+
 #endif

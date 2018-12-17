@@ -12,14 +12,18 @@
 #include <OneWire.h>
 
 #include "WiFiUtil.h"
-#include "EEUtil.h"
+#include "WiFiMain.h"
+#include "EEJsonConfig.h"
 #include "SerialOS.h"
 #include "Util.h"
 #include "TempDev.h"
+#include "WeightDev.h"
 #include "Stats.h"
 
 void setupPorts()
 {
+  pinMode(A0, INPUT);
+
   pinMode(MOSFET_P1, OUTPUT);
   digitalWrite(MOSFET_P1, LOW);
 
@@ -49,16 +53,14 @@ void setup()
   Serial.begin(SERIAL_SPEED);
   //  Serial.swap(); // use D8(TX) - D7(RX)
 
-  while (Serial.available())
-    Serial.read();
-
-  EEInit();
-
-  Serial.printf("fw ver [%s]\n", config.firmwareVersion);
+  initEEStaticConfig();
 
   statsInit();
 
   setupPorts();
+
+  // set led before wifi
+  pinMode(LED_BUILTIN, OUTPUT);
 
   reconnectWifi();
 
@@ -69,6 +71,8 @@ void setup()
 // LOOP
 //=============================================================
 
+bool systemIsOn = false;
+
 void loop()
 {
   statsUpdate();
@@ -76,6 +80,8 @@ void loop()
   manageWifi();
 
   manageTemp();
+
+  manageWeight();
 
   if (Serial.available())
   {
@@ -92,7 +98,4 @@ void loop()
         serialInput.concat(c);
     }
   }
-
-  if (server.status() == CLOSED)
-    return;
 }

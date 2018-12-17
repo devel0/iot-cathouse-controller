@@ -1,6 +1,7 @@
 #include "TempDev.h"
 #include "Config.h"
 #include "Util.h"
+#include "EEJsonConfig.h"
 
 int temperatureDeviceCount = 0;
 
@@ -55,10 +56,10 @@ void setupTemperatureDevices()
 
         temperatureHistory = (float **)malloc(sizeof(float *) * temperatureDeviceCount);
 
-        auto ramsize = freeMemorySum() - config.temperatureHistoryFreeramThreshold - 3 * 1024; // 3 kb diff for wifi
+        auto ramsize = freeMemorySum() - eeJsonConfig.temperatureHistoryFreeramThreshold - 3 * 1024; // 3 kb diff for wifi
         temperatureHistorySize = ramsize / temperatureDeviceCount / sizeof(float);
 
-        temperatureHistoryIntervalSec = config.temperatureHistoryBacklogHours * 60 * 60 / temperatureHistorySize;
+        temperatureHistoryIntervalSec = eeJsonConfig.temperatureHistoryBacklogHours * 60 * 60 / temperatureHistorySize;
 
         for (int i = 0; i < temperatureDeviceCount; ++i)
             temperatureHistory[i] = (float *)malloc(sizeof(float) * temperatureHistorySize);
@@ -68,13 +69,27 @@ void setupTemperatureDevices()
     readTemperatures();
 }
 
+float tbottom, twood, tambient, textern;
+
 void readTemperatures()
 {
     DS18B20.requestTemperatures();
     for (int i = 0; i < temperatureDeviceCount; ++i)
     {
+        auto id = (char *)tempDevAddress[i];
         auto temp = DS18B20.getTempC(tempDevAddress[i]);
+
+        if (strncmp(id, eeJsonConfig.tbottomID.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+            tbottom = temp;
+        else if (strncmp(id, eeJsonConfig.twoodID.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+            twood = temp;
+        else if (strncmp(id, eeJsonConfig.tambientID.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+            tambient = temp;
+        else if (strncmp(id, eeJsonConfig.texternID.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+            textern = temp;
+
         //Serial.printf("temperature sensor [%d] = %f\n", i, temp);
+        //Serial.printf("tbottom [%f] ; twood [%f] ; tambient [%f] ; textern [%f]\n", tbottom, twood, tambient, textern);
         temperatures[i] = temp;
     }
 
@@ -83,7 +98,7 @@ void readTemperatures()
 
 void manageTemp()
 {
-    if (timeDiff(lastTemperatureRead, millis()) > config.updateTemperatureIntervalMs)
+    if (timeDiff(lastTemperatureRead, millis()) > eeJsonConfig.updateTemperatureIntervalMs)
         readTemperatures();
 
     if (temperatureHistory != NULL &&

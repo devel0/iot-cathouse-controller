@@ -8,9 +8,12 @@ F("<html> \
 background-color: yellow; \
 } \
 .cfg-lbl { \
+text-align: right; \
+font-weight: bold; \
+} \
+.cfg-notes { \
 color: gray; \
 font-style: italic; \
-text-align: right; \
 } \
 </style> \
 </head> \
@@ -112,100 +115,152 @@ crossorigin=\"anonymous\"> \
 </div> \
 </div> \
 <div class=\"row\"> \
-<div class=\"col-auto\"> \
+<div class=\"col\"> \
 <table class=\"table table-striped\"> \
 <thead> \
 <tr> \
-<th style='text-align:right'><b>Var</b></th> \
-<th><b>Value</b></th> \
-<th><b>Unit</b></th> \
+<th width=\"30%\" style='text-align:right'><b>Var</b></th> \
+<th width=\"20%\"><b>Value</b></th> \
+<th width=\"5%\"><b>Unit</b></th> \
+<td width=\"60%\"><b>Notes</b></td> \
 </tr> \
 </thead> \
 <tbody id=\"config-tbl\"> \
 <tr> \
-<td class='cfg-lbl'>firmware ver</td> \
+<td class='cfg-lbl'>Firmware ver</td> \
 <td><span id='config-firmwareVersion'></span></td> \
+<td></td> \
 <td></td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl'>WiFi SSID</td> \
 <td><span id='config-wifiSSID'></span></td> \
 <td></td> \
+<td></td> \
+</tr> \
+<tr> \
+<td class='cfg-lbl align-middle'>Temperature sensor ID ( bottom )</td> \
+<td><input type='text' maxlength=\"16\" class='form-control' id='config-tbottomId'></input></td> \
+<td></td> \
+<td class='cfg-notes'>bottom temperature sensor id</td> \
+</tr> \
+<tr> \
+<td class='cfg-lbl align-middle'>Temperature sensor ID ( wood )</td> \
+<td><input type='text' maxlength=\"16\" class='form-control' id='config-twoodId'></input></td> \
+<td></td> \
+<td class='cfg-notes'>wood temperature sensor id</td> \
+</tr> \
+<tr> \
+<td class='cfg-lbl align-middle'>Temperature sensor ID ( ambient )</td> \
+<td><input type='text' maxlength=\"16\" class='form-control' id='config-tambientId'></input></td> \
+<td></td> \
+<td class='cfg-notes'>ambient temperature sensor id</td> \
+</tr> \
+<tr> \
+<td class='cfg-lbl align-middle'>Temperature sensor ID ( extern )</td> \
+<td><input type='text' maxlength=\"16\" class='form-control' id='config-texternId'></input></td> \
+<td></td> \
+<td class='cfg-notes'>extern temperature sensor id</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Temperature History freeram threshold</td> \
 <td><input type='number' step='0.001' class='form-control' id='config-temperatureHistoryFreeramThreshold-kb'></input></td> \
 <td class='align-middle'>kb</td> \
+<td class='cfg-notes'>allocate temperature history so that it can hold Temperature History \
+backlog size timespan leaving Temperature History freeram threshold estimated ram \
+available</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Temperature History backlog size</td> \
 <td><input type='number' step='1' class='form-control' id='config-temperatureHistoryBacklogHours'></input></td> \
 <td class='align-middle'>hours</td> \
+<td class='cfg-notes'></td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Consumption update interval</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-updateConsumptionIntervalMs-sec'></input></td> \
 <td class='align-middle'>sec</td> \
+<td class='cfg-notes'>interval to update Wh consumption stats</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Freeram update interval</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-updateFreeramIntervalMs-sec'></input></td> \
 <td class='align-middle'>sec</td> \
+<td class='cfg-notes'>interval to update freeram stats</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Temperature update interval</td> \
 <td><input type='number' step='1' class='form-control' id='config-updateTemperatureIntervalMs-sec'></input></td> \
 <td class='align-middle'>sec</td> \
+<td class='cfg-notes'>interval to update current temperature by reading sensors</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Bottom temperature limit</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tbottomLimit'></input></td> \
 <td class='align-middle'>C</td> \
+<td class='cfg-notes'>if bottom temp >= bottom temperature limit heat ports gets disabled \
+for Cooldown time</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Wood temperature limit</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-twoodLimit'></input></td> \
 <td class='align-middle'>C</td> \
+<td class='cfg-notes'>if bottom temp >= wood temperature limit heat ports gets disabled for \
+Cooldown time</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Ambient temperature limit</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tambientLimit'></input></td> \
 <td class='align-middle'>C</td> \
+<td class='cfg-notes'>if bottom temp >= ambient temperature limit heat ports gets disabled \
+for Cooldown time</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Cooldown time</td> \
 <td><input type='number' step='0.01' class='form-control' id='config-cooldownTimeMs-min'></input></td> \
 <td class='align-middle'>min</td> \
+<td class='cfg-notes'>heat ports disable time when cooldown condition occurs</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Ambient >= Extern sys OFF</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tambientVsExternGTESysOff'></input></td> \
 <td class='align-middle'>C</td> \
+<td class='cfg-notes'>if ambient >= (Ambient >= Extern sys OFF) heat ports enter disable \
+state</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Ambient &lt;= Extern sys ON</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tambientVsExternLTESysOn'></input></td> \
 <td class='align-middle'>C</td> \
+<td class='cfg-notes'>if ambient >= (Ambient &lt;= Extern sys ON) heat ports enter enable \
+state</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Bottom >= T fan ON</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tbottomGTEFanOn'></input></td> \
 <td class='align-middle'>C</td> \
+<td class='cfg-notes'>if ambient >= (Bottom >= T fan ON) fan enter enable state</td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl align-middle'>Bottom &lt;= T fan ON</td> \
+<td class='cfg-lbl align-middle'>Bottom &lt;= T fan OFF</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tbottomLTEFanOff'></input></td> \
 <td class='align-middle'>C</td> \
+<td class='cfg-notes'>if ambient &lt;= (Bottom &lt;= T fan OFF) fan enter disable state</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>(Wood - Bottom) >= T sys ON</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-autoactivateWoodBottomDeltaGTESysOn'></input></td> \
 <td class='align-middle'>C</td> \
+<td class='cfg-notes'>if (twood - bottom) >= ((Wood - Bottom) >= T sys ON) system enter \
+enable state</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Wood excursion &lt;= T sys OFF</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-autodeactivateWoodDeltaLT'></input></td> \
 <td class='align-middle'>C</td> \
+<td class='cfg-notes'>if bottom excursion, over last Wood excursion analysis total time \
+interval &lt;= (Wood excursion &lt;= T sys OFF) system enter disable state for atleast \
+Inhibit activate after deactivation timespan</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Inhibit activate after deactivation min time</td> \
@@ -216,16 +271,22 @@ crossorigin=\"anonymous\"> \
 <td class='cfg-lbl align-middle'>Wood excursion sample slots count</td> \
 <td><input type='number' step='1' class='form-control' id='config-autodeactivateExcursionSampleCount'></input></td> \
 <td></td> \
+<td class='cfg-notes'>stat past Wood excursion analysis total temperatures time interval \
+using a bunch of Wood excursion sample slots count (min,max) objects. When total stat \
+interval exceeded then oldest sample gets removed in favor of a new one in the head \
+(current time)</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Wood excursion analysis total time interval</td> \
 <td><input type='number' step='0.01' class='form-control' id='config-autodeactivateExcursionSampleTotalMs-min'></input></td> \
 <td class='align-middle'>min</td> \
+<td class='cfg-notes'>suggested value : at least 1.5 x heat cycle time interval</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Extern >= T sys OFF</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-texternGTESysOff'></input></td> \
 <td class='align-middle'>C</td> \
+<td class='cfg-notes'>if extern >= (Extern >= T sys OFF) then system enter disabled state</td> \
 </tr> \
 </tbody> \
 </table> \

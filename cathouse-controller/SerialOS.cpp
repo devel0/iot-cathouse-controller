@@ -4,9 +4,11 @@
 
 #include "Util.h"
 #include "WiFiUtil.h"
-#include "EEUtil.h"
+#include "EEStaticConfig.h"
 
 String serialInput;
+
+bool serialOsActivated = false;
 
 //
 void printSyntaxHelp()
@@ -20,31 +22,32 @@ void printSyntaxHelp()
   Serial.printf("%-30s | Set WiFi access point id\n", "set wifi ssid <ssid>");
   Serial.printf("%-30s | Set WiFi access point pwd\n", "set wifi pwd <pwd>");
   Serial.printf("%-30s | Reconnect WiFi\n", "reconnect");
-  Serial.printf("%-30s | Reset to factory defaults\n", "factoryDefaults");
+  Serial.printf("%-30s | Exit from SerialOs\n", "exit");
   Serial.println();
 }
 
 //
 void processSerialCmd()
-{
+{  
   if (serialInput.indexOf("set wifi ssid ") == 0)
   {
-    strncpy(config.wifiSSID, serialInput.substring(14).c_str(), CONFIG_WIFI_SSID_STR_SIZE);
-    saveConfig();
+    memset(eeStaticConfig.wifiSSID, 0, WIDI_SSID_STRLENMAX + 1);
+    strncpy(eeStaticConfig.wifiSSID, serialInput.substring(14).c_str(), WIDI_SSID_STRLENMAX);
+    saveEEStaticConfig();
   }
   else if (serialInput.indexOf("set wifi pwd ") == 0)
   {
-    strncpy(config.wifiPwd, serialInput.substring(13).c_str(), CONFIG_WIFI_SSID_PWD_STR_SIZE);
-    saveConfig();
+    memset(eeStaticConfig.wifiPwd, 0, WIDI_PWD_STRLENMAX + 1);
+    strncpy(eeStaticConfig.wifiPwd, serialInput.substring(13).c_str(), WIDI_PWD_STRLENMAX);
+    saveEEStaticConfig();
   }
   else if (serialInput == "reconnect")
   {
     reconnectWifi();
   }
-  else if (serialInput == "factoryDefaults")
+  else if (serialInput == "exit")
   {
-    EEResetToFactoryDefault(&config);
-    saveConfig();
+    serialOsActivated = false;
   }
   else
   {

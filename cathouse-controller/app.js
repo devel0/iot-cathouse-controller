@@ -3,32 +3,13 @@
 //-------------------- PLEASE REVIEW FOLLOW VARIABLES ------------------
 //
 
-//
-// add a description to your sensors here
-//
-var sensorDesc = [{
-        id: "28b03724070000c8",
-        description: "bottom"
-    },
-    {
-        id: "28f00a3b05000038",
-        description: "ambient"
-    },
-    {
-        id: "28e2cc23070000d8",
-        description: "wood"
-    },
-    {
-        id: "28d12b5b0500001c",
-        description: "extern"
-    }
-];
-
 // automatic replaced to debug = false during compilation
 // this is used to debug page index.htm locally
 var debug = true;
 
 //==============================================================================
+
+var sensorDesc = [];
 
 requirejs.config({
     "moment": "://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"
@@ -56,8 +37,8 @@ function showConfig() {
 var history_interval_sec = 10;
 
 var baseurl = '';
-//if (debug) baseurl = 'http://10.10.3.9';
-if (debug) baseurl = 'http://10.10.3.11';
+if (debug) baseurl = 'http://10.10.3.9';
+//if (debug) baseurl = 'http://10.10.3.11';
 
 async function reloadTemp(addr) {
     showSpin();
@@ -145,12 +126,35 @@ async function reloadConfig() {
             finished = true;
         } catch (e) {
             sleep(1000);
+            finished=true;
         }
     }
     hideSpin();
 
+    sensorDesc = [{
+            id: res["tbottomId"],
+            description: "bottom"
+        },
+        {
+            id: res["twoodId"],
+            description: "wood"
+        },
+        {
+            id: res["tambientId"],
+            description: "ambient"
+        },
+        {
+            id: res["texternId"],
+            description: "extern"
+        }
+    ];
+
     $('#config-firmwareVersion')[0].innerText = res["firmwareVersion"];
     $('#config-wifiSSID')[0].innerText = res["wifiSSID"];
+    $('#config-tbottomId')[0].value = res["tbottomId"];
+    $('#config-twoodId')[0].value = res["twoodId"];
+    $('#config-tambientId')[0].value = res["tambientId"];
+    $('#config-texternId')[0].value = res["texternId"];
     $('#config-temperatureHistoryFreeramThreshold-kb')[0].value = res["temperatureHistoryFreeramThreshold"] / 1024.0;
     $('#config-temperatureHistoryBacklogHours')[0].value = res["temperatureHistoryBacklogHours"];
     $('#config-updateConsumptionIntervalMs-sec')[0].value = res["updateConsumptionIntervalMs"] / 1000.0;
@@ -178,6 +182,10 @@ async function saveConfig() {
     let res = null;
 
     let config = {
+        tbottomId: $('#config-tbottomId')[0].value,
+        twoodId: $('#config-twoodId')[0].value,
+        tambientId: $('#config-tambientId')[0].value,
+        texternId: $('#config-texternId')[0].value,
         temperatureHistoryFreeramThreshold: parseFloat($('#config-temperatureHistoryFreeramThreshold-kb')[0].value) * 1024,
         temperatureHistoryBacklogHours: parseInt($('#config-temperatureHistoryBacklogHours')[0].value),
         updateConsumptionIntervalMs: parseFloat($('#config-updateConsumptionIntervalMs-sec')[0].value) * 1000,
@@ -210,6 +218,7 @@ async function saveConfig() {
                     if (e.statusText == "OK") {
                         hideSpin();
                         finished = true;
+                        alert('config saved');
                         return 0;
                     } else if (e.statusText == "error") {
                         hideSpin();
