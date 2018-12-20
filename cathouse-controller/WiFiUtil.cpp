@@ -3,6 +3,7 @@
 #include "SerialOS.h"
 #include "EEStaticConfig.h"
 #include "Util.h"
+#include "Config.h"
 
 void reconnectWifi()
 {
