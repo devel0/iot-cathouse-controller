@@ -345,8 +345,11 @@ bool manageWifi()
 
             eeJsonConfig.Load(s.c_str());
             eeJsonConfig.SaveToEEProm();
-
-            //eeJsonConfig.SaveToEEProm();
+            if (eeStaticConfigDirty)
+            {
+              saveEEStaticConfig();
+              eeStaticConfigDirty = false;
+            }
           }
 
           header = "";

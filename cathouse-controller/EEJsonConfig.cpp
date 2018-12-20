@@ -1,4 +1,5 @@
 #include "EEJsonConfig.h"
+#include "EEStaticConfig.h"
 
 #include <EEPROM.h>
 
@@ -25,10 +26,6 @@ void EEJsonConfig::Save(Print &prn)
     JsonWriter json(&stream);
 
     json.beginObject()
-        .property("tbottomId", tbottomId)
-        .property("twoodId", twoodId)
-        .property("tambientId", tambientId)
-        .property("texternId", texternId)
         .property("tbottomLimit", tbottomLimit)
         .property("twoodLimit", twoodLimit)
         .property("tambientLimit", tambientLimit)
@@ -172,13 +169,41 @@ void EEJsonConfigParseListener::key(String key)
 void EEJsonConfigParseListener::value(String value)
 {
     if (lastKey == "tbottomId")
-        eeJsonConfig.tbottomId = value;
+    {
+        if (strncmp(eeStaticConfig.tbottomId, value.c_str(), DS18B20_ID_STRLENMAX) != 0)
+        {
+            strncpy(eeStaticConfig.tbottomId, value.c_str(), DS18B20_ID_STRLENMAX);
+            eeStaticConfig.tbottomId[DS18B20_ID_STRLENMAX] = 0;
+            eeStaticConfigDirty = true;
+        }
+    }
     else if (lastKey == "twoodId")
-        eeJsonConfig.twoodId = value;
+    {
+        if (strncmp(eeStaticConfig.twoodId, value.c_str(), DS18B20_ID_STRLENMAX) != 0)
+        {
+            strncpy(eeStaticConfig.twoodId, value.c_str(), DS18B20_ID_STRLENMAX);
+            eeStaticConfig.twoodId[DS18B20_ID_STRLENMAX] = 0;
+            eeStaticConfigDirty = true;
+        }
+    }
     else if (lastKey == "tambientId")
-        eeJsonConfig.tambientId = value;
+    {
+        if (strncmp(eeStaticConfig.tambientId, value.c_str(), DS18B20_ID_STRLENMAX) != 0)
+        {
+            strncpy(eeStaticConfig.tambientId, value.c_str(), DS18B20_ID_STRLENMAX);
+            eeStaticConfig.tambientId[DS18B20_ID_STRLENMAX] = 0;
+            eeStaticConfigDirty = true;
+        }
+    }
     else if (lastKey == "texternId")
-        eeJsonConfig.texternId = value;
+    {
+        if (strncmp(eeStaticConfig.texternId, value.c_str(), DS18B20_ID_STRLENMAX) != 0)
+        {
+            strncpy(eeStaticConfig.texternId, value.c_str(), DS18B20_ID_STRLENMAX);
+            eeStaticConfig.texternId[DS18B20_ID_STRLENMAX] = 0;
+            eeStaticConfigDirty = true;
+        }
+    }
     else if (lastKey == "tbottomLimit")
         eeJsonConfig.tbottomLimit = atof(value.c_str());
     else if (lastKey == "twoodLimit")

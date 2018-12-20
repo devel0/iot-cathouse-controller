@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "Util.h"
 #include "Stats.h"
+#include "EEStaticConfig.h"
 #include "EEJsonConfig.h"
 
 int temperatureDeviceCount = 0;
@@ -86,13 +87,13 @@ void readTemperatures()
         auto id = (char *)tempDevAddress[i];
         auto temp = DS18B20.getTempC(tempDevAddress[i]);
 
-        if (strncmp(id, eeJsonConfig.tbottomId.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+        if (strncmp(id, eeStaticConfig.tbottomId, DS18B20_ID_STRLENMAX) == 0)
             tbottom = temp;
-        else if (strncmp(id, eeJsonConfig.twoodId.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+        else if (strncmp(id, eeStaticConfig.twoodId, DS18B20_ID_STRLENMAX) == 0)
             twood = temp;
-        else if (strncmp(id, eeJsonConfig.tambientId.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+        else if (strncmp(id, eeStaticConfig.tambientId, DS18B20_ID_STRLENMAX) == 0)
             tambient = temp;
-        else if (strncmp(id, eeJsonConfig.texternId.c_str(), CONFIG_TEMP_ID_STRMAXLEN) == 0)
+        else if (strncmp(id, eeStaticConfig.texternId, DS18B20_ID_STRLENMAX) == 0)
             textern = temp;
 
         //Serial.printf("temperature sensor [%d] = %f\n", i, temp);

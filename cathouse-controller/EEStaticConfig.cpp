@@ -6,6 +6,7 @@
 #include <EEPROM.h>
 
 EEStaticConfig eeStaticConfig;
+bool eeStaticConfigDirty =false;
 
 void initEEStaticConfig()
 {
@@ -17,15 +18,19 @@ void initEEStaticConfig()
     {
         Serial.println("firmware version changed -> eeprom reset to factory defaults");
         strcpy(eeStaticConfig.firmwareVersion, FIRMWARE_VER);
-        // preserve ssid,pwd contents but ensure string termination
+        // preserve ssid,pwd,temp ids contents but ensure string termination
         eeStaticConfig.wifiSSID[WIFI_SSID_STRLENMAX] = 0;
         eeStaticConfig.wifiPwd[WIFI_PWD_STRLENMAX] = 0;
+        eeStaticConfig.tbottomId[DS18B20_ID_STRLENMAX] = 0;
+        eeStaticConfig.twoodId[DS18B20_ID_STRLENMAX] = 0;
+        eeStaticConfig.tambientId[DS18B20_ID_STRLENMAX] = 0;
+        eeStaticConfig.texternId[DS18B20_ID_STRLENMAX] = 0;
         saveEEStaticConfig();
 
         // zeroes json config
         Serial.println("clearing eeJsonConfig");
         eeJsonConfig.Clear();
-        eeJsonConfig.SaveToEEProm();        
+        eeJsonConfig.SaveToEEProm();
     }
 }
 
@@ -38,7 +43,7 @@ void loadEEStaticConfig()
 }
 
 void saveEEStaticConfig()
-{    
+{
     auto ptr = (uint8_t *)&eeStaticConfig;
     auto l = sizeof(EEStaticConfig);
     for (int i = 0; i < l; ++i)

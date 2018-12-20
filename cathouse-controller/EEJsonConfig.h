@@ -17,11 +17,6 @@
 class EEJsonConfig
 {
 public:
-  String tbottomId;
-  String twoodId;
-  String tambientId;
-  String texternId;    
-
   // if bottom temp >= tbottomLimit heat ports gets disabled for cooldownTimeMs
   double tbottomLimit;
 

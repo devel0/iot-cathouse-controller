@@ -1,7 +1,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define FIRMWARE_VER "cathouse-0.80"
+#define FIRMWARE_VER "cathouse-0.81"
 
 #include <Arduino.h>
 
@@ -20,8 +20,6 @@
 #define MOSFET_P2 D2
 #define MOSFET_P3 D8
 #define MOSFET_P4 D7
-
-#define CONFIG_TEMP_ID_STRMAXLEN 16
 
 // measured system power / 4
 #define W_PORT 26.75
