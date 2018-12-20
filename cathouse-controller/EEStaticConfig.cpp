@@ -6,7 +6,7 @@
 #include <EEPROM.h>
 
 EEStaticConfig eeStaticConfig;
-bool eeStaticConfigDirty =false;
+bool eeStaticConfigDirty = false;
 
 void initEEStaticConfig()
 {
@@ -25,6 +25,21 @@ void initEEStaticConfig()
         eeStaticConfig.twoodId[DS18B20_ID_STRLENMAX] = 0;
         eeStaticConfig.tambientId[DS18B20_ID_STRLENMAX] = 0;
         eeStaticConfig.texternId[DS18B20_ID_STRLENMAX] = 0;
+
+        // ensure no doublequotes
+        if (strchr(eeStaticConfig.wifiSSID, (char)'"') != NULL)
+            eeStaticConfig.wifiSSID[0] = 0;
+        if (strchr(eeStaticConfig.wifiPwd, (char)'"') != NULL)
+            eeStaticConfig.wifiPwd[0] = 0;
+        if (strchr(eeStaticConfig.tbottomId, (char)'"') != NULL)
+            eeStaticConfig.tbottomId[0] = 0;
+        if (strchr(eeStaticConfig.twoodId, (char)'"') != NULL)
+            eeStaticConfig.twoodId[0] = 0;
+        if (strchr(eeStaticConfig.tambientId, (char)'"') != NULL)
+            eeStaticConfig.tambientId[0] = 0;
+        if (strchr(eeStaticConfig.texternId, (char)'"') != NULL)
+            eeStaticConfig.texternId[0] = 0;
+
         saveEEStaticConfig();
 
         // zeroes json config

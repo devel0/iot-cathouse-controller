@@ -13,13 +13,15 @@
 // https://github.com/maxpowel/ArduinoJsonWriter
 #include "JsonWriter.h"
 
+#include "Config.h"
+
 //-----------------------------------------
 // EEJsonConfig
 //-----------------------------------------
 
 EEJsonConfig eeJsonConfig;
 
-void EEJsonConfig::Save(Print &prn)
+void EEJsonConfig::Save(Print &prn, bool forWebapi)
 {
     String output;
     StringStream stream(output);
@@ -33,7 +35,19 @@ void EEJsonConfig::Save(Print &prn)
         .property("tambientVsExternGTESysOff", tambientVsExternGTESysOff)
         .property("tambientVsExternLTESysOn", tambientVsExternLTESysOn)
         .property("texternGTESysOff", texternGTESysOff)
-        .property("adcWeightGTECatInThere", adcWeightGTECatInThere)
+        .property("adcWeightGTECatInThere", adcWeightGTECatInThere);
+
+    if (forWebapi)
+    {
+        json.property("firmwareVersion", FIRMWARE_VER)
+            .property("wifiSSID", eeStaticConfig.wifiSSID)
+            .property("tbottomId", String(eeStaticConfig.tbottomId))
+            .property("twoodId", String(eeStaticConfig.twoodId))
+            .property("tambientId", String(eeStaticConfig.tambientId))
+            .property("texternId", String(eeStaticConfig.texternId));
+    }
+
+    json
         .endObject();
 
     Serial.printf("saving eeJsonConfig [%s]\n", output.c_str());

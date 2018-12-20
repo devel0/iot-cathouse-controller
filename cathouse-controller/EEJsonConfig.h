@@ -42,7 +42,7 @@ public:
   int adcWeightGTECatInThere;
 
   // serialize this config in json format using overridable Printer write method
-  void Save(Print &prn);
+  void Save(Print &prn, bool forWebapi = false);
   void SaveToEEProm();
 
   // deserialize given json data into this object

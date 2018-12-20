@@ -322,7 +322,7 @@ bool manageWifi()
 
             clientOk(client, JSON);
 
-            eeJsonConfig.Save(client);
+            eeJsonConfig.Save(client, true);
           }
           //-----------------------------------------------
           // /saveconfig
