@@ -19,8 +19,8 @@
 EEJsonConfig eeJsonConfig;
 
 void EEJsonConfig::Save(Print &prn)
-{    
-    String output;    
+{
+    String output;
     StringStream stream(output);
     JsonWriter json(&stream);
 
@@ -28,25 +28,13 @@ void EEJsonConfig::Save(Print &prn)
         .property("tbottomId", tbottomId)
         .property("twoodId", twoodId)
         .property("tambientId", tambientId)
-        .property("texternId", texternId)
-        .property("temperatureHistoryFreeramThreshold", temperatureHistoryFreeramThreshold)
-        .property("temperatureHistoryBacklogHours", temperatureHistoryBacklogHours)
-        .property("updateConsumptionIntervalMs", updateConsumptionIntervalMs)
-        .property("updateFreeramIntervalMs", updateFreeramIntervalMs)
-        .property("updateTemperatureIntervalMs", updateTemperatureIntervalMs)
+        .property("texternId", texternId)        
         .property("tbottomLimit", tbottomLimit)
         .property("twoodLimit", twoodLimit)
         .property("tambientLimit", tambientLimit)
         .property("cooldownTimeMs", cooldownTimeMs)
         .property("tambientVsExternGTESysOff", tambientVsExternGTESysOff)
-        .property("tambientVsExternLTESysOn", tambientVsExternLTESysOn)
-        .property("tbottomGTEFanOn", tbottomGTEFanOn)
-        .property("tbottomLTEFanOff", tbottomLTEFanOff)
-        .property("autoactivateWoodBottomDeltaGTESysOn", autoactivateWoodBottomDeltaGTESysOn)
-        .property("autodeactivateWoodDeltaLT", autodeactivateWoodDeltaLT)
-        .property("autodeactivateInhibitAutoactivateMinMs", autodeactivateInhibitAutoactivateMinMs)
-        .property("autodeactivateExcursionSampleCount", autodeactivateExcursionSampleCount)
-        .property("autodeactivateExcursionSampleTotalMs", autodeactivateExcursionSampleTotalMs)
+        .property("tambientVsExternLTESysOn", tambientVsExternLTESysOn)        
         .property("texternGTESysOff", texternGTESysOff)
         .endObject();
 
@@ -56,7 +44,7 @@ void EEJsonConfig::Save(Print &prn)
 }
 
 void EEJsonConfig::SaveToEEProm()
-{    
+{
     EEPrinter prn(EE_JSON_CONFIG_OFFSET);
     Save(prn);
     prn.commit();
@@ -96,25 +84,13 @@ void EEJsonConfig::LoadFromEEProm()
 }
 
 void EEJsonConfig::Clear()
-{
-    temperatureHistoryFreeramThreshold = 10 * 1024;
-    temperatureHistoryBacklogHours = 48;
-    updateConsumptionIntervalMs = 2500;
-    updateFreeramIntervalMs = 1000;
-    updateTemperatureIntervalMs = 5000;
+{        
     tbottomLimit = 40;
     twoodLimit = 50;
     tambientLimit = 17;
     cooldownTimeMs = 2 * 60 * 1000;
     tambientVsExternGTESysOff = 11;
-    tambientVsExternLTESysOn = 10;
-    tbottomGTEFanOn = 30;
-    tbottomLTEFanOff = 25;
-    autoactivateWoodBottomDeltaGTESysOn = 3;
-    autodeactivateWoodDeltaLT = 8.5;
-    autodeactivateInhibitAutoactivateMinMs = 30 * 60 * 1000;
-    autodeactivateExcursionSampleCount = 5;
-    autodeactivateExcursionSampleTotalMs = 30 * 60 * 1000;
+    tambientVsExternLTESysOn = 10;    
     texternGTESysOff = 14;
 }
 
@@ -200,17 +176,7 @@ void EEJsonConfigParseListener::value(String value)
     else if (lastKey == "tambientId")
         eeJsonConfig.tambientId = value;
     else if (lastKey == "texternId")
-        eeJsonConfig.texternId = value;
-    else if (lastKey == "temperatureHistoryFreeramThreshold")
-        eeJsonConfig.temperatureHistoryFreeramThreshold = atoi(value.c_str());
-    else if (lastKey == "temperatureHistoryBacklogHours")
-        eeJsonConfig.temperatureHistoryBacklogHours = atoi(value.c_str());
-    else if (lastKey == "updateConsumptionIntervalMs")
-        eeJsonConfig.updateConsumptionIntervalMs = atol(value.c_str());
-    else if (lastKey == "updateFreeramIntervalMs")
-        eeJsonConfig.updateFreeramIntervalMs = atol(value.c_str());
-    else if (lastKey == "updateTemperatureIntervalMs")
-        eeJsonConfig.updateTemperatureIntervalMs = atol(value.c_str());
+        eeJsonConfig.texternId = value;    
     else if (lastKey == "tbottomLimit")
         eeJsonConfig.tbottomLimit = atof(value.c_str());
     else if (lastKey == "twoodLimit")
@@ -223,18 +189,8 @@ void EEJsonConfigParseListener::value(String value)
         eeJsonConfig.tambientVsExternGTESysOff = atof(value.c_str());
     else if (lastKey == "tambientVsExternLTESysOn")
         eeJsonConfig.tambientVsExternLTESysOn = atof(value.c_str());
-    else if (lastKey == "tbottomGTEFanOn")
-        eeJsonConfig.tbottomGTEFanOn = atof(value.c_str());
-    else if (lastKey == "tbottomLTEFanOff")
-        eeJsonConfig.tbottomLTEFanOff = atof(value.c_str());
-    else if (lastKey == "autoactivateWoodBottomDeltaGTESysOn")
-        eeJsonConfig.autoactivateWoodBottomDeltaGTESysOn = atof(value.c_str());
-    else if (lastKey == "autodeactivateWoodDeltaLT")
-        eeJsonConfig.autodeactivateWoodDeltaLT = atof(value.c_str());
-    else if (lastKey == "autodeactivateInhibitAutoactivateMinMs")
-        eeJsonConfig.autodeactivateInhibitAutoactivateMinMs = atol(value.c_str());
-    else if (lastKey == "autodeactivateExcursionSampleCount")
-        eeJsonConfig.autodeactivateExcursionSampleCount = atoi(value.c_str());
+    else if (lastKey == "texternGTESysOff")
+        eeJsonConfig.texternGTESysOff = atof(value.c_str());
 
     //Serial.println("value: " + value);
 }

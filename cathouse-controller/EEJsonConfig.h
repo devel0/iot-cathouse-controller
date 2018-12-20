@@ -20,23 +20,7 @@ public:
   String tbottomId;
   String twoodId;
   String tambientId;
-  String texternId;  
-
-  // allocate temperature history so that it can hold temperatureHistoryBacklogHours hours
-  // leaving temperatureHistoryFreeramThreshold free ram bytes
-  unsigned int temperatureHistoryFreeramThreshold;
-
-  // (see temperatureHistoryFreeramThreshold )
-  unsigned int temperatureHistoryBacklogHours;
-
-  // ms interval to update Wh consumption stat
-  unsigned long updateConsumptionIntervalMs;
-
-  // ms interval to update freeram stat
-  unsigned long updateFreeramIntervalMs;
-
-  // ms interval to update current temperature
-  unsigned long updateTemperatureIntervalMs;
+  String texternId;    
 
   // if bottom temp >= tbottomLimit heat ports gets disabled for cooldownTimeMs
   double tbottomLimit;
@@ -54,33 +38,7 @@ public:
   double tambientVsExternGTESysOff;
 
   // if tambient <= tambientVsExternLTESysOn heat ports enter enable state
-  double tambientVsExternLTESysOn;
-
-  // if tbottom >= tbottomGTEFanOn fan enter enable state
-  double tbottomGTEFanOn;
-
-  // if tbottom <= tbottomLTEFanOff fan enter disable state
-  double tbottomLTEFanOff;
-
-  // if (twood - tbottom) >= autoactivateWoodBottomDeltaGTESysOn system enter enable state
-  double autoactivateWoodBottomDeltaGTESysOn;
-
-  // if tbottom excursion over last autodeactivateExcursionSampleTotalMs interval <= autodeactivateWoodDeltaLT
-  // system enter disable state for atleast autodeactivateInhibitAutoactivateMinMs timespan
-  double autodeactivateWoodDeltaLT;
-
-  // (see autodeactivateWoodDeltaLT)
-  unsigned long autodeactivateInhibitAutoactivateMinMs;
-
-  // (see also autodeactivateWoodDeltaLT)
-  // stat past autodeactivateExcursionSampleTotalMs temperatures time interval using
-  // a bunch of autodeactivateExcursionSampleCount (min,max) objects
-  // when total stat interval exceeded oldest sample removed and added a new one on top (current time)
-  int autodeactivateExcursionSampleCount;
-
-  // (see autodeactivateExcursionSampleCount)
-  // suggested value : at least 1.5 x heat cycle time interval
-  unsigned long autodeactivateExcursionSampleTotalMs;
+  double tambientVsExternLTESysOn;  
 
   // if textern >= texternGTESysOff system enter disable state
   double texternGTESysOff;

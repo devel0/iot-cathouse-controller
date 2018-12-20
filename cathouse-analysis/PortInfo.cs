@@ -125,7 +125,7 @@ namespace cathouse_analysis
                     IsOn = false;
                 }
                 else
-                    System.Console.WriteLine($"can't disable port {PortNumber} in min on time mode");
+                    System.Console.WriteLine($"can't disable port {PortNumber} in min on time mode ( OnTime = {OnTime} )");
             }
             // enable port ( if not in cooldown mode )
             else if ((!IsOn || force) && on)
@@ -137,7 +137,7 @@ namespace cathouse_analysis
                     IsOn = true;
                 }
                 else
-                    System.Console.WriteLine($"can't enable port {PortNumber} in cooldown mode");
+                    System.Console.WriteLine($"can't enable port {PortNumber} in cooldown mode ( OffTime = {OffTime} )");
             }
         }
 

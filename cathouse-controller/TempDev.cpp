@@ -56,16 +56,11 @@ void setupTemperatureDevices()
 
         temperatureHistory = (float **)malloc(sizeof(float *) * temperatureDeviceCount);
 
-        auto threshold = eeJsonConfig.temperatureHistoryFreeramThreshold;
-        if (threshold < FREERAM_THRESHOLD_MIN_BYTES)
-            threshold = FREERAM_THRESHOLD_MIN_BYTES;
-
+        auto threshold = FREERAM_THRESHOLD_MIN_BYTES;
         auto ramsize = freeMemorySum() - threshold - 3 * 1024; // 3 kb diff for wifi
         temperatureHistorySize = ramsize / temperatureDeviceCount / sizeof(float);
 
-        auto backloghr = eeJsonConfig.temperatureHistoryBacklogHours;
-        if (backloghr < TEMPERATURE_HISTORY_BACKLOG_HOURS_MIN)
-            backloghr = TEMPERATURE_HISTORY_BACKLOG_HOURS_MIN;
+        auto backloghr = TEMPERATURE_HISTORY_BACKLOG_HOURS;
         temperatureHistoryIntervalSec = backloghr * 60 * 60 / temperatureHistorySize;
 
         for (int i = 0; i < temperatureDeviceCount; ++i)
@@ -107,8 +102,7 @@ void manageTemp()
 {
     {
         auto delta = timeDiff(lastTemperatureRead, millis());
-        if (delta > eeJsonConfig.updateTemperatureIntervalMs &&
-            delta > UPDATE_TEMPERATURE_INTERVAL_MIN_MS)
+        if (delta >= UPDATE_TEMPERATURE_INTERVAL_MS)
             readTemperatures();
     }
 

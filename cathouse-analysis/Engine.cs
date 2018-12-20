@@ -58,8 +58,6 @@ namespace cathouse_analysis
         /// </summary>
         public const double TEXTERN_GTE_SYSOFF = 14d;
 
-        public bool SystemIsOn = false;
-
         public Engine()
         {
         }
@@ -88,17 +86,24 @@ namespace cathouse_analysis
             var s = await client.GetStringAsync($"http://cathouse.searchathing.com/temp/28d12b5b0500001c");
             return double.Parse(s, CultureInfo.InvariantCulture);
         }
+
+        async Task<double> GetWeightADC()
+        {
+            var s = await client.GetStringAsync($"http://cathouse.searchathing.com/port/get/7");
+            return double.Parse(s, CultureInfo.InvariantCulture);
+        }
         #endregion
 
         async Task TurnOffSystem()
         {
             foreach (var p in ports) await p.Write(false);
             await fan.Write(false);
-            SystemIsOn = false;
         }
 
         PortInfo fan = null;
         List<PortInfo> ports = null;
+
+        enum HeatCycleType { none, full, standby };
 
         public async Task Run()
         {
@@ -119,7 +124,9 @@ namespace cathouse_analysis
 
             var excursionSamples = new List<ExcursionSample>();
 
-            var dtBegin = DateTime.Now;
+            var currentHeatCycle = HeatCycleType.none;
+            var heatCycleSpan = TimeSpan.FromSeconds(0);
+            var dtHeatCycleBegin = DateTime.Now;
 
 #if !DEBUG
             try
@@ -128,11 +135,10 @@ namespace cathouse_analysis
                 var sw = new StreamWriter("/home/devel0/devel-tmp/cathouse-lab/data2.csv", true);
 
                 var dt = DateTime.Now;
-                DateTime? dtCooldownStarted = null;
+
                 // cooldown time if temp exceed max values
                 var COOLDOWN_TIME = TimeSpan.FromMinutes(2);
-
-                DateTime? dtDeactivateStarted = null;
+                var wlst = new List<double>();
 
                 while (true)
                 {
@@ -144,185 +150,103 @@ namespace cathouse_analysis
                         var tambient = await GetTAmbient();
                         var twood = await GetTWood();
                         var textern = await GetTExtern();
+                        var weightadc = await GetWeightADC();
 
-                        #region logdata
+                        if (wlst.Count > 5) wlst.RemoveAt(0);
+                        wlst.Add(weightadc);
+
+                        var wmean = (wlst.Sum(w => w) / wlst.Count);
+                        System.Console.WriteLine($"W={weightadc} [mean={wmean}]");
+                        var catisinthere = wmean > 260;
+
+                        if (!catisinthere)
                         {
-                            var dtstr = DateTime.Now.ToString("O");
-                            //var catinthere = false;
-
-                            foreach (var p in ports) await p.Verify();
-
-                            var deltawood = 0d;
-                            if (excursionSamples.Count > 0 && excursionSamples.First().Count > 0)
+                            foreach (var p in ports)
                             {
-                                var min = Min(excursionSamples.Min(w => w.Min), twood);
-                                var max = Max(excursionSamples.Max(w => w.Max), twood);
-                                deltawood = max - min;
+                                await p.Write(false);
                             }
+                            await fan.Write(false);
 
-                            var str = Invariant($"{dtstr} {(SystemIsOn ? "1" : "0")} {deltawood} {(fan.IsOn ? "1" : "0")} {((p1.IsOn || p2.IsOn || p3.IsOn || p4.IsOn) ? "1" : "0")} {textern} {tambient} {tbottom} {twood}");
-
-                            System.Console.WriteLine();
-                            System.Console.WriteLine("date syson deltawood fan heating text tamb tbott twood");
-                            System.Console.WriteLine(str);
-                            System.Console.WriteLine();
-
-                            //    if ((DateTime.Now - dt).TotalSeconds >= 60) // flush data recording
+                            if (currentHeatCycle != HeatCycleType.none)
                             {
-                                sw.WriteLine(str);
-                                sw.Flush();
-                                dt = DateTime.Now;
+                                System.Console.WriteLine($"<===== {DateTime.Now} cat exited");
+                                currentHeatCycle = HeatCycleType.none;
                             }
                         }
-                        #endregion
-
-                        #region check system reactivation
-                        var needActivate = false;
-                        System.Console.WriteLine($"  Abs(twood - tbottom) = {Abs(twood - tbottom)} >= AUTOACTIVATE_WOOD_BOTTOM_DELTA = {AUTOACTIVATE_WOOD_BOTTOM_DELTA} : {Abs(twood - tbottom) >= AUTOACTIVATE_WOOD_BOTTOM_DELTA}");
-                        if (!SystemIsOn && (textern < TEXTERN_GTE_SYSOFF || textern - 1 > tambient))
+                        else
                         {
-                            //  check if cat in there to activate if any ( but must not in autodeactivate min timespan )
-                            if (((Abs(twood - tbottom) >= AUTOACTIVATE_WOOD_BOTTOM_DELTA) &&
-                                (!dtDeactivateStarted.HasValue
-                                ||
-                                (DateTime.Now - dtDeactivateStarted.Value) > AUTODEACTIVATE_INHIBIT_AUTOACTIVATE_MINTIMESPAN)))
+                            switch (currentHeatCycle)
                             {
-                                needActivate = true;
-                                System.Console.WriteLine($"---> NEED ACTIVATE");
-                                System.Console.WriteLine($"  textern < {TEXTERN_GTE_SYSOFF} : {textern < TEXTERN_GTE_SYSOFF}");
-                                System.Console.WriteLine($"  textern-1 > tambient : {textern - 1 > tambient}");
-                                System.Console.WriteLine($"  dtDeactivateStarted.HasValue = {dtDeactivateStarted.HasValue}");
-                                if (dtDeactivateStarted.HasValue)
-                                    System.Console.WriteLine($"  (Datetime.Now - dtDeactivateStarted.Value) > AUTODEACTIVATE_INHIBIT_AUTOACTIVATE_MINTIMESPAN) : {(DateTime.Now - dtDeactivateStarted.Value) > AUTODEACTIVATE_INHIBIT_AUTOACTIVATE_MINTIMESPAN}");
-                            }
-                        }
-                        #endregion
-
-                        #region SystemOn ( or needActivation )
-                        if (SystemIsOn || needActivate)
-                        {
-                            dtDeactivateStarted = null;
-
-                            if (!SystemIsOn)
-                            {
-                                System.Console.WriteLine($"===> TURN SYSTEM ON");
-                                SystemIsOn = true;
-                            }
-
-                            #region eval deactivate based on excursion values
-                            {
-                                ExcursionSample es = null;
-                                var excursionSamplesMaxCount = AUTODEACTIVATE_EXCURSION_SAMPLE_COUNT;
-                                var excursionSampleMaxAge = AUTODEACTIVATE_EXCURSION_SAMPLE_TOTAL_TIMESPAN / excursionSamplesMaxCount;
-
-                                if (excursionSamples.Count == 0)
-                                {
-                                    es = new ExcursionSample(excursionSampleMaxAge);
-                                    excursionSamples.Add(es);
-                                }
-                                else
-                                {
-                                    es = excursionSamples.Last();
-                                    // if this sample set expired create new one and if count exceed excursionSamplesMaxCount
-                                    // - eval delta to understand if cat in there
-                                    // - remove oldest                            
-                                    if (!es.Add(tbottom))
+                                case HeatCycleType.none:
                                     {
-                                        es = new ExcursionSample(excursionSampleMaxAge);
-                                        es.Add(tbottom);
+                                        dtHeatCycleBegin = DateTime.Now;
+                                        currentHeatCycle = HeatCycleType.full;
+                                        System.Console.WriteLine($"=====> {DateTime.Now} cat entered");
 
-                                        if (excursionSamples.Count > excursionSamplesMaxCount)
+                                        foreach (var p in ports)
                                         {
-                                            var min = Min(excursionSamples.Min(w => w.Min), tbottom);
-                                            var max = Max(excursionSamples.Max(w => w.Max), tbottom);
-                                            var delta = max - min;
-
-                                            if (delta < AUTODEACTIVATE_BOTTOM_DELTA_LT)
-                                            {
-                                                dtDeactivateStarted = DateTime.Now;
-                                            }
-
-                                            System.Console.WriteLine($"________EVAL AUTODEACTIVATE = {dtDeactivateStarted.HasValue} ; MIN = {min} ; MAX = {max} ; DELTA = {delta}");
-
-                                            var first = excursionSamples.First();
-                                            excursionSamples.Remove(first);
-
-
-                                            if (dtDeactivateStarted.HasValue)
-                                            {
-                                                System.Console.WriteLine($"===> TURN SYSTEM OFF");
-
-                                                await TurnOffSystem();
-                                                continue;
-                                            }
+                                            await p.Write(true);
                                         }
-
-                                        excursionSamples.Add(es);
+                                        await fan.Write(true);
                                     }
-
-                                    {
-                                        var min = Min(excursionSamples.Min(w => w.Min), tbottom);
-                                        var max = Max(excursionSamples.Max(w => w.Max), tbottom);
-                                        var delta = max - min;
-                                        System.Console.WriteLine($"es slots cnt={excursionSamples.Count} esidx={excursionSamples.IndexOf(es)} : last excursion sample count={es.Count} age={es.Age} maxAge={es.MaxAge} min={es.Min} max={es.Max} delta={es.Max - es.Min} oldest sample timestamp = {es.OldestSampleTimestamp}");
-                                        System.Console.WriteLine($"all excursion slots min={min} max={max} delta={delta}");
-                                    }
-                                }
+                                    break;
                             }
-                            #endregion
 
-                            var tambient_gte_sysoff = textern + TAMBIENT_VS_EXTERN_GTE_SYSOFF;
-                            var tambient_lte_syson = textern + TAMBIENT_VS_EXTERN_LTE_SYSON;
-
-                            if (textern > TEXTERN_GTE_SYSOFF && tambient + 1 >= textern) // disable system if extern temp hot and extern-1 > ambient
+                            switch (currentHeatCycle)
                             {
-                                foreach (var p in ports) await p.Write(false);
-                                await fan.Write(false);
-
-                                System.Console.WriteLine($"===> TURN SYSTEM OFF because textern = {textern} and tambient+1 >= textern: {tambient}+1 >= {textern}");
-                                await TurnOffSystem();
-                                continue;
-                            }
-                            else if (!dtCooldownStarted.HasValue ||
-                                 (dtCooldownStarted.HasValue && (DateTime.Now - dtCooldownStarted.Value >= COOLDOWN_TIME)))
-                            {
-                                dtCooldownStarted = null;
-
-                                // if temp exceed disable all ports and enter cooldown mode
-                                if (tbottom >= TBOTTOM_LIMIT || twood >= TWOOD_LIMIT || tambient >= TAMBIENT_LIMIT)
-                                {
-                                    dtCooldownStarted = DateTime.Now;
-                                    foreach (var x in ports) await x.Write(false, force: true);
-                                }
-                                // run ports to increase tambient
-                                else
-                                {
-                                    if (tambient <= tambient_lte_syson)
+                                case HeatCycleType.full:
                                     {
-                                        foreach (var p in ports) await p.Write(true);
-                                    }
-                                    else if (tambient >= tambient_gte_sysoff)
-                                    {
-                                        foreach (var p in ports) await p.Write(false);
-                                    }
+                                        foreach (var p in ports)
+                                        {
+                                            await p.Write(true);
+                                        }
+                                        await fan.Write(true);
 
-                                    System.Console.WriteLine($"FAN={fan.IsOn}");
-                                }
+                                        if ((DateTime.Now - dtHeatCycleBegin) > TimeSpan.FromMinutes(20))
+                                        {
+                                            currentHeatCycle = HeatCycleType.standby;
+                                            dtHeatCycleBegin = DateTime.Now;
+
+                                            foreach (var p in ports)
+                                            {
+                                                if (p != p2)
+                                                    await p.Write(false);
+                                                else
+                                                    await p.Write(true);
+                                            }
+                                            await fan.Write(false);
+                                        }
+                                    }
+                                    break;
+
+                                case HeatCycleType.standby:
+                                    {
+                                        foreach (var p in ports)
+                                        {
+                                            if (p != p2)
+                                                await p.Write(false);
+                                            else
+                                                await p.Write(true);
+                                        }
+                                        await fan.Write(false);
+
+                                        if ((DateTime.Now - dtHeatCycleBegin) > TimeSpan.FromMinutes(30))
+                                        {
+                                            currentHeatCycle = HeatCycleType.full;
+                                            dtHeatCycleBegin = DateTime.Now;
+
+                                            foreach (var p in ports)
+                                            {
+                                                await p.Write(true);
+                                            }
+                                            await fan.Write(true);
+                                        }
+                                    }
+                                    break;
                             }
                         }
-                        #endregion
 
-                        #region fan control
-                        {
-                            if (ports.Any(w => w.IsOn))
-                                // control fan based on bottom temp
-                                //                            if (tbottom >= TBOTTOM_GTE_FANON && ((tambient - textern) <= TAMBIENT_VS_EXTERN_GTE_SYSOFF))
-                                await fan.Write(true);
-                            else
-                                //else //if (tbottom <= TBOTTOM_LTE_FANOFF)
-                                await fan.Write(false);
-                        }
-                        #endregion
+                        await Task.Delay(5000);
                     }
 #if !DEBUG
                     catch (Exception ex)
