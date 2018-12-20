@@ -126,7 +126,7 @@ async function reloadConfig() {
             finished = true;
         } catch (e) {
             await sleep(1000);
-            finished=true;
+            finished = true;
         }
     }
     hideSpin();
@@ -154,13 +154,14 @@ async function reloadConfig() {
     $('#config-tbottomId')[0].value = res["tbottomId"];
     $('#config-twoodId')[0].value = res["twoodId"];
     $('#config-tambientId')[0].value = res["tambientId"];
-    $('#config-texternId')[0].value = res["texternId"];    
+    $('#config-texternId')[0].value = res["texternId"];
+    $('#config-adcWeightGTECatInThere')[0].value = res["adcWeightGTECatInThere"];
     $('#config-tbottomLimit')[0].value = res["tbottomLimit"];
     $('#config-twoodLimit')[0].value = res["twoodLimit"];
     $('#config-tambientLimit')[0].value = res["tambientLimit"];
     $('#config-cooldownTimeMs-min')[0].value = res["cooldownTimeMs"] / 1000.0 / 60.0;
     $('#config-tambientVsExternGTESysOff')[0].value = res["tambientVsExternGTESysOff"];
-    $('#config-tambientVsExternLTESysOn')[0].value = res["tambientVsExternLTESysOn"];    
+    $('#config-tambientVsExternLTESysOn')[0].value = res["tambientVsExternLTESysOn"];
     $('#config-texternGTESysOff')[0].value = res["texternGTESysOff"];
 }
 
@@ -173,25 +174,14 @@ async function saveConfig() {
         tbottomId: $('#config-tbottomId')[0].value,
         twoodId: $('#config-twoodId')[0].value,
         tambientId: $('#config-tambientId')[0].value,
-        texternId: $('#config-texternId')[0].value,
-        temperatureHistoryFreeramThreshold: parseFloat($('#config-temperatureHistoryFreeramThreshold-kb')[0].value) * 1024,
-        temperatureHistoryBacklogHours: parseInt($('#config-temperatureHistoryBacklogHours')[0].value),
-        updateConsumptionIntervalMs: parseFloat($('#config-updateConsumptionIntervalMs-sec')[0].value) * 1000,
-        updateFreeramIntervalMs: parseFloat($('#config-updateFreeramIntervalMs-sec')[0].value) * 1000,
-        updateTemperatureIntervalMs: parseFloat($('#config-updateTemperatureIntervalMs-sec')[0].value) * 1000,
+        texternId: $('#config-texternId')[0].value,        
+        adcWeightGTECatInThere: $('#config-adcWeightGTECatInThere')[0].value,
         tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value),
         twoodLimit: parseFloat($('#config-twoodLimit')[0].value),
         tambientLimitxx: parseFloat($('#config-tambientLimit')[0].value),
         cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60,
         tambientVsExternGTESysOff: parseFloat($('#config-tambientVsExternGTESysOff')[0].value),
-        tambientVsExternLTESysOn: parseFloat($('#config-tambientVsExternLTESysOn')[0].value),
-        tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value),
-        tbottomLTEFanOff: parseFloat($('#config-tbottomLTEFanOff')[0].value),
-        autoactivateWoodBottomDeltaGTESysOn: parseFloat($('#config-autoactivateWoodBottomDeltaGTESysOn')[0].value),
-        autodeactivateWoodDeltaLT: parseFloat($('#config-autodeactivateWoodDeltaLT')[0].value),
-        autodeactivateInhibitAutoactivateMinMs: parseFloat($('#config-autodeactivateInhibitAutoactivateMinMs-min')[0].value) * 1000 * 60,
-        autodeactivateExcursionSampleCount: parseInt($('#config-autodeactivateExcursionSampleCount')[0].value),
-        autodeactivateExcursionSampleTotalMs: parseFloat($('#config-autodeactivateExcursionSampleTotalMs-min')[0].value) * 1000 * 60,
+        tambientVsExternLTESysOn: parseFloat($('#config-tambientVsExternLTESysOn')[0].value),        
         texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value)
     };
 
@@ -243,90 +233,165 @@ async function reloadall() {
     });
     await reloadInfo();
 
-    let finished = false;
-
-    let res = null;
-    while (!finished) {
-        try {
-            res = await $.ajax({
-                url: baseurl + "/temphistory",
-                type: 'GET'
-            });
-            finished = true;
-        } catch (e) {
-            await sleep(1000);
-        }
-    }
-
-    var colors = ['orange', 'yellow', 'green', 'blue', 'violet', 'black', 'red'];
-    var ctx = document.getElementById("myChart").getContext('2d');
-
-    var dtnow = moment();
-
-    var i = 0;
-    var dss = [];
-    $.each(res, function (idx, data) {
-        id = Object.keys(data)[0];
-        desc = id;
-        q = $.grep(sensorDesc, (el, idx) => el.id == id);
-        if (q.length > 0) desc = q[0].description;
-
-        if (i > colors.length - 1) color = 'brown';
-        else color = colors[i];
-
-        valcnt = data[id].length;
-
-        let trend = '<i class="fas fa-equals"></i>';
-        if (valcnt > 1) {
-            var last = data[id][valcnt - 1];
-            var lastbut1 = data[id][valcnt - 2];
-            if (last > lastbut1)
-                trend = '<i style="color:red" class="fas fa-arrow-up"></i>';
-            else if (last < lastbut1)
-                trend = '<i style="color:blue" class="fas fa-arrow-down"></i>';
-        }
-        $('#trend' + id)[0].innerHTML = trend;
-
-
-        dts = [];
-        $.each(data[id], function (idx, val) {
-            secbefore = (valcnt - idx - 1) * history_interval_sec;
-            tt = moment(dtnow).subtract(secbefore, 'seconds');
-            dts.push({
-                t: tt,
-                y: val
-            });
-        });
-
-        dss.push({
-            borderColor: color,
-            label: desc,
-            data: dts,
-            pointRadius: 0
-        });
-
-        ++i;
-    });
-
-    var myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            datasets: dss
-        },
-        options: {
-            scales: {
-                xAxes: [{
-                    type: 'time',
-                    time: {
-                        displayFormats: {
-                            'hour': 'HH:mm'
-                        }
-                    },
-                    position: 'bottom'
-                }]
+    // temperature charts
+    {
+        let finished = false;
+        let res = null;
+        while (!finished) {
+            try {
+                res = await $.ajax({
+                    url: baseurl + "/temphistory",
+                    type: 'GET'
+                });
+                finished = true;
+            } catch (e) {
+                await sleep(1000);
             }
         }
-    });
+
+        var colors = ['orange', 'yellow', 'green', 'blue', 'violet', 'black', 'red'];
+        var ctx = document.getElementById("myChart").getContext('2d');
+
+        var dtnow = moment();
+
+        var i = 0;
+        var dss = [];
+        $.each(res, function (idx, data) {
+            id = Object.keys(data)[0];
+            desc = id;
+            q = $.grep(sensorDesc, (el, idx) => el.id == id);
+            if (q.length > 0) desc = q[0].description;
+
+            if (i > colors.length - 1) color = 'brown';
+            else color = colors[i];
+
+            valcnt = data[id].length;
+
+            let trend = '<i class="fas fa-equals"></i>';
+            if (valcnt > 1) {
+                var last = data[id][valcnt - 1];
+                var lastbut1 = data[id][valcnt - 2];
+                if (last > lastbut1)
+                    trend = '<i style="color:red" class="fas fa-arrow-up"></i>';
+                else if (last < lastbut1)
+                    trend = '<i style="color:blue" class="fas fa-arrow-down"></i>';
+            }
+            $('#trend' + id)[0].innerHTML = trend;
+
+
+            dts = [];
+            $.each(data[id], function (idx, val) {
+                secbefore = (valcnt - idx - 1) * history_interval_sec;
+                tt = moment(dtnow).subtract(secbefore, 'seconds');
+                dts.push({
+                    t: tt,
+                    y: val
+                });
+            });
+
+            dss.push({
+                borderColor: color,
+                label: desc,
+                data: dts,
+                pointRadius: 0
+            });
+
+            ++i;
+        });
+
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: dss
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            displayFormats: {
+                                'hour': 'HH:mm'
+                            }
+                        },
+                        position: 'bottom'
+                    }]
+                }
+            }
+        });
+    }
+
+    // cat in there chart
+    {
+        let finished = false;
+        let res = null;
+        while (!finished) {
+            try {
+                res = await $.ajax({
+                    url: baseurl + "/catinhistory",
+                    type: 'GET'
+                });
+                finished = true;
+            } catch (e) {
+                await sleep(1000);
+            }
+        }
+
+        var ctx = document.getElementById("myChart2").getContext('2d');
+
+        var dtnow = moment();
+
+        var i = 0;
+        var dss = []; {
+            dts = [];
+            let valcnt = res.length;
+            $.each(res, function (idx, val) {
+                secbefore = (valcnt - idx - 1) * history_interval_sec;
+                tt = moment(dtnow).subtract(secbefore, 'seconds');
+                dts.push({
+                    t: tt,
+                    y: val ? 1 : 0
+                });
+            });
+
+            dss.push({
+                borderColor: '#F0B8FF',
+                //backgroundColor: '#F0B8FF',
+                fill: true,
+                label: 'cat in there', //desc,
+                data: dts,
+                pointRadius: 0
+            });
+
+            ++i;
+        };
+
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: dss
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        display: false,
+                        type: 'time'/*,
+                        time: {
+                            displayFormats: {
+                                'hour': 'HH:mm'
+                            }
+                        },
+                        position: 'bottom'*/
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            min: 0,
+                            max: 1
+                        }
+                    }]
+                }
+            }
+        });
+    }
 }
 
 async function myfn() {

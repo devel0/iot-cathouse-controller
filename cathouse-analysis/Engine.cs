@@ -157,7 +157,7 @@ namespace cathouse_analysis
 
                         var wmean = (wlst.Sum(w => w) / wlst.Count);
                         System.Console.WriteLine($"W={weightadc} [mean={wmean}]");
-                        var catisinthere = wmean > 260;
+                        var catisinthere = wmean >= 250;
 
                         if (!catisinthere)
                         {
@@ -166,12 +166,12 @@ namespace cathouse_analysis
                                 await p.Write(false);
                             }
                             await fan.Write(false);
-
+/* 
                             if (currentHeatCycle != HeatCycleType.none)
                             {
                                 System.Console.WriteLine($"<===== {DateTime.Now} cat exited");
                                 currentHeatCycle = HeatCycleType.none;
-                            }
+                            }*/
                         }
                         else
                         {

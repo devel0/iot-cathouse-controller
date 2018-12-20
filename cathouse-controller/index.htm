@@ -45,6 +45,7 @@
         <div class="row">
             <div class="col">
                 <h2>Chart</h2>
+                <canvas id="myChart2" height="30"></canvas>
                 <canvas id="myChart" height="80"></canvas>
             </div>
             <div class="col-auto">
@@ -84,14 +85,6 @@
                         </table>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-auto">
-                <button class="btn btn-primary" onclick='reloadall()'>reload all</button>
-            </div>
-            <div class="col">
-                <button class="btn btn-default" onclick='reload_enabled=true;'>autoreload</button>
             </div>
         </div>
         <div class="row mt-3">
@@ -138,6 +131,12 @@
                             <td></td>
                         </tr>
                         <tr>
+                            <td class='cfg-lbl align-middle'>Cat in there ADC weight mean (min)</td>
+                            <td><input type='text' maxlength="16" class='form-control' id='config-adcWeightGTECatInThere'></input></td>
+                            <td></td>
+                            <td class='cfg-notes'>if adc weight (mean) >= Cat in there ADC weight mean (min) then `cat is in there`</td>
+                        </tr>
+                        <tr>
                             <td class='cfg-lbl align-middle'>Temperature sensor ID ( bottom )</td>
                             <td><input type='text' maxlength="16" class='form-control' id='config-tbottomId'></input></td>
                             <td></td>
@@ -160,7 +159,7 @@
                             <td><input type='text' maxlength="16" class='form-control' id='config-texternId'></input></td>
                             <td></td>
                             <td class='cfg-notes'>extern temperature sensor id</td>
-                        </tr>                        
+                        </tr>
                         <tr>
                             <td class='cfg-lbl align-middle'>Bottom temperature limit</td>
                             <td><input type='number' step='0.1' class='form-control' id='config-tbottomLimit'></input></td>
@@ -201,7 +200,7 @@
                             <td class='align-middle'>C</td>
                             <td class='cfg-notes'>if ambient >= (Ambient &lt;= Extern sys ON) heat ports enter enable
                                 state</td>
-                        </tr>                        
+                        </tr>
                         <tr>
                             <td class='cfg-lbl align-middle'>Extern >= T sys OFF</td>
                             <td><input type='number' step='0.1' class='form-control' id='config-texternGTESysOff'></input></td>
