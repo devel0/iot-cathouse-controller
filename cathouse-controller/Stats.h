@@ -11,6 +11,8 @@ extern double Wh;
 extern bool p_was_active[4];
 extern unsigned long lastConsumptionUpdate;
 
+extern double adcWeightMean;
+
 void statsInit();
 void statsUpdate();
 

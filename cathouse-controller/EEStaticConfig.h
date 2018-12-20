@@ -6,8 +6,8 @@
 #define EE_SIZE 4096
 
 #define FIRMWARE_VERSION_STRLENMAX 14
-#define WIDI_SSID_STRLENMAX 32
-#define WIDI_PWD_STRLENMAX 64
+#define WIFI_SSID_STRLENMAX 32
+#define WIFI_PWD_STRLENMAX 64
 
 struct EEStaticConfig
 {
@@ -16,10 +16,10 @@ struct EEStaticConfig
     char firmwareVersion[FIRMWARE_VERSION_STRLENMAX + 1];
 
     // wifi station id
-    char wifiSSID[WIDI_SSID_STRLENMAX + 1];
+    char wifiSSID[WIFI_SSID_STRLENMAX + 1];
 
     // wifi password
-    char wifiPwd[WIDI_PWD_STRLENMAX + 1];
+    char wifiPwd[WIFI_PWD_STRLENMAX + 1];
 };
 
 extern EEStaticConfig eeStaticConfig;

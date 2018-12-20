@@ -1,6 +1,7 @@
 #include "TempDev.h"
 #include "Config.h"
 #include "Util.h"
+#include "Stats.h"
 #include "EEJsonConfig.h"
 
 int temperatureDeviceCount = 0;
@@ -20,6 +21,8 @@ uint16_t temperatureHistoryFillCnt = 0;
 
 unsigned long lastTemperatureHistoryRecord;
 uint16_t temperatureHistoryIntervalSec = 5 * 60; // computed
+
+BitArray *catInThereHistory;
 
 OneWire tempOneWire(ONEWIRE_PIN);
 DallasTemperature DS18B20(&tempOneWire);
@@ -67,6 +70,8 @@ void setupTemperatureDevices()
             temperatureHistory[i] = (float *)malloc(sizeof(float) * temperatureHistorySize);
 
         lastTemperatureHistoryRecord = millis();
+
+        catInThereHistory = new BitArray(temperatureHistorySize);
     }
     readTemperatures();
 }
@@ -117,6 +122,8 @@ void manageTemp()
 
         for (int i = 0; i < temperatureDeviceCount; ++i)
             temperatureHistory[i][temperatureHistoryOff] = temperatures[i];
+
+        catInThereHistory->Set(temperatureHistoryOff, adcWeightMean >= eeJsonConfig.adcWeightGTECatInThere);
 
         ++temperatureHistoryOff;
         lastTemperatureHistoryRecord = millis();

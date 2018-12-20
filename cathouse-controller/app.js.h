@@ -43,7 +43,7 @@ type: 'GET' \
 }); \
 finished = true; \
 } catch (e) { \
-sleep(1000); \
+await sleep(1000); \
 } \
 } \
 hideSpin(); \
@@ -62,7 +62,7 @@ type: 'GET' \
 }); \
 finished = true; \
 } catch (e) { \
-sleep(1000); \
+await sleep(1000); \
 } \
 } \
 hideSpin(); \
@@ -115,7 +115,7 @@ type: 'GET' \
 }); \
 finished = true; \
 } catch (e) { \
-sleep(1000); \
+await sleep(1000); \
 finished=true; \
 } \
 } \
@@ -220,7 +220,7 @@ return 0; \
 }); \
 finished = true; \
 } catch (e) { \
-sleep(1000); \
+await sleep(1000); \
 } \
 } \
 hideSpin(); \
@@ -256,7 +256,7 @@ type: 'GET' \
 }); \
 finished = true; \
 } catch (e) { \
-sleep(1000); \
+await sleep(1000); \
 } \
 } \
  \
@@ -344,7 +344,7 @@ type: 'GET' \
 }); \
 finished = true; \
 } catch (e) { \
-sleep(1000); \
+await sleep(1000); \
 } \
 } \
  \
@@ -358,7 +358,7 @@ type: 'GET' \
 }); \
 finished = true; \
 } catch (e) { \
-sleep(1000); \
+await sleep(1000); \
 } \
 } \
  \

@@ -127,7 +127,7 @@ bool manageWifi()
           {
             clientOk(client, JSON);
 
-            Serial.printf("temperatureHistoryFillCnt: %d Off:%d\n", temperatureHistoryFillCnt, temperatureHistoryOff);
+            //Serial.printf("temperatureHistoryFillCnt: %d Off:%d\n", temperatureHistoryFillCnt, temperatureHistoryOff);
 
             client.print('[');
             for (int i = 0; i < temperatureDeviceCount; ++i)
@@ -147,6 +147,26 @@ bool manageWifi()
               }
               client.print(F("]}"));
               if (i != temperatureDeviceCount - 1)
+                client.print(',');
+            }
+            client.print(']');
+          }
+          //--------------------------
+          // /catinhistory
+          //--------------------------
+          else if (header.indexOf("GET /catinhistory ") >= 0)
+          {
+            clientOk(client, JSON);
+
+            client.print('[');
+            auto j = (temperatureHistoryFillCnt == temperatureHistorySize) ? temperatureHistoryOff : 0;
+            auto size = min(temperatureHistoryFillCnt, temperatureHistorySize);
+            for (int k = 0; k < size; ++k)
+            {
+              if (j == temperatureHistorySize)
+                j = 0;
+              client.print(catInThereHistory->Get(j++) ? "true" : "false");
+              if (k < size - 1)
                 client.print(',');
             }
             client.print(']');
@@ -177,6 +197,12 @@ bool manageWifi()
 
             client.print(F(", \"temperatureHistoryOff\":"));
             client.print(temperatureHistoryOff);
+
+            client.print(F(", \"adcWeightMean\":"));
+            client.print(adcWeightMean);
+
+            client.print(F(", \"catIsInThere\":"));
+            client.print(adcWeightMean >= eeJsonConfig.adcWeightGTECatInThere ? "true" : "false");
 
             for (int i = 0; i < 4; ++i)
             {
@@ -291,12 +317,12 @@ bool manageWifi()
           // /getconfig
           //-----------------------------------------------
           else if (header.indexOf("GET /getconfig ") >= 0)
-          {            
+          {
             //WiFiPrinter prn(client);
 
             clientOk(client, JSON);
 
-            eeJsonConfig.Save(client);            
+            eeJsonConfig.Save(client);
           }
           //-----------------------------------------------
           // /saveconfig

@@ -28,14 +28,15 @@ void EEJsonConfig::Save(Print &prn)
         .property("tbottomId", tbottomId)
         .property("twoodId", twoodId)
         .property("tambientId", tambientId)
-        .property("texternId", texternId)        
+        .property("texternId", texternId)
         .property("tbottomLimit", tbottomLimit)
         .property("twoodLimit", twoodLimit)
         .property("tambientLimit", tambientLimit)
         .property("cooldownTimeMs", cooldownTimeMs)
         .property("tambientVsExternGTESysOff", tambientVsExternGTESysOff)
-        .property("tambientVsExternLTESysOn", tambientVsExternLTESysOn)        
+        .property("tambientVsExternLTESysOn", tambientVsExternLTESysOn)
         .property("texternGTESysOff", texternGTESysOff)
+        .property("adcWeightGTECatInThere", adcWeightGTECatInThere)
         .endObject();
 
     Serial.printf("saving eeJsonConfig [%s]\n", output.c_str());
@@ -84,14 +85,15 @@ void EEJsonConfig::LoadFromEEProm()
 }
 
 void EEJsonConfig::Clear()
-{        
+{
     tbottomLimit = 40;
     twoodLimit = 50;
     tambientLimit = 17;
     cooldownTimeMs = 2 * 60 * 1000;
     tambientVsExternGTESysOff = 11;
-    tambientVsExternLTESysOn = 10;    
+    tambientVsExternLTESysOn = 10;
     texternGTESysOff = 14;
+    adcWeightGTECatInThere = 260;
 }
 
 //-----------------------------------------
@@ -176,7 +178,7 @@ void EEJsonConfigParseListener::value(String value)
     else if (lastKey == "tambientId")
         eeJsonConfig.tambientId = value;
     else if (lastKey == "texternId")
-        eeJsonConfig.texternId = value;    
+        eeJsonConfig.texternId = value;
     else if (lastKey == "tbottomLimit")
         eeJsonConfig.tbottomLimit = atof(value.c_str());
     else if (lastKey == "twoodLimit")
@@ -191,6 +193,8 @@ void EEJsonConfigParseListener::value(String value)
         eeJsonConfig.tambientVsExternLTESysOn = atof(value.c_str());
     else if (lastKey == "texternGTESysOff")
         eeJsonConfig.texternGTESysOff = atof(value.c_str());
+    else if (lastKey == "adcWeightGTECatInThere")
+        eeJsonConfig.adcWeightGTECatInThere = atoi(value.c_str());
 
     //Serial.println("value: " + value);
 }

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 #include <OneWire.h>
+#include "BitArray.h"
 #include <DallasTemperature.h>
 
 extern int temperatureDeviceCount;
@@ -19,6 +20,8 @@ extern uint16_t temperatureHistorySize;
 
 // computed : interval of recording foreach temp device in order to span over desired TEMPERATURE_HISTORY_BACKLOG_HOURS
 extern uint16_t temperatureHistoryIntervalSec;
+
+extern BitArray *catInThereHistory;
 
 void setupTemperatureDevices();
 void readTemperatures();

@@ -9,7 +9,7 @@
 // https://github.com/squix78/json-streaming-parser
 #include "JsonListener.h"
 
-#define EE_JSON_CONFIG_OFFSET (FIRMWARE_VERSION_STRLENMAX + WIDI_SSID_STRLENMAX + WIDI_PWD_STRLENMAX)
+#define EE_JSON_CONFIG_OFFSET (FIRMWARE_VERSION_STRLENMAX + WIFI_SSID_STRLENMAX + WIFI_PWD_STRLENMAX)
 
 //
 // Follow config can be written and readed from eeprom directly in json format through serialize/deserialize methods
@@ -42,6 +42,9 @@ public:
 
   // if textern >= texternGTESysOff system enter disable state
   double texternGTESysOff;
+
+  // if adc weight (mean) >= adcWeightGTECatInThere then `cat is in there`
+  int adcWeightGTECatInThere;
 
   // serialize this config in json format using overridable Printer write method
   void Save(Print &prn);

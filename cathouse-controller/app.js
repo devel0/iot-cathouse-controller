@@ -52,7 +52,7 @@ async function reloadTemp(addr) {
             });
             finished = true;
         } catch (e) {
-            sleep(1000);
+            await sleep(1000);
         }
     }
     hideSpin();
@@ -71,7 +71,7 @@ async function reloadInfo() {
             });
             finished = true;
         } catch (e) {
-            sleep(1000);
+            await sleep(1000);
         }
     }
     hideSpin();
@@ -125,7 +125,7 @@ async function reloadConfig() {
             });
             finished = true;
         } catch (e) {
-            sleep(1000);
+            await sleep(1000);
             finished=true;
         }
     }
@@ -230,7 +230,7 @@ async function saveConfig() {
             });
             finished = true;
         } catch (e) {
-            sleep(1000);
+            await sleep(1000);
         }
     }
     hideSpin();
@@ -266,7 +266,7 @@ async function reloadall() {
             });
             finished = true;
         } catch (e) {
-            sleep(1000);
+            await sleep(1000);
         }
     }
 
@@ -355,7 +355,7 @@ async function myfn() {
             });
             finished = true;
         } catch (e) {
-            sleep(1000);
+            await sleep(1000);
         }
     }
 
@@ -369,7 +369,7 @@ async function myfn() {
             });
             finished = true;
         } catch (e) {
-            sleep(1000);
+            await sleep(1000);
         }
     }
 

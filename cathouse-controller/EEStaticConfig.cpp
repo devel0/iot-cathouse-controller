@@ -18,8 +18,8 @@ void initEEStaticConfig()
         Serial.println("firmware version changed -> eeprom reset to factory defaults");
         strcpy(eeStaticConfig.firmwareVersion, FIRMWARE_VER);
         // preserve ssid,pwd contents but ensure string termination
-        eeStaticConfig.wifiSSID[WIDI_SSID_STRLENMAX] = 0;
-        eeStaticConfig.wifiPwd[WIDI_PWD_STRLENMAX] = 0;
+        eeStaticConfig.wifiSSID[WIFI_SSID_STRLENMAX] = 0;
+        eeStaticConfig.wifiPwd[WIFI_PWD_STRLENMAX] = 0;
         saveEEStaticConfig();
 
         // zeroes json config

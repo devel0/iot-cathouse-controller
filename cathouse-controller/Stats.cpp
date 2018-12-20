@@ -5,11 +5,15 @@
 
 double runtime_hr = 0.0;
 double Wh = 0.0;
-extern unsigned long freeram_lastupdate = millis();
-extern uint32_t freeram_min = 80 * 1024, freeram = 80 * 1024;
+unsigned long freeram_lastupdate = millis();
+uint32_t freeram_min = 80 * 1024, freeram = 80 * 1024;
 // used for consumption stat
 bool p_was_active[4];
 unsigned long lastConsumptionUpdate = millis();
+
+unsigned long adcWeightLastUpdate = millis();
+SearchAThing::Arduino::SList<int> adcWeightLst;
+double adcWeightMean = 0.0;
 
 void statsInit()
 {
@@ -19,6 +23,28 @@ void statsInit()
 
 void statsUpdate()
 {
+    {
+        auto tdelta = timeDiff(adcWeightLastUpdate, millis());
+        if (tdelta >= UPDATE_ADCWEIGHT_INTERVAL_MS)
+        {
+            auto v = analogRead(ADCWEIGHT_PIN);
+            if (adcWeightLst.Size() >= ADCWEIGHT_MEAN_SAMPLE_CNT)
+                adcWeightLst.Remove(0);
+
+            adcWeightLst.Add(v);
+            adcWeightMean = 0.0;
+            auto n = adcWeightLst.GetNode(0);
+            while (n)
+            {
+                adcWeightMean += n->data;
+                n = n->next;
+            }
+            adcWeightMean /= adcWeightLst.Size();
+
+            adcWeightLastUpdate = millis();
+        }
+    }
+
     {
         auto tdelta = timeDiff(freeram_lastupdate, millis());
         if (tdelta >= UPDATE_FREERAM_INTERVAL_MS)

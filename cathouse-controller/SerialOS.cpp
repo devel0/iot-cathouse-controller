@@ -35,14 +35,14 @@ void processSerialCmd()
 {
   if (serialInput.indexOf("set wifi ssid ") == 0)
   {
-    memset(eeStaticConfig.wifiSSID, 0, WIDI_SSID_STRLENMAX + 1);
-    strncpy(eeStaticConfig.wifiSSID, serialInput.substring(14).c_str(), WIDI_SSID_STRLENMAX);
+    memset(eeStaticConfig.wifiSSID, 0, WIFI_SSID_STRLENMAX + 1);
+    strncpy(eeStaticConfig.wifiSSID, serialInput.substring(14).c_str(), WIFI_SSID_STRLENMAX);
     saveEEStaticConfig();
   }
   else if (serialInput.indexOf("set wifi pwd ") == 0)
   {
-    memset(eeStaticConfig.wifiPwd, 0, WIDI_PWD_STRLENMAX + 1);
-    strncpy(eeStaticConfig.wifiPwd, serialInput.substring(13).c_str(), WIDI_PWD_STRLENMAX);
+    memset(eeStaticConfig.wifiPwd, 0, WIFI_PWD_STRLENMAX + 1);
+    strncpy(eeStaticConfig.wifiPwd, serialInput.substring(13).c_str(), WIFI_PWD_STRLENMAX);
     saveEEStaticConfig();
   }
   else if (serialInput == "factoryreset")
