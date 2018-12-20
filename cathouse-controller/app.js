@@ -154,25 +154,13 @@ async function reloadConfig() {
     $('#config-tbottomId')[0].value = res["tbottomId"];
     $('#config-twoodId')[0].value = res["twoodId"];
     $('#config-tambientId')[0].value = res["tambientId"];
-    $('#config-texternId')[0].value = res["texternId"];
-    $('#config-temperatureHistoryFreeramThreshold-kb')[0].value = res["temperatureHistoryFreeramThreshold"] / 1024.0;
-    $('#config-temperatureHistoryBacklogHours')[0].value = res["temperatureHistoryBacklogHours"];
-    $('#config-updateConsumptionIntervalMs-sec')[0].value = res["updateConsumptionIntervalMs"] / 1000.0;
-    $('#config-updateFreeramIntervalMs-sec')[0].value = res["updateFreeramIntervalMs"] / 1000.0;
-    $('#config-updateTemperatureIntervalMs-sec')[0].value = res["updateTemperatureIntervalMs"] / 1000.0;
+    $('#config-texternId')[0].value = res["texternId"];    
     $('#config-tbottomLimit')[0].value = res["tbottomLimit"];
     $('#config-twoodLimit')[0].value = res["twoodLimit"];
     $('#config-tambientLimit')[0].value = res["tambientLimit"];
     $('#config-cooldownTimeMs-min')[0].value = res["cooldownTimeMs"] / 1000.0 / 60.0;
     $('#config-tambientVsExternGTESysOff')[0].value = res["tambientVsExternGTESysOff"];
-    $('#config-tambientVsExternLTESysOn')[0].value = res["tambientVsExternLTESysOn"];
-    $('#config-tbottomGTEFanOn')[0].value = res["tbottomGTEFanOn"];
-    $('#config-tbottomLTEFanOff')[0].value = res["tbottomLTEFanOff"];
-    $('#config-autoactivateWoodBottomDeltaGTESysOn')[0].value = res["autoactivateWoodBottomDeltaGTESysOn"];
-    $('#config-autodeactivateWoodDeltaLT')[0].value = res["autodeactivateWoodDeltaLT"];
-    $('#config-autodeactivateInhibitAutoactivateMinMs-min')[0].value = res["autodeactivateInhibitAutoactivateMinMs"] / 1000.0 / 60.0;
-    $('#config-autodeactivateExcursionSampleCount')[0].value = res["autodeactivateExcursionSampleCount"];
-    $('#config-autodeactivateExcursionSampleTotalMs-min')[0].value = res["autodeactivateExcursionSampleTotalMs"] / 1000.0 / 60.0;
+    $('#config-tambientVsExternLTESysOn')[0].value = res["tambientVsExternLTESysOn"];    
     $('#config-texternGTESysOff')[0].value = res["texternGTESysOff"];
 }
 
