@@ -339,7 +339,8 @@ bool manageWifi()
           {
             clientOk(client, TEXT);
 
-            auto str = header.substring(19);
+            auto arg = header.substring(19);
+            auto str = arg.substring(0, arg.indexOf(" "));
 
             if (str == "0")
               catInThere = false;
