@@ -1,5 +1,13 @@
 # iot-cathouse-controller
 
+- [requirements](#requirements)
+  * [thirdy part libraries](#thirdy-part-libraries)
+- [initial setup](#initial-setup)
+  * [set wifi ssid and pwd](#set-wifi-ssid-and-pwd)
+  * [parameter configurations](#parameter-configurations)
+  * [set temperature sensor ids](#set-temperature-sensor-ids)
+- [debug](#debug)
+
 ## requirements
 
 - hardware
