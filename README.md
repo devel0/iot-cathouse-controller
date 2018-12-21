@@ -3,7 +3,7 @@
 ## requirements
 
 - hardware
-  - [billing of materials](doc/cathouse-drawings/bom.xlsx)
+  - [billing of materials](doc/bom.xlsx)
   - instructables to build and assembly cathouse parts
   - [nodemcu esp8266](https://www.google.com/search?q=nodemcu+esp8266)  
 - software
