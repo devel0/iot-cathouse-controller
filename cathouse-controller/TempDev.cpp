@@ -79,6 +79,10 @@ void setupTemperatureDevices()
 }
 
 float tbottom, twood, tambient, textern;
+bool tbottom_assigned = false;
+bool twood_assigned = false;
+bool tambient_assigned = false;
+bool textern_assigned = false;
 
 void readTemperatures()
 {
@@ -88,14 +92,28 @@ void readTemperatures()
         auto id = (char *)tempDevAddress[i];
         auto temp = DS18B20.getTempC(tempDevAddress[i]);
 
+        tbottom_assigned = twood_assigned = tambient_assigned = textern_assigned = false;
+
         if (strncmp(id, eeStaticConfig.tbottomId, DS18B20_ID_STRLENMAX) == 0)
+        {
             tbottom = temp;
+            tbottom_assigned = true;
+        }
         else if (strncmp(id, eeStaticConfig.twoodId, DS18B20_ID_STRLENMAX) == 0)
+        {
             twood = temp;
+            twood_assigned = true;
+        }
         else if (strncmp(id, eeStaticConfig.tambientId, DS18B20_ID_STRLENMAX) == 0)
+        {
             tambient = temp;
+            tambient_assigned = true;
+        }
         else if (strncmp(id, eeStaticConfig.texternId, DS18B20_ID_STRLENMAX) == 0)
+        {
             textern = temp;
+            textern_assigned = true;
+        }
 
         //Serial.printf("temperature sensor [%d] = %f\n", i, temp);
         //Serial.printf("tbottom [%f] ; twood [%f] ; tambient [%f] ; textern [%f]\n", tbottom, twood, tambient, textern);

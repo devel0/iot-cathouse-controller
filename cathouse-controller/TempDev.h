@@ -28,5 +28,6 @@ void readTemperatures();
 void manageTemp();
 
 extern float tbottom, twood, tambient, textern;
+extern bool tbottom_assigned, twood_assigned, tambient_assigned, textern_assigned;
 
 #endif

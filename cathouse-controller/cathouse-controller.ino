@@ -19,6 +19,7 @@
 #include "TempDev.h"
 #include "WeightDev.h"
 #include "Stats.h"
+#include "Engine.h"
 
 void setupPorts()
 {
@@ -85,6 +86,8 @@ void loop()
   if (!serialOsActivated) statsUpdate();
 
   if (!serialOsActivated) manageTemp();
+
+  if (!serialOsActivated) engineProcess();
 
   if (Serial.available())
   {
