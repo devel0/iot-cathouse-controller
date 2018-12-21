@@ -12,7 +12,7 @@
 
 - hardware
   - [billing of materials](doc/bom.xlsx)
-  - instructables to build and assembly cathouse parts
+  - instructables to build and assembly cathouse parts (TODO)
   - [nodemcu esp8266](https://www.google.com/search?q=nodemcu+esp8266)
   - [global schematics](https://easyeda.com/editor#id=|c888d1d962eb41688482b3634ec3ae96)
     - [mosfet driver](https://easyeda.com/editor#id=|8c9be83bc0324be699e9c5582d8d355a|41530c0b5fc0479b98395b739bd6d0e3)
