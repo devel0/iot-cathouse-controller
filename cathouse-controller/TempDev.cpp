@@ -4,6 +4,7 @@
 #include "Stats.h"
 #include "EEStaticConfig.h"
 #include "EEJsonConfig.h"
+#include "WeightDev.h"
 
 int temperatureDeviceCount = 0;
 
@@ -61,7 +62,7 @@ void setupTemperatureDevices()
         temperatureHistory = (float **)malloc(sizeof(float *) * temperatureDeviceCount);
 
         auto threshold = FREERAM_THRESHOLD_MIN_BYTES;
-        auto ramsize = freeMemorySum() - threshold - 3 * 1024; // 3 kb diff for wifi
+        auto ramsize = freeMemorySum() - threshold - ADCWEIGHT_HISTORY_BACKLOG_KB * 1024 - 3 * 1024; // 3 kb diff for wifi
         temperatureHistorySize = ramsize / temperatureDeviceCount / sizeof(float);
 
         auto backloghr = TEMPERATURE_HISTORY_BACKLOG_HOURS;
@@ -124,7 +125,7 @@ void manageTemp()
         for (int i = 0; i < temperatureDeviceCount; ++i)
             temperatureHistory[i][temperatureHistoryOff] = temperatures[i];
 
-        catInThereHistory->Set(temperatureHistoryOff, adcWeightMean >= eeJsonConfig.adcWeightGTECatInThere);
+        catInThereHistory->Set(temperatureHistoryOff, catInThere);
 
         ++temperatureHistoryOff;
         lastTemperatureHistoryRecord = millis();

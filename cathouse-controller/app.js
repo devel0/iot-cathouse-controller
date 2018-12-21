@@ -7,6 +7,9 @@
 // this is used to debug page index.htm locally
 var debug = true;
 
+var infoUpdateIntervalMs = 5000;
+var tempUpdateIntervalMs = 10000;
+
 //==============================================================================
 
 var sensorDesc = [];
@@ -59,7 +62,68 @@ async function reloadTemp(addr) {
     $('#t' + addr)[0].innerText = res;
 }
 
+// https://github.com/devel0/js-util/blob/986f314207ebd1b27db3a937a552b30f1b1392fa/src/js-util.js
+function human_readable_filesize(bytes, onlyBytesUnit = true, bytesMultiple = 1, decimals = 1) {
+    let k = 1024.0;
+    let m = k * 1024.0;
+    let g = m * 1024.0;
+    let t = g * 1024.0;
+
+    if (bytesMultiple != 1) bytes = Math.trunc(mround(bytes, bytesMultiple));
+
+    if (bytes < k) {
+        if (onlyBytesUnit) return bytes;
+        else return bytes + ' b';
+    } else if (bytes >= k && bytes < m) return (bytes / k).toFixed(decimals) + ' Kb';
+    else if (bytes >= m && bytes < g) return (bytes / m).toFixed(decimals) + ' Mb';
+    else if (bytes >= g && bytes < t) return (bytes / g).toFixed(decimals) + ' Gb';
+    else return (bytes / t).toFixed(decimals);
+}
+
+function toggleCatInThere() {
+    if (confirm('sure to force toggling of cathouse in there?') != true)
+        return;
+    _toggleCatInThere();
+}
+
+async function _toggleCatInThere() {
+    console.log("processing toggling");
+    showSpin();
+    let finished = false;
+    let res = null;
+    while (!finished) {
+        try {
+            res = await $.ajax({
+                url: baseurl + '/info',
+                type: 'GET'
+            });
+            finished = true;
+        } catch (e) {
+            await sleep(1000);
+        }
+    }
+
+    let catIsInThere = res.catIsInThere ? false : true;
+    finished = false;
+    res = null;
+    while (!finished) {
+        try {
+            res = await $.ajax({
+                url: baseurl + '/setcatinthere/' + (catIsInThere ? '1' : '0'),
+                type: 'GET'
+            });
+            finished = true;
+        } catch (e) {
+            await sleep(1000);
+        }
+    }
+    hideSpin();
+
+    //alert('toggled to ' + ((catIsInThere ? '1' : '0')));
+}
+
 async function reloadInfo() {
+    console.log("--> reloadInfo");
     showSpin();
     let finished = false;
     let res = null;
@@ -111,128 +175,115 @@ async function reloadInfo() {
     let runtime_hr = res.runtime_hr;
 
     $('.mean-power')[0].innerText = (Wh / runtime_hr).toFixed(0);
-}
+    $('.free-ram')[0].innerText = human_readable_filesize(res.freeram);
+    $('.cat-is-in-there')[0].innerText = res.catIsInThere ? 'yes' : 'no';
+    if (res.catIsInThere)
+        $('.cat-is-in-there').addClass('port-on');
+    else
+        $('.cat-is-in-there').removeClass('port-on');
 
-async function reloadConfig() {
-    showSpin();
-    let finished = false;
-    let res = null;
-    while (!finished) {
-        try {
-            res = await $.ajax({
-                url: baseurl + '/getconfig',
-                type: 'GET'
+    // adc weight array chart
+    // cat in there chart
+    {
+        var ctx = document.getElementById("myChart3").getContext('2d');
+
+        var dtnow = moment();
+        let ary = res["adcWeightArray"];
+        let interval_sec = res["statIntervalSec"];
+
+        var i = 0;
+        var dss = []; {
+            dts = [];
+            let valcnt = ary.length;
+            $.each(ary, function (idx, val) {
+                secbefore = (valcnt - idx - 1) * interval_sec;
+                tt = moment(dtnow).subtract(secbefore, 'seconds');
+                dts.push({
+                    t: tt,
+                    y: val
+                });
             });
-            finished = true;
-        } catch (e) {
-            await sleep(1000);
-            finished = true;
-        }
-    }
-    hideSpin();
-
-    sensorDesc = [{
-            id: res["tbottomId"],
-            description: "bottom"
-        },
-        {
-            id: res["twoodId"],
-            description: "wood"
-        },
-        {
-            id: res["tambientId"],
-            description: "ambient"
-        },
-        {
-            id: res["texternId"],
-            description: "extern"
-        }
-    ];
-
-    $('#config-firmwareVersion')[0].innerText = res["firmwareVersion"];
-    $('#config-wifiSSID')[0].innerText = res["wifiSSID"];
-    $('#config-tbottomId')[0].value = res["tbottomId"];
-    $('#config-twoodId')[0].value = res["twoodId"];
-    $('#config-tambientId')[0].value = res["tambientId"];
-    $('#config-texternId')[0].value = res["texternId"];
-    $('#config-adcWeightGTECatInThere')[0].value = res["adcWeightGTECatInThere"];
-    $('#config-tbottomLimit')[0].value = res["tbottomLimit"];
-    $('#config-twoodLimit')[0].value = res["twoodLimit"];
-    $('#config-tambientLimit')[0].value = res["tambientLimit"];
-    $('#config-cooldownTimeMs-min')[0].value = res["cooldownTimeMs"] / 1000.0 / 60.0;
-    $('#config-tambientVsExternGTESysOff')[0].value = res["tambientVsExternGTESysOff"];
-    $('#config-tambientVsExternLTESysOn')[0].value = res["tambientVsExternLTESysOn"];
-    $('#config-texternGTESysOff')[0].value = res["texternGTESysOff"];
-}
-
-async function saveConfig() {
-    showSpin();
-    let finished = false;
-    let res = null;
-
-    let config = {
-        tbottomId: $('#config-tbottomId')[0].value,
-        twoodId: $('#config-twoodId')[0].value,
-        tambientId: $('#config-tambientId')[0].value,
-        texternId: $('#config-texternId')[0].value,        
-        adcWeightGTECatInThere: $('#config-adcWeightGTECatInThere')[0].value,
-        tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value),
-        twoodLimit: parseFloat($('#config-twoodLimit')[0].value),
-        tambientLimitxx: parseFloat($('#config-tambientLimit')[0].value),
-        cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60,
-        tambientVsExternGTESysOff: parseFloat($('#config-tambientVsExternGTESysOff')[0].value),
-        tambientVsExternLTESysOn: parseFloat($('#config-tambientVsExternLTESysOn')[0].value),        
-        texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value)
-    };
-
-    while (!finished) {
-        try {
-            res = await $.ajax({
-                url: baseurl + '/saveconfig',
-                type: 'POST',
-                data: JSON.stringify(config),
-                dataType: 'JSON',
-                error: function (e) {
-                    if (e.statusText == "OK") {
-                        hideSpin();
-                        finished = true;
-                        alert('config saved');
-                        return 0;
-                    } else if (e.statusText == "error") {
-                        hideSpin();
-                        alert('failed');
-                        finished = true;
-                        return 0;
-                    }
+            let meanw = _.reduce(ary, function (memo, num) {
+                return memo + num;
+            }, 0) / valcnt;
+            let meanwlatest = 0.0; {
+                let i = valcnt - 1;
+                let c = 0;
+                while (i >= 0 && c < 10) {
+                    meanwlatest += ary[i];
+                    ++c;
                 }
+                meanwlatest /= 10;
+            }
+            $('.adc-weight')[0].innerText = meanw.toFixed(0);
+            $('.adc-weight-latest')[0].innerText = meanwlatest.toFixed(0);
+            dtsmean = [];
+            dtsmean.push({
+                t: moment(dtnow).subtract((valcnt - 1) * interval_sec, 'seconds'),
+                y: meanw
             });
-            finished = true;
-        } catch (e) {
-            await sleep(1000);
-        }
+            dtsmean.push({
+                t: moment(dtnow),
+                y: meanw
+            });
+
+            dss.push({
+                borderColor: '#00ff00',
+                fill: false,
+                label: 'mean',
+                data: dtsmean,
+                pointRadius: 0
+            }, {
+                borderColor: '#00aa00',
+                fill: true,
+                label: 'adc Weight',
+                data: dts,
+                pointRadius: 0
+            });
+
+            ++i;
+        };
+
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: dss
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        //display: false,
+                        type: 'time'
+                        /*,
+                                                time: {
+                                                    displayFormats: {
+                                                        'hour': 'HH:mm'
+                                                    }
+                                                },
+                                                position: 'bottom'*/
+                    }],
+                    /*                    yAxes: [{
+                                            ticks: {
+                                                min: 0,
+                                                max: 1
+                                            }
+                                        }]*/
+                }
+            }
+        });
     }
-    hideSpin();
 }
 
-var reload_enabled = false;
-setInterval(autoreload, 10000);
-
-function autoreload() {
-    if (!reload_enabled) return;
-    reloadall();
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function reloadall() {
+async function reloadAllTemp() {
+    console.log("--> reloadAllTemp");
     $('.tempdev').each(async function (idx) {
         let v = this.innerText;
         await reloadTemp(v);
     });
-    await reloadInfo();
+}
 
+async function reloadCharts() {
+    console.log("--> reloadCharts");
     // temperature charts
     {
         let finished = false;
@@ -357,7 +408,7 @@ async function reloadall() {
                 borderColor: '#F0B8FF',
                 //backgroundColor: '#F0B8FF',
                 fill: true,
-                label: 'cat in there', //desc,
+                label: 'cat in there',
                 data: dts,
                 pointRadius: 0
             });
@@ -373,14 +424,15 @@ async function reloadall() {
             options: {
                 scales: {
                     xAxes: [{
-                        display: false,
-                        type: 'time'/*,
-                        time: {
-                            displayFormats: {
-                                'hour': 'HH:mm'
-                            }
-                        },
-                        position: 'bottom'*/
+                        //display: false,
+                        type: 'time'
+                        /*,
+                                                time: {
+                                                    displayFormats: {
+                                                        'hour': 'HH:mm'
+                                                    }
+                                                },
+                                                position: 'bottom'*/
                     }],
                     yAxes: [{
                         ticks: {
@@ -394,7 +446,99 @@ async function reloadall() {
     }
 }
 
+async function reloadConfig() {
+    showSpin();
+    let finished = false;
+    let res = null;
+    while (!finished) {
+        try {
+            res = await $.ajax({
+                url: baseurl + '/getconfig',
+                type: 'GET'
+            });
+            finished = true;
+        } catch (e) {
+            await sleep(1000);
+            finished = true;
+        }
+    }
+    hideSpin();
+
+    sensorDesc = [{
+            id: res["tbottomId"],
+            description: "bottom"
+        },
+        {
+            id: res["twoodId"],
+            description: "wood"
+        },
+        {
+            id: res["tambientId"],
+            description: "ambient"
+        },
+        {
+            id: res["texternId"],
+            description: "extern"
+        }
+    ];
+
+    $('#config-firmwareVersion')[0].innerText = res["firmwareVersion"];
+    $('#config-wifiSSID')[0].innerText = res["wifiSSID"];
+    $('#config-tbottomId')[0].value = res["tbottomId"];
+    $('#config-twoodId')[0].value = res["twoodId"];
+    $('#config-tambientId')[0].value = res["tambientId"];
+    $('#config-texternId')[0].value = res["texternId"];
+    $('#config-manualMode').prop('checked', res["manualMode"]);
+    $('#config-adcWeightDeltaCat')[0].value = res["adcWeightDeltaCat"];
+    $('#config-tbottomLimit')[0].value = res["tbottomLimit"];
+    $('#config-twoodLimit')[0].value = res["twoodLimit"];
+    $('#config-tambientLimit')[0].value = res["tambientLimit"];
+    $('#config-cooldownTimeMs-min')[0].value = res["cooldownTimeMs"] / 1000.0 / 60.0;
+    $('#config-standbyPort')[0].value = res["standbyPort"];
+    $('#config-standbyDuration-min')[0].value = res["standbyDurationMs"] / 1000.0 / 60.0;
+    $('#config-fullpowerDuration-min')[0].value = res["fullpowerDurationMs"] / 1000.0 / 60.0;    
+    $('#config-texternGTESysOff')[0].value = res["texternGTESysOff"];
+    $('#config-tbottomGTEFanOn')[0].value = res["tbottomGTEFanOn"];
+}
+
+setInterval(autorefresh, 1000);
+
+var infoLastLoad;
+var tempLastLoad;
+var chartLastLoad;
+var autorefreshInProgress = false;
+
+async function autorefresh() {
+    if (autorefreshInProgress) return;
+
+    autorefreshInProgress = true;
+    var dtnow = new Date();
+    if (infoLastLoad === undefined || (dtnow - infoLastLoad) > infoUpdateIntervalMs) {
+        await reloadInfo();
+        infoLastLoad = new Date();
+    }
+    if (tempLastLoad === undefined || (dtnow - tempLastLoad) > tempUpdateIntervalMs) {
+        await reloadAllTemp();
+        tempLastLoad = new Date();
+    }
+    if (chartLastLoad === undefined || (dtnow - chartLastLoad) > history_interval_sec * 1000) {
+        await reloadCharts();
+        chartLastLoad = new Date();
+    }
+    autorefreshInProgress = false;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function myfn() {
+    if (window.innerWidth < 800) {
+        $('#myChart2').prop("height", 60);
+        $('#myChart3').prop("height", 120);
+    }
+
+    autorefreshInProgress = true;
     // retrieve temperature devices and populate table
 
     hideSpin();
@@ -465,7 +609,59 @@ async function myfn() {
 
     $('#tbody-temp')[0].innerHTML = h;
 
-    await reloadall();
+    autorefreshInProgress = false;
 }
 
 myfn();
+
+async function saveConfig() {
+    showSpin();
+    let finished = false;
+    let res = null;
+
+    let config = {
+        tbottomId: $('#config-tbottomId')[0].value,
+        twoodId: $('#config-twoodId')[0].value,
+        tambientId: $('#config-tambientId')[0].value,
+        texternId: $('#config-texternId')[0].value,
+        manualMode: $('#config-manualMode').is(":checked"),
+        adcWeightDeltaCat: $('#config-adcWeightDeltaCat')[0].value,
+        tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value),
+        twoodLimit: parseFloat($('#config-twoodLimit')[0].value),
+        tambientLimitxx: parseFloat($('#config-tambientLimit')[0].value),
+        cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60,
+        standbyPort: parseInt($('#config-standbyPort')[0].value),
+        fullpowerDurationMs: parseFloat($('#config-fullpowerDuration-min')[0].value) * 1000 * 60,
+        standbyDurationMs: parseFloat($('#config-standbyDuration-min')[0].value) * 1000 * 60,        
+        texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value),
+        tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value)
+    };
+
+    while (!finished) {
+        try {
+            res = await $.ajax({
+                url: baseurl + '/saveconfig',
+                type: 'POST',
+                data: JSON.stringify(config),
+                dataType: 'JSON',
+                error: function (e) {
+                    if (e.statusText == "OK") {
+                        hideSpin();
+                        finished = true;
+                        alert('config saved');
+                        return 0;
+                    } else if (e.statusText == "error") {
+                        hideSpin();
+                        alert('failed');
+                        finished = true;
+                        return 0;
+                    }
+                }
+            });
+            finished = true;
+        } catch (e) {
+            await sleep(1000);
+        }
+    }
+    hideSpin();
+}

@@ -1,6 +1,9 @@
 F(" \
 var debug = false; \
  \
+var infoUpdateIntervalMs = 5000; \
+var tempUpdateIntervalMs = 10000; \
+ \
  \
 var sensorDesc = []; \
  \
@@ -50,7 +53,25 @@ hideSpin(); \
 $('#t' + addr)[0].innerText = res; \
 } \
  \
+function human_readable_filesize(bytes, onlyBytesUnit = true, bytesMultiple = 1, decimals = 1) { \
+let k = 1024.0; \
+let m = k * 1024.0; \
+let g = m * 1024.0; \
+let t = g * 1024.0; \
+ \
+if (bytesMultiple != 1) bytes = Math.trunc(mround(bytes, bytesMultiple)); \
+ \
+if (bytes < k) { \
+if (onlyBytesUnit) return bytes; \
+else return bytes + ' b'; \
+} else if (bytes >= k && bytes < m) return (bytes / k).toFixed(decimals) + ' Kb'; \
+else if (bytes >= m && bytes < g) return (bytes / m).toFixed(decimals) + ' Mb'; \
+else if (bytes >= g && bytes < t) return (bytes / g).toFixed(decimals) + ' Gb'; \
+else return (bytes / t).toFixed(decimals); \
+} \
+ \
 async function reloadInfo() { \
+console.log(\"--> reloadInfo\"); \
 showSpin(); \
 let finished = false; \
 let res = null; \
@@ -101,152 +122,27 @@ let Wh = res.Wh; \
 let runtime_hr = res.runtime_hr; \
  \
 $('.mean-power')[0].innerText = (Wh / runtime_hr).toFixed(0); \
+$('.free-ram')[0].innerText = human_readable_filesize(res.freeram); \
+$('.adc-weight')[0].innerText = res.adcWeightMean; \
+$('.cat-is-in-there')[0].innerText = res.catIsInThere ? 'yes' : 'no'; \
+if (res.catIsInThere) \
+$('.cat-is-in-there').addClass('port-on'); \
+else \
+$('.cat-is-in-there').removeClass('port-on'); \
 } \
  \
-async function reloadConfig() { \
-showSpin(); \
-let finished = false; \
-let res = null; \
-while (!finished) { \
-try { \
-res = await $.ajax({ \
-url: baseurl + '/getconfig', \
-type: 'GET' \
-}); \
-finished = true; \
-} catch (e) { \
-await sleep(1000); \
-finished=true; \
-} \
-} \
-hideSpin(); \
- \
-sensorDesc = [{ \
-id: res[\"tbottomId\"], \
-description: \"bottom\" \
-}, \
-{ \
-id: res[\"twoodId\"], \
-description: \"wood\" \
-}, \
-{ \
-id: res[\"tambientId\"], \
-description: \"ambient\" \
-}, \
-{ \
-id: res[\"texternId\"], \
-description: \"extern\" \
-} \
-]; \
- \
-$('#config-firmwareVersion')[0].innerText = res[\"firmwareVersion\"]; \
-$('#config-wifiSSID')[0].innerText = res[\"wifiSSID\"]; \
-$('#config-tbottomId')[0].value = res[\"tbottomId\"]; \
-$('#config-twoodId')[0].value = res[\"twoodId\"]; \
-$('#config-tambientId')[0].value = res[\"tambientId\"]; \
-$('#config-texternId')[0].value = res[\"texternId\"]; \
-$('#config-temperatureHistoryFreeramThreshold-kb')[0].value = res[\"temperatureHistoryFreeramThreshold\"] / 1024.0; \
-$('#config-temperatureHistoryBacklogHours')[0].value = res[\"temperatureHistoryBacklogHours\"]; \
-$('#config-updateConsumptionIntervalMs-sec')[0].value = res[\"updateConsumptionIntervalMs\"] / 1000.0; \
-$('#config-updateFreeramIntervalMs-sec')[0].value = res[\"updateFreeramIntervalMs\"] / 1000.0; \
-$('#config-updateTemperatureIntervalMs-sec')[0].value = res[\"updateTemperatureIntervalMs\"] / 1000.0; \
-$('#config-tbottomLimit')[0].value = res[\"tbottomLimit\"]; \
-$('#config-twoodLimit')[0].value = res[\"twoodLimit\"]; \
-$('#config-tambientLimit')[0].value = res[\"tambientLimit\"]; \
-$('#config-cooldownTimeMs-min')[0].value = res[\"cooldownTimeMs\"] / 1000.0 / 60.0; \
-$('#config-tambientVsExternGTESysOff')[0].value = res[\"tambientVsExternGTESysOff\"]; \
-$('#config-tambientVsExternLTESysOn')[0].value = res[\"tambientVsExternLTESysOn\"]; \
-$('#config-tbottomGTEFanOn')[0].value = res[\"tbottomGTEFanOn\"]; \
-$('#config-tbottomLTEFanOff')[0].value = res[\"tbottomLTEFanOff\"]; \
-$('#config-autoactivateWoodBottomDeltaGTESysOn')[0].value = res[\"autoactivateWoodBottomDeltaGTESysOn\"]; \
-$('#config-autodeactivateWoodDeltaLT')[0].value = res[\"autodeactivateWoodDeltaLT\"]; \
-$('#config-autodeactivateInhibitAutoactivateMinMs-min')[0].value = res[\"autodeactivateInhibitAutoactivateMinMs\"] / 1000.0 / 60.0; \
-$('#config-autodeactivateExcursionSampleCount')[0].value = res[\"autodeactivateExcursionSampleCount\"]; \
-$('#config-autodeactivateExcursionSampleTotalMs-min')[0].value = res[\"autodeactivateExcursionSampleTotalMs\"] / 1000.0 / 60.0; \
-$('#config-texternGTESysOff')[0].value = res[\"texternGTESysOff\"]; \
-} \
- \
-async function saveConfig() { \
-showSpin(); \
-let finished = false; \
-let res = null; \
- \
-let config = { \
-tbottomId: $('#config-tbottomId')[0].value, \
-twoodId: $('#config-twoodId')[0].value, \
-tambientId: $('#config-tambientId')[0].value, \
-texternId: $('#config-texternId')[0].value, \
-temperatureHistoryFreeramThreshold: parseFloat($('#config-temperatureHistoryFreeramThreshold-kb')[0].value) * 1024, \
-temperatureHistoryBacklogHours: parseInt($('#config-temperatureHistoryBacklogHours')[0].value), \
-updateConsumptionIntervalMs: parseFloat($('#config-updateConsumptionIntervalMs-sec')[0].value) * 1000, \
-updateFreeramIntervalMs: parseFloat($('#config-updateFreeramIntervalMs-sec')[0].value) * 1000, \
-updateTemperatureIntervalMs: parseFloat($('#config-updateTemperatureIntervalMs-sec')[0].value) * 1000, \
-tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value), \
-twoodLimit: parseFloat($('#config-twoodLimit')[0].value), \
-tambientLimitxx: parseFloat($('#config-tambientLimit')[0].value), \
-cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60, \
-tambientVsExternGTESysOff: parseFloat($('#config-tambientVsExternGTESysOff')[0].value), \
-tambientVsExternLTESysOn: parseFloat($('#config-tambientVsExternLTESysOn')[0].value), \
-tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value), \
-tbottomLTEFanOff: parseFloat($('#config-tbottomLTEFanOff')[0].value), \
-autoactivateWoodBottomDeltaGTESysOn: parseFloat($('#config-autoactivateWoodBottomDeltaGTESysOn')[0].value), \
-autodeactivateWoodDeltaLT: parseFloat($('#config-autodeactivateWoodDeltaLT')[0].value), \
-autodeactivateInhibitAutoactivateMinMs: parseFloat($('#config-autodeactivateInhibitAutoactivateMinMs-min')[0].value) * 1000 * 60, \
-autodeactivateExcursionSampleCount: parseInt($('#config-autodeactivateExcursionSampleCount')[0].value), \
-autodeactivateExcursionSampleTotalMs: parseFloat($('#config-autodeactivateExcursionSampleTotalMs-min')[0].value) * 1000 * 60, \
-texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value) \
-}; \
- \
-while (!finished) { \
-try { \
-res = await $.ajax({ \
-url: baseurl + '/saveconfig', \
-type: 'POST', \
-data: JSON.stringify(config), \
-dataType: 'JSON', \
-error: function (e) { \
-if (e.statusText == \"OK\") { \
-hideSpin(); \
-finished = true; \
-alert('config saved'); \
-return 0; \
-} else if (e.statusText == \"error\") { \
-hideSpin(); \
-alert('failed'); \
-finished = true; \
-return 0; \
-} \
-} \
-}); \
-finished = true; \
-} catch (e) { \
-await sleep(1000); \
-} \
-} \
-hideSpin(); \
-} \
- \
-var reload_enabled = false; \
-setInterval(autoreload, 10000); \
- \
-function autoreload() { \
-if (!reload_enabled) return; \
-reloadall(); \
-} \
- \
-function sleep(ms) { \
-return new Promise(resolve => setTimeout(resolve, ms)); \
-} \
- \
-async function reloadall() { \
+async function reloadAllTemp() { \
+console.log(\"--> reloadAllTemp\"); \
 $('.tempdev').each(async function (idx) { \
 let v = this.innerText; \
 await reloadTemp(v); \
 }); \
-await reloadInfo(); \
+} \
  \
+async function reloadCharts() { \
+console.log(\"--> reloadCharts\"); \
+{ \
 let finished = false; \
- \
 let res = null; \
 while (!finished) { \
 try { \
@@ -331,7 +227,168 @@ position: 'bottom' \
 }); \
 } \
  \
+{ \
+let finished = false; \
+let res = null; \
+while (!finished) { \
+try { \
+res = await $.ajax({ \
+url: baseurl + \"/catinhistory\", \
+type: 'GET' \
+}); \
+finished = true; \
+} catch (e) { \
+await sleep(1000); \
+} \
+} \
+ \
+var ctx = document.getElementById(\"myChart2\").getContext('2d'); \
+ \
+var dtnow = moment(); \
+ \
+var i = 0; \
+var dss = []; { \
+dts = []; \
+let valcnt = res.length; \
+$.each(res, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val ? 1 : 0 \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: '#F0B8FF', \
+fill: true, \
+label: 'cat in there', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+ \
+var myChart = new Chart(ctx, { \
+type: 'line', \
+data: { \
+datasets: dss \
+}, \
+options: { \
+scales: { \
+xAxes: [{ \
+type: 'time' \
+/*, \
+time: { \
+displayFormats: { \
+'hour': 'HH:mm' \
+} \
+}, \
+position: 'bottom'*/ \
+}], \
+yAxes: [{ \
+ticks: { \
+min: 0, \
+max: 1 \
+} \
+}] \
+} \
+} \
+}); \
+} \
+} \
+ \
+async function reloadConfig() { \
+showSpin(); \
+let finished = false; \
+let res = null; \
+while (!finished) { \
+try { \
+res = await $.ajax({ \
+url: baseurl + '/getconfig', \
+type: 'GET' \
+}); \
+finished = true; \
+} catch (e) { \
+await sleep(1000); \
+finished = true; \
+} \
+} \
+hideSpin(); \
+ \
+sensorDesc = [{ \
+id: res[\"tbottomId\"], \
+description: \"bottom\" \
+}, \
+{ \
+id: res[\"twoodId\"], \
+description: \"wood\" \
+}, \
+{ \
+id: res[\"tambientId\"], \
+description: \"ambient\" \
+}, \
+{ \
+id: res[\"texternId\"], \
+description: \"extern\" \
+} \
+]; \
+ \
+$('#config-firmwareVersion')[0].innerText = res[\"firmwareVersion\"]; \
+$('#config-wifiSSID')[0].innerText = res[\"wifiSSID\"]; \
+$('#config-tbottomId')[0].value = res[\"tbottomId\"]; \
+$('#config-twoodId')[0].value = res[\"twoodId\"]; \
+$('#config-tambientId')[0].value = res[\"tambientId\"]; \
+$('#config-texternId')[0].value = res[\"texternId\"]; \
+$('#config-manualMode').prop('checked', res[\"manualMode\"]); \
+$('#config-adcWeightDeltaCat')[0].value = res[\"adcWeightDeltaCat\"]; \
+$('#config-tbottomLimit')[0].value = res[\"tbottomLimit\"]; \
+$('#config-twoodLimit')[0].value = res[\"twoodLimit\"]; \
+$('#config-tambientLimit')[0].value = res[\"tambientLimit\"]; \
+$('#config-cooldownTimeMs-min')[0].value = res[\"cooldownTimeMs\"] / 1000.0 / 60.0; \
+$('#config-standbyPort')[0].value = res[\"standbyPort\"]; \
+$('#config-standbyDuration-min')[0].value = res[\"standbyDurationMs\"] / 1000.0 / 60.0; \
+$('#config-fullpowerDuration-min')[0].value = res[\"fullpowerDurationMs\"] / 1000.0 / 60.0; \
+$('#config-tambientVsExternGTESysOff')[0].value = res[\"tambientVsExternGTESysOff\"]; \
+$('#config-tambientVsExternLTESysOn')[0].value = res[\"tambientVsExternLTESysOn\"]; \
+$('#config-texternGTESysOff')[0].value = res[\"texternGTESysOff\"]; \
+$('#config-tbottomGTEFanOn')[0].value = res[\"tbottomGTEFanOn\"]; \
+} \
+ \
+setInterval(autorefresh, 1000); \
+ \
+var infoLastLoad; \
+var tempLastLoad; \
+var chartLastLoad; \
+var autorefreshInProgress = false; \
+ \
+async function autorefresh() { \
+if (autorefreshInProgress) return; \
+ \
+autorefreshInProgress = true; \
+var dtnow = new Date(); \
+if (infoLastLoad === undefined || (dtnow - infoLastLoad) > infoUpdateIntervalMs) { \
+await reloadInfo(); \
+infoLastLoad = new Date(); \
+} \
+if (tempLastLoad === undefined || (dtnow - tempLastLoad) > tempUpdateIntervalMs) { \
+await reloadAllTemp(); \
+tempLastLoad = new Date(); \
+} \
+if (chartLastLoad === undefined || (dtnow - chartLastLoad) > history_interval_sec * 1000) { \
+await reloadCharts(); \
+chartLastLoad = new Date(); \
+} \
+autorefreshInProgress = false; \
+} \
+ \
+function sleep(ms) { \
+return new Promise(resolve => setTimeout(resolve, ms)); \
+} \
+ \
 async function myfn() { \
+autorefreshInProgress = true; \
  \
 hideSpin(); \
 let res = null; \
@@ -395,8 +452,62 @@ h += \"</tr>\"; \
  \
 $('#tbody-temp')[0].innerHTML = h; \
  \
-await reloadall(); \
+autorefreshInProgress = false; \
 } \
  \
 myfn(); \
+ \
+async function saveConfig() { \
+showSpin(); \
+let finished = false; \
+let res = null; \
+ \
+let config = { \
+tbottomId: $('#config-tbottomId')[0].value, \
+twoodId: $('#config-twoodId')[0].value, \
+tambientId: $('#config-tambientId')[0].value, \
+texternId: $('#config-texternId')[0].value, \
+manualMode: $('#config-manualMode').is(\":checked\"), \
+adcWeightDeltaCat: $('#config-adcWeightDeltaCat')[0].value, \
+tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value), \
+twoodLimit: parseFloat($('#config-twoodLimit')[0].value), \
+tambientLimitxx: parseFloat($('#config-tambientLimit')[0].value), \
+cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60, \
+standbyPort: parseInt($('#config-standbyPort')[0].value), \
+fullpowerDurationMs: parseFloat($('#config-fullpowerDuration-min')[0].value) * 1000 * 60, \
+standbyDurationMs: parseFloat($('#config-standbyDuration-min')[0].value) * 1000 * 60, \
+tambientVsExternGTESysOff: parseFloat($('#config-tambientVsExternGTESysOff')[0].value), \
+tambientVsExternLTESysOn: parseFloat($('#config-tambientVsExternLTESysOn')[0].value), \
+texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value), \
+tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value) \
+}; \
+ \
+while (!finished) { \
+try { \
+res = await $.ajax({ \
+url: baseurl + '/saveconfig', \
+type: 'POST', \
+data: JSON.stringify(config), \
+dataType: 'JSON', \
+error: function (e) { \
+if (e.statusText == \"OK\") { \
+hideSpin(); \
+finished = true; \
+alert('config saved'); \
+return 0; \
+} else if (e.statusText == \"error\") { \
+hideSpin(); \
+alert('failed'); \
+finished = true; \
+return 0; \
+} \
+} \
+}); \
+finished = true; \
+} catch (e) { \
+await sleep(1000); \
+} \
+} \
+hideSpin(); \
+} \
 ")

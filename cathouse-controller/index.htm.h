@@ -11,6 +11,21 @@ background-color: yellow; \
 text-align: right; \
 font-weight: bold; \
 } \
+.cfg-lbl-cool { \
+text-align: right; \
+font-weight: bold; \
+color:steelblue; \
+} \
+.cfg-lbl-hot { \
+text-align: right; \
+font-weight: bold; \
+color:mediumvioletred; \
+} \
+.cfg-lbl-pink { \
+text-align: right; \
+font-weight: bold; \
+color:blueviolet; \
+} \
 .cfg-notes { \
 color: gray; \
 font-style: italic; \
@@ -24,12 +39,13 @@ integrity=\"sha256-eSi1q2PG6J7g7ib17yAaWMcrr5GrtohYChqibrV7PBE=\" crossorigin=\"
 crossorigin=\"anonymous\"> \
  \
 <body> \
-<div class=\"container\"> \
+<div class=\"container-fluid\"> \
 <div class=\"row\"> \
 <div class=\"col-auto\"> \
 <div class=\"btn-group\" role=\"group\"> \
 <button class=\"btn btn-link\" onclick='showHome()'>Home</button> \
 <button class=\"btn btn-link\" onclick='showConfig()'>Config</button> \
+<button class=\"btn btn-link\" onclick=\"window.open('https://github.com/devel0/iot-cathouse-controller')\">About</button> \
 <div class=\"col\"><i class=\"fas fa-spin fa-spinner j-spin collapse\"></i></div> \
 </div> \
 </div> \
@@ -37,18 +53,19 @@ crossorigin=\"anonymous\"> \
 </div> \
  \
 <!-- HOME --> \
-<div class=\"container j-containers j-home\"> \
+<div class=\"container-fluid j-containers j-home\"> \
 <div class=\"row mt-3\"> \
 <div class=\"col-auto\"> \
-<h1>Temperature sensors</h1> \
+<h1>Cathouse controller</h1> \
 </div> \
 </div> \
 <div class=\"row\"> \
-<div class=\"col\"> \
-<h2>Chart</h2> \
+<div class=\"col-9\"> \
+<h2>Charts</h2> \
+<canvas id=\"myChart2\" height=\"30\"></canvas> \
 <canvas id=\"myChart\" height=\"80\"></canvas> \
 </div> \
-<div class=\"col-auto\"> \
+<div class=\"col\"> \
 <div class=\"row\"> \
 <div class=\"col-auto\"> \
 <h2>Ports</h2> \
@@ -62,13 +79,31 @@ crossorigin=\"anonymous\"> \
 </div> \
 <div class=\"row mt-3\"> \
 <div class=\"col-auto\"> \
-<span class='h2 mean-power'></span><span class='h2'> W</span> \
+<h2>Stats</h2> \
+<table> \
+<tr> \
+<td class=\"text-right\">Power (mean)</td> \
+<td><span class='h3 mean-power ml-3'></span><span class=\"h3\">W</span></td> \
+</tr> \
+<tr> \
+<td class=\"text-right\">Freeram</td> \
+<td><span class='free-ram ml-3'></span></td> \
+</tr> \
+<tr> \
+<td class=\"text-right\">ADC weight (mean)</td> \
+<td><span class='adc-weight ml-3'></span></td> \
+</tr> \
+<tr> \
+<td class=\"text-right\">Cat is in there</td> \
+<td><span class='cat-is-in-there ml-3'></span></td> \
+</tr> \
+</table> \
 </div> \
 </div> \
 </div> \
 </div> \
 <div class=\"row\"> \
-<div class=\"col\"> \
+<div class=\"col-9\"> \
 <h2>Tabular</h2> \
 <div class=\"table-container\"> \
 <div class=\"table table-striped\"> \
@@ -85,24 +120,6 @@ crossorigin=\"anonymous\"> \
 </table> \
 </div> \
 </div> \
-</div> \
-</div> \
-<div class=\"row\"> \
-<div class=\"col-auto\"> \
-<button class=\"btn btn-primary\" onclick='reloadall()'>reload all</button> \
-</div> \
-<div class=\"col\"> \
-<button class=\"btn btn-default\" onclick='reload_enabled=true;'>autoreload</button> \
-</div> \
-</div> \
-<div class=\"row mt-3\"> \
-<div class=\"col\"> \
-<h3>Misc</h3> \
-<ul> \
-<li> \
-<a href=\"https://github.com/devel0/iot-cathouse-controller\">API</a> \
-</li> \
-</ul> \
 </div> \
 </div> \
 </div> \
@@ -139,6 +156,20 @@ crossorigin=\"anonymous\"> \
 <td></td> \
 </tr> \
 <tr> \
+<td class='cfg-lbl align-middle'>Manual mode</td> \
+<td><input type='checkbox' class='form-control' id='config-manualMode'></input></td> \
+<td></td> \
+<td class='cfg-notes'>if true ports will not changed automatically by the mcu but can managed through \
+webapi</td> \
+</tr> \
+<tr> \
+<td class='cfg-lbl-pink align-middle'>ADC weight delta cat</td> \
+<td><input type='text' maxlength=\"16\" class='form-control' id='config-adcWeightDeltaCat'></input></td> \
+<td></td> \
+<td class='cfg-notes'>adc weight quantity delta between mean values (last 20sec) to detect \
+ingress/egress of the cat</td> \
+</tr> \
+<tr> \
 <td class='cfg-lbl align-middle'>Temperature sensor ID ( bottom )</td> \
 <td><input type='text' maxlength=\"16\" class='form-control' id='config-tbottomId'></input></td> \
 <td></td> \
@@ -162,128 +193,75 @@ crossorigin=\"anonymous\"> \
 <td></td> \
 <td class='cfg-notes'>extern temperature sensor id</td> \
 </tr> \
+ \
 <tr> \
-<td class='cfg-lbl align-middle'>Temperature History freeram threshold</td> \
-<td><input type='number' step='0.001' class='form-control' id='config-temperatureHistoryFreeramThreshold-kb'></input></td> \
-<td class='align-middle'>kb</td> \
-<td class='cfg-notes'>allocate temperature history so that it can hold Temperature History \
-backlog size timespan leaving Temperature History freeram threshold estimated ram \
-available</td> \
+<td class='cfg-lbl-hot align-middle'>Standby duration</td> \
+<td><input type='number' step='0.01' class='form-control' id='config-standbyDuration-min'></input></td> \
+<td class='align-middle'>min</td> \
+<td class='cfg-notes'>duration of standby cycle</td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl align-middle'>Temperature History backlog size</td> \
-<td><input type='number' step='1' class='form-control' id='config-temperatureHistoryBacklogHours'></input></td> \
-<td class='align-middle'>hours</td> \
-<td class='cfg-notes'></td> \
+<td class='cfg-lbl-hot align-middle'>(Ambient-Extern) >= T sys standby</td> \
+<td><input type='number' step='0.1' class='form-control' id='config-tambientVsExternGTESysOff'></input></td> \
+<td class='align-middle'>C</td> \
+<td class='cfg-notes'>if ambient-extern >= T system goes standby \
+state</td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl align-middle'>Consumption update interval</td> \
-<td><input type='number' step='0.1' class='form-control' id='config-updateConsumptionIntervalMs-sec'></input></td> \
-<td class='align-middle'>sec</td> \
-<td class='cfg-notes'>interval to update Wh consumption stats</td> \
+<td class='cfg-lbl-hot align-middle'>Standby port</td> \
+<td><input type='number' step='1' min=\"0\" max=\"4\" class='form-control' id='config-standbyPort'></input></td> \
+<td class='align-middle'></td> \
+<td class='cfg-notes'>port to maintain enabled during standby (1-4 or 0 for none)</td> \
+</tr> \
+ \
+<tr> \
+<td class='cfg-lbl-hot align-middle'>Fullpower duration</td> \
+<td><input type='number' step='0.01' class='form-control' id='config-fullpowerDuration-min'></input></td> \
+<td class='align-middle'>min</td> \
+<td class='cfg-notes'>duration of fullpower cycle</td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl align-middle'>Freeram update interval</td> \
-<td><input type='number' step='0.1' class='form-control' id='config-updateFreeramIntervalMs-sec'></input></td> \
-<td class='align-middle'>sec</td> \
-<td class='cfg-notes'>interval to update freeram stats</td> \
+<td class='cfg-lbl-hot align-middle'>(Ambient-Extern) &lt;= T sys fullpower</td> \
+<td><input type='number' step='0.1' class='form-control' id='config-tambientVsExternLTESysOn'></input></td> \
+<td class='align-middle'>C</td> \
+<td class='cfg-notes'>if ambient-extern &lt;= T system goes full power \
+state</td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl align-middle'>Temperature update interval</td> \
-<td><input type='number' step='1' class='form-control' id='config-updateTemperatureIntervalMs-sec'></input></td> \
-<td class='align-middle'>sec</td> \
-<td class='cfg-notes'>interval to update current temperature by reading sensors</td> \
+<td class='cfg-lbl-hot align-middle'>TBottom >= T fan on</td> \
+<td><input type='number' step='0.1' class='form-control' id='config-tbottomGTEFanOn'></input></td> \
+<td class='align-middle'>C</td> \
+<td class='cfg-notes'>when in fullpower mode fan activate if tbottom >= T</td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl align-middle'>Bottom temperature limit</td> \
+<td class='cfg-lbl-cool align-middle'>Cooldown time</td> \
+<td><input type='number' step='0.01' class='form-control' id='config-cooldownTimeMs-min'></input></td> \
+<td class='align-middle'>min</td> \
+<td class='cfg-notes'>duration of cooldown if cooldown condition occurs</td> \
+</tr> \
+<tr> \
+<td class='cfg-lbl-cool align-middle'>Bottom temperature limit</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tbottomLimit'></input></td> \
 <td class='align-middle'>C</td> \
 <td class='cfg-notes'>if bottom temp >= bottom temperature limit heat ports gets disabled \
 for Cooldown time</td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl align-middle'>Wood temperature limit</td> \
+<td class='cfg-lbl-cool align-middle'>Wood temperature limit</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-twoodLimit'></input></td> \
 <td class='align-middle'>C</td> \
 <td class='cfg-notes'>if bottom temp >= wood temperature limit heat ports gets disabled for \
 Cooldown time</td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl align-middle'>Ambient temperature limit</td> \
+<td class='cfg-lbl-cool align-middle'>Ambient temperature limit</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tambientLimit'></input></td> \
 <td class='align-middle'>C</td> \
 <td class='cfg-notes'>if bottom temp >= ambient temperature limit heat ports gets disabled \
 for Cooldown time</td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl align-middle'>Cooldown time</td> \
-<td><input type='number' step='0.01' class='form-control' id='config-cooldownTimeMs-min'></input></td> \
-<td class='align-middle'>min</td> \
-<td class='cfg-notes'>heat ports disable time when cooldown condition occurs</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl align-middle'>Ambient >= Extern sys OFF</td> \
-<td><input type='number' step='0.1' class='form-control' id='config-tambientVsExternGTESysOff'></input></td> \
-<td class='align-middle'>C</td> \
-<td class='cfg-notes'>if ambient >= (Ambient >= Extern sys OFF) heat ports enter disable \
-state</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl align-middle'>Ambient &lt;= Extern sys ON</td> \
-<td><input type='number' step='0.1' class='form-control' id='config-tambientVsExternLTESysOn'></input></td> \
-<td class='align-middle'>C</td> \
-<td class='cfg-notes'>if ambient >= (Ambient &lt;= Extern sys ON) heat ports enter enable \
-state</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl align-middle'>Bottom >= T fan ON</td> \
-<td><input type='number' step='0.1' class='form-control' id='config-tbottomGTEFanOn'></input></td> \
-<td class='align-middle'>C</td> \
-<td class='cfg-notes'>if ambient >= (Bottom >= T fan ON) fan enter enable state</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl align-middle'>Bottom &lt;= T fan OFF</td> \
-<td><input type='number' step='0.1' class='form-control' id='config-tbottomLTEFanOff'></input></td> \
-<td class='align-middle'>C</td> \
-<td class='cfg-notes'>if ambient &lt;= (Bottom &lt;= T fan OFF) fan enter disable state</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl align-middle'>(Wood - Bottom) >= T sys ON</td> \
-<td><input type='number' step='0.1' class='form-control' id='config-autoactivateWoodBottomDeltaGTESysOn'></input></td> \
-<td class='align-middle'>C</td> \
-<td class='cfg-notes'>if (twood - bottom) >= ((Wood - Bottom) >= T sys ON) system enter \
-enable state</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl align-middle'>Wood excursion &lt;= T sys OFF</td> \
-<td><input type='number' step='0.1' class='form-control' id='config-autodeactivateWoodDeltaLT'></input></td> \
-<td class='align-middle'>C</td> \
-<td class='cfg-notes'>if bottom excursion, over last Wood excursion analysis total time \
-interval &lt;= (Wood excursion &lt;= T sys OFF) system enter disable state for atleast \
-Inhibit activate after deactivation timespan</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl align-middle'>Inhibit activate after deactivation min time</td> \
-<td><input type='number' step='0.01' class='form-control' id='config-autodeactivateInhibitAutoactivateMinMs-min'></input></td> \
-<td class='align-middle'>min</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl align-middle'>Wood excursion sample slots count</td> \
-<td><input type='number' step='1' class='form-control' id='config-autodeactivateExcursionSampleCount'></input></td> \
-<td></td> \
-<td class='cfg-notes'>stat past Wood excursion analysis total temperatures time interval \
-using a bunch of Wood excursion sample slots count (min,max) objects. When total stat \
-interval exceeded then oldest sample gets removed in favor of a new one in the head \
-(current time)</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl align-middle'>Wood excursion analysis total time interval</td> \
-<td><input type='number' step='0.01' class='form-control' id='config-autodeactivateExcursionSampleTotalMs-min'></input></td> \
-<td class='align-middle'>min</td> \
-<td class='cfg-notes'>suggested value : at least 1.5 x heat cycle time interval</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl align-middle'>Extern >= T sys OFF</td> \
+<td class='cfg-lbl-cool align-middle'>Extern >= T sys OFF</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-texternGTESysOff'></input></td> \
 <td class='align-middle'>C</td> \
 <td class='cfg-notes'>if extern >= (Extern >= T sys OFF) then system enter disabled state</td> \

@@ -71,28 +71,23 @@ void clientOk(WiFiClient &client, CCTypes type)
     client.println("HTTP/1.1 200 OK");
     switch (type)
     {
-    case HTML:
-        Serial.println("[HTML]");
+    case HTML:        
         client.println("Content-Type: text/html");
         break;
 
-    case JSON:
-        Serial.println("[JSON]");
+    case JSON:        
         client.println("Content-Type: application/json");
         break;
 
-    case TEXT:
-        Serial.println("[TEXT]");
+    case TEXT:        
         client.println("Content-Type: text/plain");
         break;
 
-    case JAVASCRIPT:
-        Serial.println("[JS]");
+    case JAVASCRIPT:        
         client.println("Content-Type: text/javascript");
         break;
 
-    case PNG:
-        Serial.println("[PNG]");
+    case PNG:        
         client.println("Content-Type: image/png");
         break;
     }

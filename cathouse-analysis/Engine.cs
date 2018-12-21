@@ -157,7 +157,7 @@ namespace cathouse_analysis
 
                         var wmean = (wlst.Sum(w => w) / wlst.Count);
                         System.Console.WriteLine($"W={weightadc} [mean={wmean}]");
-                        var catisinthere = wmean >= 250;
+                        var catisinthere = wmean >= 120;
 
                         if (!catisinthere)
                         {

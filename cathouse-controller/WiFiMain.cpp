@@ -6,6 +6,7 @@
 #include "SList.h"
 #include "TempDev.h"
 #include "Stats.h"
+#include "WeightDev.h"
 
 #include <ArduinoJson.h>
 
@@ -33,7 +34,6 @@ bool manageWifi()
           header += c;
         else
         {
-          Serial.printf("header [%s]\n", header.c_str());
           int newlinecnt = 0;
           while (client.available() || newlinecnt != 2) // discard rest of header
           {
@@ -98,7 +98,7 @@ bool manageWifi()
           {
             auto tid = header.substring(10);
             tid = tid.substring(0, tid.indexOf(" "));
-            Serial.printf("query for device id = %s]\n", tid.c_str());
+            //Serial.printf("query for device id = %s]\n", tid.c_str());
             bool found = false;
 
             clientOk(client, TEXT);
@@ -180,7 +180,10 @@ bool manageWifi()
 
             client.print('{');
 
-            client.print(F("\"freeram\":"));
+            client.print(F("\"statIntervalSec\":"));
+            client.print(UPDATE_STATS_INTERVAL_MS / 1000);
+
+            client.print(F(", \"freeram\":"));
             client.print(freeram);
 
             client.print(F(", \"freeram_min\":"));
@@ -198,11 +201,29 @@ bool manageWifi()
             client.print(F(", \"temperatureHistoryOff\":"));
             client.print(temperatureHistoryOff);
 
-            client.print(F(", \"adcWeightMean\":"));
-            client.print(adcWeightMean);
+            client.print(F(", \"adcWeightArraySize\":"));
+            client.print(adcWeightArraySize);
+
+            client.print(F(", \"adcWeightArrayOff\":"));
+            client.print(adcWeightArrayOff);
+
+            client.print(F(", \"adcWeightArrayFillCnt\":"));
+            client.print(adcWeightArrayFillCnt);
+
+            client.print(F(", \"adcWeightArray\":["));
+            {
+              auto wstart = adcWeightArrayFillCnt == adcWeightArraySize ? adcWeightArrayOff : 0;
+              for (int i = wstart; i < wstart + adcWeightArrayFillCnt; ++i)
+              {
+                client.printf("%d", adcWeightArray[i % adcWeightArraySize]);
+                if (i < wstart + adcWeightArrayFillCnt - 1)
+                  client.print(",");
+              }
+            }
+            client.print(F("]"));
 
             client.print(F(", \"catIsInThere\":"));
-            client.print(adcWeightMean >= eeJsonConfig.adcWeightGTECatInThere ? "true" : "false");
+            client.print(catInThere ? "true" : "false");
 
             for (int i = 0; i < 4; ++i)
             {
@@ -240,7 +261,7 @@ bool manageWifi()
             auto port = header.substring(14);
             port = port.substring(0, port.indexOf(" "));
 
-            Serial.printf("port = [%s]\n", port.c_str());
+            //Serial.printf("port = [%s]\n", port.c_str());
 
             if (port == "1")
               client.print(digitalRead(MOSFET_P1));
@@ -271,13 +292,11 @@ bool manageWifi()
           {
             clientOk(client, TEXT);
 
-            Serial.printf("header = [%s]\n", header.c_str());
-
             auto str = header.substring(14);
             auto port = str.substring(0, str.indexOf("/"));
             auto mode = str.substring(str.indexOf("/") + 1, str.indexOf(" "));
 
-            Serial.printf("setting port [%s] to [%s]\n", port.c_str(), mode.c_str());
+            //Serial.printf("setting port [%s] to [%s]\n", port.c_str(), mode.c_str());
 
             auto portnr = atoi(port.c_str());
             auto modenr = atoi(mode.c_str());
@@ -310,6 +329,24 @@ bool manageWifi()
               digitalWrite(portpin, HIGH);
             else
               digitalWrite(portpin, LOW);
+
+            client.print("OK");
+          }
+          //--------------------------
+          // /setcatinthere/{0,1}
+          //--------------------------
+          else if (header.indexOf("GET /setcatinthere/") >= 0)
+          {
+            clientOk(client, TEXT);
+
+            auto str = header.substring(19);
+
+            if (str == "0")
+              catInThere = false;
+            else
+              catInThere = true;
+
+            Serial.printf("catInThere = %d\n", catInThere ? 1 : 0);
 
             client.print("OK");
           }
