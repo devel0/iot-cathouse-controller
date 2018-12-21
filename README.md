@@ -3,7 +3,9 @@
 ## requirements
 
 - hardware
-  - [Billing of materials](doc/cathouse-drawings/bom.xlsx)
+  - [billing of materials](doc/cathouse-drawings/bom.xlsx)
+  - instructables to build and assembly cathouse parts
+  - [nodemcu esp8266](https://www.google.com/search?q=nodemcu+esp8266)  
 - software
   - [vscode arduino](https://github.com/devel0/knowledge/blob/master/electronics/vscode-arduino.md)
   - [esp8266 board plugin](https://github.com/esp8266/Arduino#installing-with-boards-manager)
