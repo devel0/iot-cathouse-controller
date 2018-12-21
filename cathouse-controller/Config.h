@@ -1,7 +1,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define FIRMWARE_VER "cathouse-0.80"
+#define FIRMWARE_VER "cathouse-0.81"
 
 #include <Arduino.h>
 

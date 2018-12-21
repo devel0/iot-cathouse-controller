@@ -87,12 +87,12 @@ bool textern_assigned = false;
 void readTemperatures()
 {
     DS18B20.requestTemperatures();
+
+    tbottom_assigned = twood_assigned = tambient_assigned = textern_assigned = false;
     for (int i = 0; i < temperatureDeviceCount; ++i)
     {
         auto id = (char *)tempDevAddress[i];
-        auto temp = DS18B20.getTempC(tempDevAddress[i]);
-
-        tbottom_assigned = twood_assigned = tambient_assigned = textern_assigned = false;
+        auto temp = DS18B20.getTempC(tempDevAddress[i]);        
 
         if (strncmp(id, eeStaticConfig.tbottomId, DS18B20_ID_STRLENMAX) == 0)
         {

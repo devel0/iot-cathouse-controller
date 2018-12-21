@@ -58,6 +58,12 @@ void engineProcess()
     if (timeDiff(lastEngineProcessExec, millis()) < ENGINE_POOL_INTERVAL_MS)
         return;
 
+    if (eeJsonConfig.manualMode)
+    {
+        lastEngineProcessExec = millis();
+        return;
+    }
+
     if (catInThere) // on
     {
 
@@ -148,7 +154,7 @@ void engineProcess()
 
                 setFullpowerPorts();
 
-                Serial.printf("engine> back to fullpower from off cycle because prev cycle expired and cat is in there");
+                Serial.printf("engine> back to fullpower from off cycle because prev cycle expired and cat is in there\n");
             }
             else
             {
@@ -160,14 +166,14 @@ void engineProcess()
                 case fullpower:
                 {
                     setFullpowerPorts();
-                    Serial.printf("engine> back to fullpower from off cycle because prev cycle still valid and cat is in there");
+                    Serial.printf("engine> back to fullpower from off cycle because prev cycle still valid and cat is in there\n");
                 }
                 break;
 
                 case standby:
                 {
                     setStandbyPorts();
-                    Serial.printf("engine> back to standby from off cycle because prev cycle still valid and cat is in there");
+                    Serial.printf("engine> back to standby from off cycle because prev cycle still valid and cat is in there\n");
                 }
                 break;
                 }
@@ -179,25 +185,29 @@ void engineProcess()
         {
             auto currentCycleDuration = timeDiff(currentCycleBegin, millis());
 
+            auto pfan = digitalRead(FAN_PIN);
             // turn fan on when tbottom reach enough temp
             if (tbottom_assigned)
             {
-                auto p = digitalRead(FAN_PIN);
-                if (tbottom >= eeJsonConfig.tbottomGTEFanOn && p == LOW)
+
+                if (tbottom >= eeJsonConfig.tbottomGTEFanOn && pfan == LOW)
                 {
                     digitalWrite(FAN_PIN, HIGH);
-                    Serial.printf("engine> enable fan because tbottom %f>=%f in fullpower cycle", tbottom, eeJsonConfig.tbottomGTEFanOn);
+                    Serial.printf("engine> enable fan because tbottom %f>=%f in fullpower cycle\n", tbottom, eeJsonConfig.tbottomGTEFanOn);
                 }
-                else if (p == HIGH)
+                else if (pfan == HIGH)
                 {
                     digitalWrite(FAN_PIN, LOW);
-                    Serial.printf("engine> disable fan because tbottom %f<%f in fullpower cycle", tbottom, eeJsonConfig.tbottomGTEFanOn);
+                    Serial.printf("engine> disable fan because tbottom %f<%f in fullpower cycle\n", tbottom, eeJsonConfig.tbottomGTEFanOn);
                 }
             }
             else // fallback if not assigned id to temp device to detect bottom enable fan in fullpower
             {
-                digitalWrite(FAN_PIN, HIGH);
-                Serial.printf("engine> enable fan because tbottom can't detect due to unassigned temp device id in fullpower cycle");
+                if (pfan == LOW)
+                {
+                    digitalWrite(FAN_PIN, HIGH);
+                    Serial.printf("engine> enable fan because tbottom can't detect due to unassigned temp device id in fullpower cycle\n");
+                }
             }
 
             // autoswitch next cycle when this expired
@@ -207,7 +217,7 @@ void engineProcess()
                 currentCycleBegin = millis();
                 setStandbyPorts();
 
-                Serial.printf("engine> switch to standby cycle because fullpower expired");
+                Serial.printf("engine> switch to standby cycle because fullpower expired\n");
             }
         }
         break;
@@ -223,7 +233,7 @@ void engineProcess()
                 currentCycleBegin = millis();
                 setFullpowerPorts();
 
-                Serial.printf("engine> switch to fullpower cycle because standby expired");
+                Serial.printf("engine> switch to fullpower cycle because standby expired\n");
             }
         }
         break;
@@ -248,9 +258,11 @@ void engineProcess()
 
             setDisablePorts();
 
-            Serial.printf("engine> goes off because cat exited");
+            Serial.printf("engine> goes off because cat exited\n");
         }
         break;
         }
     }
+
+    lastEngineProcessExec = millis();
 }
