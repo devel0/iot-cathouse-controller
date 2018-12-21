@@ -69,6 +69,8 @@ void engineProcess()
             currentCycle = prevCycle = disabled;
             currentCycleBegin = millis();
             setDisablePorts();
+
+            Serial.printf("engine> disabled because textern %f >= %f\n", textern, eeJsonConfig.texternGTESysOff);
         }
         else
         {
@@ -81,6 +83,8 @@ void engineProcess()
                     prevCycle = none;
                     currentCycle = none;
                     currentCycleBegin = millis();
+
+                    Serial.printf("engine> enabled because textern %f < %f\n", textern, eeJsonConfig.texternGTESysOff);
                 }
             }
             break;
@@ -89,12 +93,17 @@ void engineProcess()
             {
                 if ((tbottom_assigned && tbottom >= eeJsonConfig.tbottomLimit) ||
                     (twood_assigned && twood >= eeJsonConfig.twoodLimit) ||
-                    (tambient_assigned && tambient >= eeJsonConfig.tambientId))
+                    (tambient_assigned && tambient >= eeJsonConfig.tambientLimit))
                 {
                     prevCycle = currentCycle;
                     prevCycleBegin = currentCycleBegin;
                     currentCycle = cooldown;
                     currentCycleBegin = millis();
+
+                    Serial.printf("engine> cooldown because tbottom %f>=%f or twood %f>=%f or tambient %f>=%f\n",
+                                  tbottom, eeJsonConfig.tbottomLimit,
+                                  twood, eeJsonConfig.twoodLimit,
+                                  tambient, eeJsonConfig.tambientLimit);
                 }
             }
             break;
@@ -102,12 +111,15 @@ void engineProcess()
             {
                 if (timeDiff(currentCycleBegin, millis()) > eeJsonConfig.cooldownTimeMs)
                 {
-                    let cooldownBegin = currentCycleBegin;
+                    auto cooldownBegin = currentCycleBegin;
 
                     currentCycle = prevCycle;
                     currentCycleBegin = prevCycleBegin;
                     prevCycle = cooldown;
                     prevCycleBegin = cooldownBegin;
+
+                    Serial.printf("engine> resume previous cycle from cooldown because cooldown time %lu min expired\n",
+                                  eeJsonConfig.cooldownTimeMs / 1000 / 60);
                 }
             }
             break;
@@ -135,6 +147,8 @@ void engineProcess()
                 currentCycleBegin = millis();
 
                 setFullpowerPorts();
+
+                Serial.printf("engine> back to fullpower from off cycle because prev cycle expired and cat is in there");
             }
             else
             {
@@ -144,12 +158,18 @@ void engineProcess()
                 switch (prevCycle)
                 {
                 case fullpower:
+                {
                     setFullpowerPorts();
-                    break;
+                    Serial.printf("engine> back to fullpower from off cycle because prev cycle still valid and cat is in there");
+                }
+                break;
 
                 case standby:
+                {
                     setStandbyPorts();
-                    break;
+                    Serial.printf("engine> back to standby from off cycle because prev cycle still valid and cat is in there");
+                }
+                break;
                 }
             }
         }
@@ -162,14 +182,22 @@ void engineProcess()
             // turn fan on when tbottom reach enough temp
             if (tbottom_assigned)
             {
-                if (tbottom >= eeJsonConfig.tbottomGTEFanOn)
+                auto p = digitalRead(FAN_PIN);
+                if (tbottom >= eeJsonConfig.tbottomGTEFanOn && p == LOW)
+                {
                     digitalWrite(FAN_PIN, HIGH);
-                else
+                    Serial.printf("engine> enable fan because tbottom %f>=%f in fullpower cycle", tbottom, eeJsonConfig.tbottomGTEFanOn);
+                }
+                else if (p == HIGH)
+                {
                     digitalWrite(FAN_PIN, LOW);
+                    Serial.printf("engine> disable fan because tbottom %f<%f in fullpower cycle", tbottom, eeJsonConfig.tbottomGTEFanOn);
+                }
             }
             else // fallback if not assigned id to temp device to detect bottom enable fan in fullpower
             {
                 digitalWrite(FAN_PIN, HIGH);
+                Serial.printf("engine> enable fan because tbottom can't detect due to unassigned temp device id in fullpower cycle");
             }
 
             // autoswitch next cycle when this expired
@@ -178,6 +206,8 @@ void engineProcess()
                 currentCycle = standby;
                 currentCycleBegin = millis();
                 setStandbyPorts();
+
+                Serial.printf("engine> switch to standby cycle because fullpower expired");
             }
         }
         break;
@@ -192,6 +222,8 @@ void engineProcess()
                 currentCycle = fullpower;
                 currentCycleBegin = millis();
                 setFullpowerPorts();
+
+                Serial.printf("engine> switch to fullpower cycle because standby expired");
             }
         }
         break;
@@ -214,12 +246,9 @@ void engineProcess()
             currentCycle = none;
             currentCycleBegin = millis();
 
-            digitalWrite(MOSFET_P1, LOW);
-            digitalWrite(MOSFET_P2, LOW);
-            digitalWrite(MOSFET_P3, LOW);
-            digitalWrite(MOSFET_P4, LOW);
-            digitalWrite(FAN_PIN, LOW);
-            digitalWrite(LED_PIN, LOW);
+            setDisablePorts();
+
+            Serial.printf("engine> goes off because cat exited");
         }
         break;
         }

@@ -55,31 +55,47 @@ crossorigin=\"anonymous\"> \
 <!-- HOME --> \
 <div class=\"container-fluid j-containers j-home\"> \
 <div class=\"row mt-3\"> \
-<div class=\"col-auto\"> \
+<div class=\"col\"> \
 <h1>Cathouse controller</h1> \
 </div> \
 </div> \
 <div class=\"row\"> \
-<div class=\"col-9\"> \
+<div class=\"col col-sm-12 col-lg-7\"> \
 <h2>Charts</h2> \
 <canvas id=\"myChart2\" height=\"30\"></canvas> \
-<canvas id=\"myChart\" height=\"80\"></canvas> \
+<canvas id=\"myChart\" height=\"120\"></canvas> \
 </div> \
-<div class=\"col\"> \
+<div class=\"col col-sm-12 col-lg-5\"> \
+<div class=\"row\"> \
+<div class=\"col-12\"> \
+<h2>Ports</h2> \
 <div class=\"row\"> \
 <div class=\"col-auto\"> \
-<h2>Ports</h2> \
 <div class=\"port-p1\">P1</div> \
+</div> \
+<div class=\"col-auto\"> \
 <div class=\"port-p2\">P2</div> \
+</div> \
+<div class=\"col-auto\"> \
 <div class=\"port-p3\">P3</div> \
+</div> \
+<div class=\"col-auto\"> \
 <div class=\"port-p4\">P4</div> \
+</div> \
+<div class=\"col-auto\"> \
 <div class=\"port-led\">LED</div> \
+</div> \
+<div class=\"col-auto\"> \
 <div class=\"port-fan\">FAN</div> \
 </div> \
 </div> \
-<div class=\"row mt-3\"> \
-<div class=\"col-auto\"> \
+</div> \
+</div> \
+<div class=\"row\"> \
+<div class=\"col\"> \
 <h2>Stats</h2> \
+<div class=\"row\"> \
+<div class=\"col-12\"> \
 <table> \
 <tr> \
 <td class=\"text-right\">Power (mean)</td> \
@@ -94,16 +110,20 @@ crossorigin=\"anonymous\"> \
 <td><span class='adc-weight ml-3'></span></td> \
 </tr> \
 <tr> \
+<td class=\"text-right\">ADC weight latest 10 samples (mean)</td> \
+<td><span class='adc-weight-latest ml-3'></span></td> \
+</tr> \
+<tr> \
 <td class=\"text-right\">Cat is in there</td> \
-<td><span class='cat-is-in-there ml-3'></span></td> \
+<td> \
+<button class=\"btn btn-link\" onclick='toggleCatInThere()'><span class='cat-is-in-there ml-3'></span></button> \
+</td> \
 </tr> \
 </table> \
 </div> \
 </div> \
 </div> \
-</div> \
-<div class=\"row\"> \
-<div class=\"col-9\"> \
+<div class=\"col-auto\"> \
 <h2>Tabular</h2> \
 <div class=\"table-container\"> \
 <div class=\"table table-striped\"> \
@@ -118,6 +138,14 @@ crossorigin=\"anonymous\"> \
 </thead> \
 <tbody id=\"tbody-temp\"></tbody> \
 </table> \
+</div> \
+</div> \
+</div> \
+</div> \
+<div class=\"row\"> \
+<div class=\"col-12\"> \
+<h3>ADC Weight</h3> \
+<canvas id=\"myChart3\" height=\"80\"></canvas> \
 </div> \
 </div> \
 </div> \
@@ -156,17 +184,11 @@ crossorigin=\"anonymous\"> \
 <td></td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl align-middle'>Manual mode</td> \
-<td><input type='checkbox' class='form-control' id='config-manualMode'></input></td> \
-<td></td> \
-<td class='cfg-notes'>if true ports will not changed automatically by the mcu but can managed through \
-webapi</td> \
-</tr> \
-<tr> \
 <td class='cfg-lbl-pink align-middle'>ADC weight delta cat</td> \
 <td><input type='text' maxlength=\"16\" class='form-control' id='config-adcWeightDeltaCat'></input></td> \
 <td></td> \
-<td class='cfg-notes'>adc weight quantity delta between mean values (last 20sec) to detect \
+<td class='cfg-notes'>adc weight quantity delta between mean values (last 20sec) to \
+detect \
 ingress/egress of the cat</td> \
 </tr> \
 <tr> \
@@ -201,13 +223,6 @@ ingress/egress of the cat</td> \
 <td class='cfg-notes'>duration of standby cycle</td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl-hot align-middle'>(Ambient-Extern) >= T sys standby</td> \
-<td><input type='number' step='0.1' class='form-control' id='config-tambientVsExternGTESysOff'></input></td> \
-<td class='align-middle'>C</td> \
-<td class='cfg-notes'>if ambient-extern >= T system goes standby \
-state</td> \
-</tr> \
-<tr> \
 <td class='cfg-lbl-hot align-middle'>Standby port</td> \
 <td><input type='number' step='1' min=\"0\" max=\"4\" class='form-control' id='config-standbyPort'></input></td> \
 <td class='align-middle'></td> \
@@ -219,13 +234,6 @@ state</td> \
 <td><input type='number' step='0.01' class='form-control' id='config-fullpowerDuration-min'></input></td> \
 <td class='align-middle'>min</td> \
 <td class='cfg-notes'>duration of fullpower cycle</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl-hot align-middle'>(Ambient-Extern) &lt;= T sys fullpower</td> \
-<td><input type='number' step='0.1' class='form-control' id='config-tambientVsExternLTESysOn'></input></td> \
-<td class='align-middle'>C</td> \
-<td class='cfg-notes'>if ambient-extern &lt;= T system goes full power \
-state</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl-hot align-middle'>TBottom >= T fan on</td> \
@@ -243,28 +251,40 @@ state</td> \
 <td class='cfg-lbl-cool align-middle'>Bottom temperature limit</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tbottomLimit'></input></td> \
 <td class='align-middle'>C</td> \
-<td class='cfg-notes'>if bottom temp >= bottom temperature limit heat ports gets disabled \
+<td class='cfg-notes'>if bottom temp >= bottom temperature limit heat ports gets \
+disabled \
 for Cooldown time</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl-cool align-middle'>Wood temperature limit</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-twoodLimit'></input></td> \
 <td class='align-middle'>C</td> \
-<td class='cfg-notes'>if bottom temp >= wood temperature limit heat ports gets disabled for \
+<td class='cfg-notes'>if bottom temp >= wood temperature limit heat ports gets disabled \
+for \
 Cooldown time</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl-cool align-middle'>Ambient temperature limit</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tambientLimit'></input></td> \
 <td class='align-middle'>C</td> \
-<td class='cfg-notes'>if bottom temp >= ambient temperature limit heat ports gets disabled \
+<td class='cfg-notes'>if bottom temp >= ambient temperature limit heat ports gets \
+disabled \
 for Cooldown time</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl-cool align-middle'>Extern >= T sys OFF</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-texternGTESysOff'></input></td> \
 <td class='align-middle'>C</td> \
-<td class='cfg-notes'>if extern >= (Extern >= T sys OFF) then system enter disabled state</td> \
+<td class='cfg-notes'>if extern >= T then system enter disabled either cat is in \
+state</td> \
+</tr> \
+<tr> \
+<td class='cfg-lbl align-middle'>Manual mode</td> \
+<td><input type='checkbox' class='form-control' id='config-manualMode'></input></td> \
+<td></td> \
+<td class='cfg-notes'>if true ports will not changed automatically by the mcu but can \
+managed through \
+webapi</td> \
 </tr> \
 </tbody> \
 </table> \
@@ -286,6 +306,8 @@ crossorigin=\"anonymous\"></script> \
 <script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js\" integrity=\"sha256-oSgtFCCmHWRPQ/JmR4OoZ3Xke1Pw4v50uh6pLcu+fIc=\" \
 crossorigin=\"anonymous\"></script> \
 <script src=\"https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js\" integrity=\"sha256-1fEPhSsRKlFKGfK3eO710tEweHh1fwokU5wFGDHO+vg=\" \
+crossorigin=\"anonymous\"></script> \
+<script src=\"https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js\" integrity=\"sha256-G7A4JrJjJlFqP0yamznwPjAApIKPkadeHfyIwiaa9e0=\" \
 crossorigin=\"anonymous\"></script> \
 <script src=\"app.js\"></script> \
 </body> \

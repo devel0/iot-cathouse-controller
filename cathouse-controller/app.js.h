@@ -70,6 +70,47 @@ else if (bytes >= g && bytes < t) return (bytes / g).toFixed(decimals) + ' Gb'; 
 else return (bytes / t).toFixed(decimals); \
 } \
  \
+function toggleCatInThere() { \
+if (confirm('sure to force toggling of cathouse in there?') != true) \
+return; \
+_toggleCatInThere(); \
+} \
+ \
+async function _toggleCatInThere() { \
+console.log(\"processing toggling\"); \
+showSpin(); \
+let finished = false; \
+let res = null; \
+while (!finished) { \
+try { \
+res = await $.ajax({ \
+url: baseurl + '/info', \
+type: 'GET' \
+}); \
+finished = true; \
+} catch (e) { \
+await sleep(1000); \
+} \
+} \
+ \
+let catIsInThere = res.catIsInThere ? false : true; \
+finished = false; \
+res = null; \
+while (!finished) { \
+try { \
+res = await $.ajax({ \
+url: baseurl + '/setcatinthere/' + (catIsInThere ? '1' : '0'), \
+type: 'GET' \
+}); \
+finished = true; \
+} catch (e) { \
+await sleep(1000); \
+} \
+} \
+hideSpin(); \
+ \
+} \
+ \
 async function reloadInfo() { \
 console.log(\"--> reloadInfo\"); \
 showSpin(); \
@@ -123,12 +164,99 @@ let runtime_hr = res.runtime_hr; \
  \
 $('.mean-power')[0].innerText = (Wh / runtime_hr).toFixed(0); \
 $('.free-ram')[0].innerText = human_readable_filesize(res.freeram); \
-$('.adc-weight')[0].innerText = res.adcWeightMean; \
 $('.cat-is-in-there')[0].innerText = res.catIsInThere ? 'yes' : 'no'; \
 if (res.catIsInThere) \
 $('.cat-is-in-there').addClass('port-on'); \
 else \
 $('.cat-is-in-there').removeClass('port-on'); \
+ \
+{ \
+var ctx = document.getElementById(\"myChart3\").getContext('2d'); \
+ \
+var dtnow = moment(); \
+let ary = res[\"adcWeightArray\"]; \
+let interval_sec = res[\"statIntervalSec\"]; \
+ \
+var i = 0; \
+var dss = []; { \
+dts = []; \
+let valcnt = ary.length; \
+$.each(ary, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+let meanw = _.reduce(ary, function (memo, num) { \
+return memo + num; \
+}, 0) / valcnt; \
+let meanwlatest = 0.0; { \
+let i = valcnt - 1; \
+let c = 0; \
+while (i >= 0 && c < 10) { \
+meanwlatest += ary[i]; \
+++c; \
+} \
+meanwlatest /= 10; \
+} \
+$('.adc-weight')[0].innerText = meanw.toFixed(0); \
+$('.adc-weight-latest')[0].innerText = meanwlatest.toFixed(0); \
+dtsmean = []; \
+dtsmean.push({ \
+t: moment(dtnow).subtract((valcnt - 1) * interval_sec, 'seconds'), \
+y: meanw \
+}); \
+dtsmean.push({ \
+t: moment(dtnow), \
+y: meanw \
+}); \
+ \
+dss.push({ \
+borderColor: '#00ff00', \
+fill: false, \
+label: 'mean', \
+data: dtsmean, \
+pointRadius: 0 \
+}, { \
+borderColor: '#00aa00', \
+fill: true, \
+label: 'adc Weight', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+ \
+var myChart = new Chart(ctx, { \
+type: 'line', \
+data: { \
+datasets: dss \
+}, \
+options: { \
+scales: { \
+xAxes: [{ \
+type: 'time' \
+/*, \
+time: { \
+displayFormats: { \
+'hour': 'HH:mm' \
+} \
+}, \
+position: 'bottom'*/ \
+}], \
+/*                    yAxes: [{ \
+ticks: { \
+min: 0, \
+max: 1 \
+} \
+}]*/ \
+} \
+} \
+}); \
+} \
 } \
  \
 async function reloadAllTemp() { \
@@ -350,8 +478,6 @@ $('#config-cooldownTimeMs-min')[0].value = res[\"cooldownTimeMs\"] / 1000.0 / 60
 $('#config-standbyPort')[0].value = res[\"standbyPort\"]; \
 $('#config-standbyDuration-min')[0].value = res[\"standbyDurationMs\"] / 1000.0 / 60.0; \
 $('#config-fullpowerDuration-min')[0].value = res[\"fullpowerDurationMs\"] / 1000.0 / 60.0; \
-$('#config-tambientVsExternGTESysOff')[0].value = res[\"tambientVsExternGTESysOff\"]; \
-$('#config-tambientVsExternLTESysOn')[0].value = res[\"tambientVsExternLTESysOn\"]; \
 $('#config-texternGTESysOff')[0].value = res[\"texternGTESysOff\"]; \
 $('#config-tbottomGTEFanOn')[0].value = res[\"tbottomGTEFanOn\"]; \
 } \
@@ -388,6 +514,11 @@ return new Promise(resolve => setTimeout(resolve, ms)); \
 } \
  \
 async function myfn() { \
+if (window.innerWidth < 800) { \
+$('#myChart2').prop(\"height\", 60); \
+$('#myChart3').prop(\"height\", 120); \
+} \
+ \
 autorefreshInProgress = true; \
  \
 hideSpin(); \
@@ -476,8 +607,6 @@ cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60
 standbyPort: parseInt($('#config-standbyPort')[0].value), \
 fullpowerDurationMs: parseFloat($('#config-fullpowerDuration-min')[0].value) * 1000 * 60, \
 standbyDurationMs: parseFloat($('#config-standbyDuration-min')[0].value) * 1000 * 60, \
-tambientVsExternGTESysOff: parseFloat($('#config-tambientVsExternGTESysOff')[0].value), \
-tambientVsExternLTESysOn: parseFloat($('#config-tambientVsExternLTESysOn')[0].value), \
 texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value), \
 tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value) \
 }; \
