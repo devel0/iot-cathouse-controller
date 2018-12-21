@@ -32,11 +32,11 @@ void EvalAdcWeight()
     if (adcWeightArrayFillCnt < adcWeightArraySize)
         ++adcWeightArrayFillCnt;
 
-    auto s = 0.0; // distance of current off from last event off
+    auto s = 0; // distance of current off from last event off
     if (adcWeightArrayOff >= adcWeightArrayOffLastEvent)
         s = adcWeightArrayOff - adcWeightArrayOffLastEvent;
     else
-        s = adcWeightArraySize - adcWeightArrayOffLastEvent + adcWeightArrayOff;
+        s = adcWeightArraySize - adcWeightArrayOffLastEvent + adcWeightArrayOff;    
     if (adcWeightArrayFillCnt > 20)
     {
         auto meanLast10Samples = 0.0;
@@ -60,21 +60,24 @@ void EvalAdcWeight()
         }
         meanFromLastEvent /= (s - 10);
 
-        if (meanFromLastEvent > meanLast10Samples)
+        if (s > 10)
         {
-            if (meanFromLastEvent - meanLast10Samples >= eeJsonConfig.adcWeightDeltaCat)
+            if (meanFromLastEvent > meanLast10Samples)
             {
-                catInThere = false;
-                adcWeightArrayOffLastEvent = adcWeightArrayOff;
+                if (meanFromLastEvent - meanLast10Samples >= eeJsonConfig.adcWeightDeltaCat)
+                {
+                    catInThere = false;
+                    adcWeightArrayOffLastEvent = adcWeightArrayOff;                    
+                }
             }
-        }
-        else
-        {
-            if (meanLast10Samples - meanFromLastEvent >= eeJsonConfig.adcWeightDeltaCat)
+            else
             {
-                catInThere = true;
-                adcWeightArrayOffLastEvent = adcWeightArrayOff;
+                if (meanLast10Samples - meanFromLastEvent >= eeJsonConfig.adcWeightDeltaCat)
+                {
+                    catInThere = true;
+                    adcWeightArrayOffLastEvent = adcWeightArrayOff;                    
+                }
             }
-        }
+        }        
     }
 }
