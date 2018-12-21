@@ -8,6 +8,11 @@
   * [set temperature sensor ids](#set-temperature-sensor-ids)
 - [debug](#debug)
 
+## features
+
+- complete cathouse project ( building walls, heating system, weight detect, wifi control )
+- wifi control automatic or manual through webapi ( [example](cathouse-analysis) )
+
 ## requirements
 
 - hardware
