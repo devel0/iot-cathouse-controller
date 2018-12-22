@@ -31,9 +31,9 @@ void EEJsonConfig::Save(Print &prn, bool forWebapi)
         .property("tbottomLimit", tbottomLimit)
         .property("twoodLimit", twoodLimit)
         .property("tambientLimit", tambientLimit)
-        .property("cooldownTimeMs", cooldownTimeMs)        
+        .property("cooldownTimeMs", cooldownTimeMs)
         .property("standbyDurationMs", standbyDurationMs)
-        .property("standbyPort", standbyPort)        
+        .property("standbyPort", standbyPort)
         .property("fullpowerDurationMs", fullpowerDurationMs)
         .property("texternGTESysOff", texternGTESysOff)
         .property("adcWeightDeltaCat", adcWeightDeltaCat)
@@ -192,36 +192,64 @@ void EEJsonConfigParseListener::value(String value)
     {
         if (strncmp(eeStaticConfig.tbottomId, value.c_str(), DS18B20_ID_STRLENMAX) != 0)
         {
-            strncpy(eeStaticConfig.tbottomId, value.c_str(), DS18B20_ID_STRLENMAX);
-            eeStaticConfig.tbottomId[DS18B20_ID_STRLENMAX] = 0;
-            eeStaticConfigDirty = true;
+            if (strncmp(eeStaticConfig.tbottomId, "\"", DS18B20_ID_STRLENMAX) == 0)
+            {
+                Serial.printf("skip invalid tbottomId [%s] string contains doublequotes\n", value.c_str());
+            }
+            else
+            {
+                strncpy(eeStaticConfig.tbottomId, value.c_str(), DS18B20_ID_STRLENMAX);
+                eeStaticConfig.tbottomId[DS18B20_ID_STRLENMAX] = 0;
+                eeStaticConfigDirty = true;
+            }
         }
     }
     else if (lastKey == "twoodId")
     {
         if (strncmp(eeStaticConfig.twoodId, value.c_str(), DS18B20_ID_STRLENMAX) != 0)
         {
-            strncpy(eeStaticConfig.twoodId, value.c_str(), DS18B20_ID_STRLENMAX);
-            eeStaticConfig.twoodId[DS18B20_ID_STRLENMAX] = 0;
-            eeStaticConfigDirty = true;
+            if (strncmp(eeStaticConfig.twoodId, "\"", DS18B20_ID_STRLENMAX) == 0)
+            {
+                Serial.printf("skip invalid twoodId [%s] string contains doublequotes\n", value.c_str());
+            }
+            else
+            {
+                strncpy(eeStaticConfig.twoodId, value.c_str(), DS18B20_ID_STRLENMAX);
+                eeStaticConfig.twoodId[DS18B20_ID_STRLENMAX] = 0;
+                eeStaticConfigDirty = true;
+            }
         }
     }
     else if (lastKey == "tambientId")
     {
         if (strncmp(eeStaticConfig.tambientId, value.c_str(), DS18B20_ID_STRLENMAX) != 0)
         {
-            strncpy(eeStaticConfig.tambientId, value.c_str(), DS18B20_ID_STRLENMAX);
-            eeStaticConfig.tambientId[DS18B20_ID_STRLENMAX] = 0;
-            eeStaticConfigDirty = true;
+            if (strncmp(eeStaticConfig.tambientId, "\"", DS18B20_ID_STRLENMAX) == 0)
+            {
+                Serial.printf("skip invalid tambientId [%s] string contains doublequotes\n", value.c_str());
+            }
+            else
+            {
+                strncpy(eeStaticConfig.tambientId, value.c_str(), DS18B20_ID_STRLENMAX);
+                eeStaticConfig.tambientId[DS18B20_ID_STRLENMAX] = 0;
+                eeStaticConfigDirty = true;
+            }
         }
     }
     else if (lastKey == "texternId")
     {
         if (strncmp(eeStaticConfig.texternId, value.c_str(), DS18B20_ID_STRLENMAX) != 0)
         {
-            strncpy(eeStaticConfig.texternId, value.c_str(), DS18B20_ID_STRLENMAX);
-            eeStaticConfig.texternId[DS18B20_ID_STRLENMAX] = 0;
-            eeStaticConfigDirty = true;
+            if (strncmp(eeStaticConfig.texternId, "\"", DS18B20_ID_STRLENMAX) == 0)
+            {
+                Serial.printf("skip invalid texternId [%s] string contains doublequotes\n", value.c_str());
+            }
+            else
+            {
+                strncpy(eeStaticConfig.texternId, value.c_str(), DS18B20_ID_STRLENMAX);
+                eeStaticConfig.texternId[DS18B20_ID_STRLENMAX] = 0;
+                eeStaticConfigDirty = true;
+            }
         }
     }
     else if (lastKey == "tbottomLimit")
@@ -231,11 +259,11 @@ void EEJsonConfigParseListener::value(String value)
     else if (lastKey == "tambientLimit")
         eeJsonConfig.tambientLimit = atof(value.c_str());
     else if (lastKey == "cooldownTimeMs")
-        eeJsonConfig.cooldownTimeMs = atol(value.c_str());    
+        eeJsonConfig.cooldownTimeMs = atol(value.c_str());
     else if (lastKey == "standbyDurationMs")
         eeJsonConfig.standbyDurationMs = atol(value.c_str());
     else if (lastKey == "standbyPort")
-        eeJsonConfig.standbyPort = atoi(value.c_str());    
+        eeJsonConfig.standbyPort = atoi(value.c_str());
     else if (lastKey == "fullpowerDurationMs")
         eeJsonConfig.fullpowerDurationMs = atol(value.c_str());
     else if (lastKey == "texternGTESysOff")
