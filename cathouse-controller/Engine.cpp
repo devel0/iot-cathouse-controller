@@ -207,6 +207,13 @@ void engineProcess()
                 {
                     digitalWrite(FAN_PIN, HIGH);
                     Serial.printf("engine> enable fan because tbottom can't detect due to unassigned temp device id in fullpower cycle\n");
+                    Serial.printf("engine>   tbottom_id = [%s]\n", eeStaticConfig.tbottomId);
+                    Serial.printf("engine>   available ids:\n");
+                    for (int i = 0; i < temperatureDeviceCount; ++i)
+                    {
+                        auto id = (char *)tempDevAddress[i];
+                        Serial.printf("engine>   [%s]\n", id);
+                    }
                 }
             }
 
