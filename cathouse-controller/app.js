@@ -242,7 +242,7 @@ async function reloadInfo() {
             });
 
             ++i;
-        };
+        }
 
         var myChart = new Chart(ctx, {
             type: 'line',
@@ -250,24 +250,11 @@ async function reloadInfo() {
                 datasets: dss
             },
             options: {
+                animation: false,
                 scales: {
                     xAxes: [{
-                        //display: false,
                         type: 'time'
-                        /*,
-                                                time: {
-                                                    displayFormats: {
-                                                        'hour': 'HH:mm'
-                                                    }
-                                                },
-                                                position: 'bottom'*/
-                    }],
-                    /*                    yAxes: [{
-                                            ticks: {
-                                                min: 0,
-                                                max: 1
-                                            }
-                                        }]*/
+                    }]
                 }
             }
         });
@@ -356,6 +343,7 @@ async function reloadCharts() {
                 datasets: dss
             },
             options: {
+                animation: false,
                 scales: {
                     xAxes: [{
                         type: 'time',
@@ -422,17 +410,10 @@ async function reloadCharts() {
                 datasets: dss
             },
             options: {
+                animation: false,
                 scales: {
-                    xAxes: [{
-                        //display: false,
+                    xAxes: [{                        
                         type: 'time'
-                        /*,
-                                                time: {
-                                                    displayFormats: {
-                                                        'hour': 'HH:mm'
-                                                    }
-                                                },
-                                                position: 'bottom'*/
                     }],
                     yAxes: [{
                         ticks: {
@@ -496,7 +477,7 @@ async function reloadConfig() {
     $('#config-cooldownTimeMs-min')[0].value = res["cooldownTimeMs"] / 1000.0 / 60.0;
     $('#config-standbyPort')[0].value = res["standbyPort"];
     $('#config-standbyDuration-min')[0].value = res["standbyDurationMs"] / 1000.0 / 60.0;
-    $('#config-fullpowerDuration-min')[0].value = res["fullpowerDurationMs"] / 1000.0 / 60.0;    
+    $('#config-fullpowerDuration-min')[0].value = res["fullpowerDurationMs"] / 1000.0 / 60.0;
     $('#config-texternGTESysOff')[0].value = res["texternGTESysOff"];
     $('#config-tbottomGTEFanOn')[0].value = res["tbottomGTEFanOn"];
 }
@@ -632,7 +613,7 @@ async function saveConfig() {
         cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60,
         standbyPort: parseInt($('#config-standbyPort')[0].value),
         fullpowerDurationMs: parseFloat($('#config-fullpowerDuration-min')[0].value) * 1000 * 60,
-        standbyDurationMs: parseFloat($('#config-standbyDuration-min')[0].value) * 1000 * 60,        
+        standbyDurationMs: parseFloat($('#config-standbyDuration-min')[0].value) * 1000 * 60,
         texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value),
         tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value)
     };
