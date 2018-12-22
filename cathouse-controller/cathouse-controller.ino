@@ -50,11 +50,17 @@ void setupPorts()
 
 void setup()
 {
-delay(3000);
-
-  Serial.println("Setup serial");
   Serial.begin(SERIAL_SPEED);
   //  Serial.swap(); // use D8(TX) - D7(RX)
+
+  Serial.printf("Initial delay...\n");
+  {
+    //long m = millis();
+    //while (timeDiff(m, millis()) < 5000) ;
+    delay(5000);
+  }  
+
+  Serial.printf("STARTUP\n");
 
   initEEStaticConfig();
 
