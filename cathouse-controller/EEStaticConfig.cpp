@@ -24,13 +24,25 @@ void stringSanityCheck()
     if (strchr(eeStaticConfig.wifiPwd, (char)'"') != NULL)
         eeStaticConfig.wifiPwd[0] = 0;
     if (strchr(eeStaticConfig.tbottomId, (char)'"') != NULL)
+    {
+        Serial.printf("sanitify tbottomId [%s]\n", eeStaticConfig.tbottomId);
         eeStaticConfig.tbottomId[0] = 0;
+    }
     if (strchr(eeStaticConfig.twoodId, (char)'"') != NULL)
+    {
+        Serial.printf("sanitify twoodId [%s]\n", eeStaticConfig.twoodId);
         eeStaticConfig.twoodId[0] = 0;
+    }
     if (strchr(eeStaticConfig.tambientId, (char)'"') != NULL)
+    {
+        Serial.printf("sanitify tambientId [%s]\n", eeStaticConfig.tambientId);
         eeStaticConfig.tambientId[0] = 0;
+    }
     if (strchr(eeStaticConfig.texternId, (char)'"') != NULL)
+    {
+        Serial.printf("sanitify texternId [%s]\n", eeStaticConfig.texternId);
         eeStaticConfig.texternId[0] = 0;
+    }
 }
 
 void initEEStaticConfig()
