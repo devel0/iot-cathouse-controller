@@ -9,7 +9,7 @@
 // https://github.com/squix78/json-streaming-parser
 #include "JsonListener.h"
 
-#define EE_JSON_CONFIG_OFFSET (FIRMWARE_VERSION_STRLENMAX + WIFI_SSID_STRLENMAX + WIFI_PWD_STRLENMAX)
+#define EE_JSON_CONFIG_OFFSET (sizeof(EEStaticConfig))
 
 //
 // Follow config can be written and readed from eeprom directly in json format through serialize/deserialize methods

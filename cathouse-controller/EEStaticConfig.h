@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#define EE_SIZE 4000
+#define EE_SIZE 4096
 
 #define FIRMWARE_VERSION_STRLENMAX 14
 #define WIFI_SSID_STRLENMAX 32
