@@ -26,13 +26,13 @@ void statsUpdate()
         return;
 
     {
-        
+
         EvalAdcWeight();
     }
 
     {
         freeram = freeMemorySum();
-        freeram_min = min(freeram, freeram_min);        
+        freeram_min = min(freeram, freeram_min);
     }
 
     {
@@ -40,7 +40,7 @@ void statsUpdate()
 
         for (int i = 0; i < 4; ++i)
         {
-            auto p = heatPortIndexToPin(i);
+            auto p = portToPin(i + 1);
             auto v = digitalRead(p);
             if (v == HIGH && p_was_active[i])
             {

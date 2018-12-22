@@ -1,7 +1,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define FIRMWARE_VER "cathouse-0.81"
+#define FIRMWARE_VER "cathouse-0.82"
 
 #include <Arduino.h>
 
@@ -24,8 +24,6 @@
 // measured system power / 4
 #define W_PORT 26.75
 
-int heatPortIndexToPin(int idx);
-
 #define UPDATE_STATS_INTERVAL_MS 2000
 #define UPDATE_TEMPERATURE_INTERVAL_MS 5000
 #define FREERAM_THRESHOLD_MIN_BYTES (10*1024)
@@ -45,5 +43,11 @@ int heatPortIndexToPin(int idx);
 #define FACTORY_ADC_WEIGHT_DELTA_CAT 18
 #define FACTORY_TBOTTOM_GTE_FAN_ON 20
 #define FACTORY_MANULA_MODE false
+#define FACTORY_FANLESS_MODE true
+#define FACTORY_PORT_DURATION_MS (7 * 60 * 1000)
+#define FACTORY_PORT_OVERLAP_DURATION_MS (2 * 60 * 1000)
+
+// port {1,2,3,4,5,6} to pin
+int portToPin(int pin);
 
 #endif

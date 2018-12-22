@@ -3,17 +3,9 @@
 #include "Config.h"
 #include "EEJsonConfig.h"
 #include "TempDev.h"
+#include "Engine.h"
 
 // catInThere managed by WeightDev EvalAdcWeight()
-
-enum CycleTypes
-{
-    none,
-    fullpower,
-    standby,
-    cooldown,
-    disabled
-};
 
 CycleTypes prevCycle = none;
 unsigned long prevCycleBegin = 0;
@@ -22,6 +14,12 @@ CycleTypes currentCycle = none;
 unsigned long currentCycleBegin = millis();
 
 unsigned long lastEngineProcessExec = millis();
+
+bool fanlessStarted = false;
+int fanlessCurrentPort = 1;
+unsigned long fanlessCurrentPortBegin = 0;
+int fanlessNextPort = 2;
+unsigned long fanlessNextPortBegin = 0;
 
 void setFullpowerPorts()
 {
@@ -94,6 +92,7 @@ void engineProcess()
                 }
             }
             break;
+            case fanless:
             case fullpower:
             case standby:
             {
@@ -139,43 +138,106 @@ void engineProcess()
         {
         case none:
         {
-            auto prevCycleExpired = true;
-
-            if (prevCycle == fullpower && timeDiff(prevCycleBegin, millis()) < eeJsonConfig.fullpowerDurationMs)
-                prevCycleExpired = false;
-
-            else if (prevCycle == standby && timeDiff(prevCycleBegin, millis()) < eeJsonConfig.standbyDurationMs)
-                prevCycleExpired = false;
-
-            if (prevCycleExpired)
+            if (eeJsonConfig.fanlessMode)
             {
-                currentCycle = fullpower;
+                fanlessCurrentPort = 1;
+                fanlessCurrentPortBegin = millis();
+
+                currentCycle = fanless;
                 currentCycleBegin = millis();
-
-                setFullpowerPorts();
-
-                Serial.printf("engine> back to fullpower from off cycle because prev cycle expired and cat is in there\n");
             }
             else
             {
-                currentCycle = prevCycle;
-                currentCycleBegin = prevCycleBegin;
+                auto prevCycleExpired = true;
 
-                switch (prevCycle)
+                if (prevCycle == fullpower && timeDiff(prevCycleBegin, millis()) < eeJsonConfig.fullpowerDurationMs)
+                    prevCycleExpired = false;
+
+                else if (prevCycle == standby && timeDiff(prevCycleBegin, millis()) < eeJsonConfig.standbyDurationMs)
+                    prevCycleExpired = false;
+
+                if (prevCycleExpired)
                 {
-                case fullpower:
-                {
+                    currentCycle = fullpower;
+                    currentCycleBegin = millis();
+
                     setFullpowerPorts();
-                    Serial.printf("engine> back to fullpower from off cycle because prev cycle still valid and cat is in there\n");
-                }
-                break;
 
-                case standby:
-                {
-                    setStandbyPorts();
-                    Serial.printf("engine> back to standby from off cycle because prev cycle still valid and cat is in there\n");
+                    Serial.printf("engine> back to fullpower from off cycle because prev cycle expired and cat is in there\n");
                 }
-                break;
+                else
+                {
+                    currentCycle = prevCycle;
+                    currentCycleBegin = prevCycleBegin;
+
+                    switch (prevCycle)
+                    {
+                    case fullpower:
+                    {
+                        setFullpowerPorts();
+                        Serial.printf("engine> back to fullpower from off cycle because prev cycle still valid and cat is in there\n");
+                    }
+                    break;
+
+                    case standby:
+                    {
+                        setStandbyPorts();
+                        Serial.printf("engine> back to standby from off cycle because prev cycle still valid and cat is in there\n");
+                    }
+                    break;
+                    }
+                }
+            }
+        }
+        break;
+        case fanless:
+        {
+            auto currentPortAge = timeDiff(fanlessCurrentPortBegin, millis());
+            if (!fanlessStarted)
+            {
+                fanlessCurrentPort = 1;
+                fanlessCurrentPortBegin = millis();
+                digitalWrite(portToPin(fanlessCurrentPort), HIGH);
+                fanlessStarted = true;
+                Serial.printf("engine> initiate fanless port=%d\n", fanlessCurrentPort);
+            }
+            // if current port expired
+            else if (currentPortAge > eeJsonConfig.portDurationMs)
+            {
+                // if next port already started make it current
+                if (fanlessNextPortBegin > fanlessCurrentPortBegin)
+                {
+                    Serial.printf("engine> switch from port=%d to %d\n", fanlessCurrentPort, fanlessNextPort);
+
+                    digitalWrite(portToPin(fanlessCurrentPort), LOW);
+                    fanlessCurrentPort = fanlessNextPort;
+                    fanlessCurrentPortBegin = fanlessNextPortBegin;
+                    digitalWrite(portToPin(fanlessCurrentPort), HIGH);                    
+                }
+                else // elsewhere start it
+                {                                        
+                    digitalWrite(portToPin(fanlessCurrentPort), LOW);
+                    ++fanlessCurrentPort;                    
+                    if (fanlessCurrentPort > 4)
+                        fanlessCurrentPort = 1;
+                    fanlessCurrentPortBegin = millis();
+                    digitalWrite(portToPin(fanlessCurrentPort), HIGH);
+
+                    Serial.printf("engine> current port is now %d\n", fanlessCurrentPort);
+                }
+            }
+            // elsewhere checks for nextport start
+            else if (eeJsonConfig.portOverlapDurationMs > 0 && fanlessNextPortBegin <= fanlessCurrentPortBegin)
+            {
+                if (timeDiff(fanlessCurrentPortBegin, millis()) > eeJsonConfig.portDurationMs - eeJsonConfig.portOverlapDurationMs)
+                {                    
+                    fanlessNextPort = fanlessCurrentPort + 1;
+                    if (fanlessNextPort > 4)
+                        fanlessNextPort = 1;
+                    fanlessNextPortBegin = millis();
+                    digitalWrite(portToPin(fanlessNextPort), HIGH);
+
+                    Serial.printf("engine> starts nextport %d\n", fanlessNextPort);
                 }
             }
         }
@@ -195,7 +257,7 @@ void engineProcess()
                     digitalWrite(FAN_PIN, HIGH);
                     Serial.printf("engine> enable fan because tbottom %f>=%f in fullpower cycle\n", tbottom, eeJsonConfig.tbottomGTEFanOn);
                 }
-                else if (pfan == HIGH)
+                else if (tbottom < eeJsonConfig.tbottomGTEFanOn && pfan == HIGH)
                 {
                     digitalWrite(FAN_PIN, LOW);
                     Serial.printf("engine> disable fan because tbottom %f<%f in fullpower cycle\n", tbottom, eeJsonConfig.tbottomGTEFanOn);
@@ -211,7 +273,7 @@ void engineProcess()
                     Serial.printf("engine>   available ids:\n");
                     for (int i = 0; i < temperatureDeviceCount; ++i)
                     {
-                        auto id = (char *)tempDevAddress[i];
+                        auto id = tempDevHexAddress[i];
                         Serial.printf("engine>   [%s]\n", id);
                     }
                 }

@@ -26,9 +26,17 @@ text-align: right; \
 font-weight: bold; \
 color:blueviolet; \
 } \
+.cfg-lbl-fl { \
+text-align: right; \
+font-weight: bold; \
+color:green; \
+} \
 .cfg-notes { \
 color: gray; \
 font-style: italic; \
+} \
+.fstrong { \
+font-weight: bold; \
 } \
 </style> \
 </head> \
@@ -39,31 +47,32 @@ integrity=\"sha256-eSi1q2PG6J7g7ib17yAaWMcrr5GrtohYChqibrV7PBE=\" crossorigin=\"
 crossorigin=\"anonymous\"> \
  \
 <body> \
+<!-- HOME --> \
 <div class=\"container-fluid\"> \
-<div class=\"row\"> \
+<div class=\"row mt-3\"> \
 <div class=\"col-auto\"> \
+<h1>Cathouse controller</h1> \
+</div> \
+<div class=\"col\"> \
 <div class=\"btn-group\" role=\"group\"> \
-<button class=\"btn btn-link\" onclick='showHome()'>Home</button> \
-<button class=\"btn btn-link\" onclick='showConfig()'>Config</button> \
+<button class=\"btn btn-link\" onclick='showHome()'><span class='menu-home fstrong j-menu'>Home</span></button> \
+<button class=\"btn btn-link\" onclick='showConfig()'><span class='menu-config j-menu'>Config</span></button> \
 <button class=\"btn btn-link\" onclick=\"window.open('https://github.com/devel0/iot-cathouse-controller')\">About</button> \
 <div class=\"col\"><i class=\"fas fa-spin fa-spinner j-spin collapse\"></i></div> \
 </div> \
 </div> \
 </div> \
-</div> \
  \
-<!-- HOME --> \
-<div class=\"container-fluid j-containers j-home\"> \
-<div class=\"row mt-3\"> \
-<div class=\"col\"> \
-<h1>Cathouse controller</h1> \
-</div> \
-</div> \
-<div class=\"row\"> \
+<div class=\"row j-containers j-home\"> \
 <div class=\"col col-sm-12 col-lg-7\"> \
 <h2>Charts</h2> \
-<canvas id=\"myChart2\" height=\"30\"></canvas> \
-<canvas id=\"myChart\" height=\"120\"></canvas> \
+<div class=\"catinChartDiv\" style=\"position: relative\"> \
+<canvas id=\"catinChart\"></canvas> \
+</div> \
+<div class=\"tempChartDiv\" style=\"position: relative\"> \
+<canvas id=\"tempChart\"></canvas> \
+</div> \
+ \
 </div> \
 <div class=\"col col-sm-12 col-lg-5\"> \
 <div class=\"row\"> \
@@ -96,37 +105,42 @@ crossorigin=\"anonymous\"> \
 <h2>Stats</h2> \
 <div class=\"row\"> \
 <div class=\"col-12\"> \
-<table> \
+<div class=\"table table-striped table-sm\"> \
+<table class=\"table\"> \
 <tr> \
-<td class=\"text-right text-nowrap\">Power (mean)</td> \
-<td><span class='h3 mean-power ml-3'></span><span class=\"h3\">W</span></td> \
+<td class=\"text-right text-nowrap align-middle\">Power (mean)</td> \
+<td class=\"align-middle\"><span class='h3 mean-power ml-3'></span><span \
+class=\"h3\">W</span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right text-nowrap\">Freeram</td> \
-<td><span class='free-ram ml-3'></span></td> \
+<td class=\"text-right text-nowrap align-middle\">Freeram</td> \
+<td class=\"align-middle\"><span class='free-ram ml-3'></span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right text-nowrap\">ADC weight (mean)</td> \
-<td><span class='adc-weight ml-3'></span></td> \
+<td class=\"text-right text-nowrap align-middle\">ADC weight (mean)</td> \
+<td class=\"align-middle\"><span class='adc-weight ml-3'></span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right text-nowrap\">ADC weight latest 10 samples (mean)</td> \
-<td><span class='adc-weight-latest ml-3'></span></td> \
+<td class=\"text-right text-nowrap align-middle\">ADC weight latest 20 \
+samples (mean)</td> \
+<td class=\"align-middle\"><span class='adc-weight-latest ml-3'></span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right text-nowrap\">Cat is in there</td> \
-<td> \
+<td class=\"text-right text-nowrap align-middle\">Cat is in there</td> \
+<td class=\"align-middle\"> \
 <button class=\"btn btn-link\" onclick='toggleCatInThere()'><span class='cat-is-in-there ml-3'></span></button> \
 </td> \
 </tr> \
 </table> \
 </div> \
+ \
 </div> \
 </div> \
-<div class=\"col-auto\"> \
+</div> \
+<div class=\"col\"> \
 <h2>Tabular</h2> \
 <div class=\"table-container\"> \
-<div class=\"table table-striped\"> \
+<div class=\"table table-striped table-sm\"> \
 <table class=\"table\"> \
 <thead> \
 <tr> \
@@ -145,18 +159,19 @@ crossorigin=\"anonymous\"> \
 <div class=\"row\"> \
 <div class=\"col-12\"> \
 <h3>ADC Weight</h3> \
-<canvas id=\"myChart3\" height=\"80\"></canvas> \
+<div class=\"weightChartDiv\" style=\"position: relative\"> \
+<canvas id=\"weightChart\"></canvas> \
 </div> \
 </div> \
 </div> \
 </div> \
 </div> \
  \
-<!-- CONFIG --> \
-<div class=\"container j-containers j-config collapse\"> \
-<div class=\"row mt-3\"> \
+<div class=\"row j-containers j-config collapse\"> \
+<div class=\"col\"> \
+<div class=\"row\"> \
 <div class=\"col-auto\"> \
-<h1>Config</h1> \
+<h2>Config</h2> \
 </div> \
 </div> \
 <div class=\"row\"> \
@@ -217,6 +232,26 @@ ingress/egress of the cat</td> \
 </tr> \
  \
 <tr> \
+<td class='cfg-lbl-fl align-middle'>Fanless mode</td> \
+<td><input type='checkbox' class='form-control' id='config-fanlessMode'></input></td> \
+<td></td> \
+<td class='cfg-notes'>if true it will cycle through all ports using given fanless \
+ports intervals</td> \
+</tr> \
+<tr> \
+<td class='cfg-lbl-fl align-middle'>Port duration</td> \
+<td><input type='number' step='0.01' class='form-control' id='config-portDurationMs-min'></input></td> \
+<td class='align-middle'>min</td> \
+<td class='cfg-notes'>duration of port on before to switch to next</td> \
+</tr> \
+<tr> \
+<td class='cfg-lbl-fl align-middle'>Port overlap duration</td> \
+<td><input type='number' step='0.01' class='form-control' id='config-portOverlapDurationMs-min'></input></td> \
+<td class='align-middle'>min</td> \
+<td class='cfg-notes'>overlap duration between switching ports</td> \
+</tr> \
+ \
+<tr> \
 <td class='cfg-lbl-hot align-middle'>Standby duration</td> \
 <td><input type='number' step='0.01' class='form-control' id='config-standbyDuration-min'></input></td> \
 <td class='align-middle'>min</td> \
@@ -259,7 +294,8 @@ for Cooldown time</td> \
 <td class='cfg-lbl-cool align-middle'>Wood temperature limit</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-twoodLimit'></input></td> \
 <td class='align-middle'>C</td> \
-<td class='cfg-notes'>if bottom temp >= wood temperature limit heat ports gets disabled \
+<td class='cfg-notes'>if bottom temp >= wood temperature limit heat ports gets \
+disabled \
 for \
 Cooldown time</td> \
 </tr> \
@@ -282,7 +318,8 @@ state</td> \
 <td class='cfg-lbl align-middle'>Manual mode</td> \
 <td><input type='checkbox' class='form-control' id='config-manualMode'></input></td> \
 <td></td> \
-<td class='cfg-notes'>if true ports will not changed automatically by the mcu but can \
+<td class='cfg-notes'>if true ports will not changed automatically by the mcu but \
+can \
 managed through \
 webapi</td> \
 </tr> \
@@ -293,6 +330,8 @@ webapi</td> \
 <div class=\"row mt-3\"> \
 <div class=\"col-auto\"> \
 <button class=\"btn btn-primary\" onclick='saveConfig()'>Save config</button> \
+</div> \
+</div> \
 </div> \
 </div> \
 </div> \

@@ -240,11 +240,11 @@ async function reloadInfo() {
             let meanwlatest = 0.0; {
                 let i = valcnt - 1;
                 let c = 0;
-                while (i >= 0 && c < 10) {
+                while (i >= 0 && c < 20) {
                     meanwlatest += ary[i];
                     ++c;
                 }
-                meanwlatest /= 10;
+                meanwlatest /= 20;
             }
             $('.adc-weight')[0].innerText = meanw.toFixed(0);
             $('.adc-weight-latest')[0].innerText = meanwlatest.toFixed(0);
@@ -440,7 +440,7 @@ async function reloadCharts() {
             type: 'line',
             data: {
                 datasets: dss
-            },            
+            },
             options: {
                 maintainAspectRatio: false,
                 animation: false,
@@ -513,6 +513,9 @@ async function reloadConfig() {
     $('#config-fullpowerDuration-min')[0].value = res["fullpowerDurationMs"] / 1000.0 / 60.0;
     $('#config-texternGTESysOff')[0].value = res["texternGTESysOff"];
     $('#config-tbottomGTEFanOn')[0].value = res["tbottomGTEFanOn"];
+    $('#config-fanlessMode').prop('checked', res["fanlessMode"]);
+    $('#config-portDurationMs-min')[0].value = res["portDurationMs"] / 1000.0 / 60.0;
+    $('#config-portOverlapDurationMs-min')[0].value = res["portOverlapDurationMs"] / 1000.0 / 60.0;
 }
 
 setInterval(autorefresh, 1000);
@@ -546,8 +549,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function manageResize() {    
-}
+function manageResize() {}
 
 async function myfn() {
 
@@ -654,7 +656,9 @@ async function saveConfig() {
         fullpowerDurationMs: parseFloat($('#config-fullpowerDuration-min')[0].value) * 1000 * 60,
         standbyDurationMs: parseFloat($('#config-standbyDuration-min')[0].value) * 1000 * 60,
         texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value),
-        tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value)
+        tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value),
+        portDurationMs: parseFloat($('#config-portDurationMs-min')[0].value) * 1000 * 60,
+        portOverlapDurationMs: parseFloat($('#config-portOverlapDurationMs-min')[0].value) * 1000 * 60
     };
 
     while (!finished) {

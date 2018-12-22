@@ -22,11 +22,15 @@ $('.j-spin').addClass(\"collapse\"); \
 function showHome() { \
 $('.j-containers').addClass('collapse'); \
 $('.j-home').removeClass('collapse'); \
+$('.j-menu').removeClass('fstrong'); \
+$('.menu-home').addClass('fstrong'); \
 } \
  \
 function showConfig() { \
 $('.j-containers').addClass('collapse'); \
 $('.j-config').removeClass('collapse'); \
+$('.j-menu').removeClass('fstrong'); \
+$('.menu-config').addClass('fstrong'); \
 } \
  \
 var history_interval_sec = 10; \
@@ -78,7 +82,6 @@ _toggleCatInThere(); \
 } \
  \
 async function _toggleCatInThere() { \
-console.log(\"processing toggling\"); \
 showSpin(); \
 let finished = false; \
 let res = null; \
@@ -131,11 +134,12 @@ await sleep(1000); \
 } \
 } \
 hideSpin(); \
+ \
+await reloadInfo(); \
 } \
 } \
  \
 async function reloadInfo() { \
-console.log(\"--> reloadInfo\"); \
 showSpin(); \
 let finished = false; \
 let res = null; \
@@ -196,7 +200,7 @@ else \
 $('.cat-is-in-there').removeClass('port-on'); \
  \
 { \
-var ctx = document.getElementById(\"myChart3\").getContext('2d'); \
+var ctx = document.getElementById(\"weightChart\").getContext('2d'); \
  \
 var dtnow = moment(); \
 let ary = res[\"adcWeightArray\"]; \
@@ -220,11 +224,11 @@ return memo + num; \
 let meanwlatest = 0.0; { \
 let i = valcnt - 1; \
 let c = 0; \
-while (i >= 0 && c < 10) { \
+while (i >= 0 && c < 20) { \
 meanwlatest += ary[i]; \
 ++c; \
 } \
-meanwlatest /= 10; \
+meanwlatest /= 20; \
 } \
 $('.adc-weight')[0].innerText = meanw.toFixed(0); \
 $('.adc-weight-latest')[0].innerText = meanwlatest.toFixed(0); \
@@ -261,6 +265,7 @@ data: { \
 datasets: dss \
 }, \
 options: { \
+maintainAspectRatio: false, \
 animation: false, \
 scales: { \
 xAxes: [{ \
@@ -273,7 +278,6 @@ type: 'time' \
 } \
  \
 async function reloadAllTemp() { \
-console.log(\"--> reloadAllTemp\"); \
 $('.tempdev').each(async function (idx) { \
 let v = this.innerText; \
 await reloadTemp(v); \
@@ -281,7 +285,6 @@ await reloadTemp(v); \
 } \
  \
 async function reloadCharts() { \
-console.log(\"--> reloadCharts\"); \
 { \
 let finished = false; \
 let res = null; \
@@ -298,7 +301,7 @@ await sleep(1000); \
 } \
  \
 var colors = ['orange', 'yellow', 'green', 'blue', 'violet', 'black', 'red']; \
-var ctx = document.getElementById(\"myChart\").getContext('2d'); \
+var ctx = document.getElementById(\"tempChart\").getContext('2d'); \
  \
 var dtnow = moment(); \
  \
@@ -384,7 +387,7 @@ await sleep(1000); \
 } \
 } \
  \
-var ctx = document.getElementById(\"myChart2\").getContext('2d'); \
+var ctx = document.getElementById(\"catinChart\").getContext('2d'); \
  \
 var dtnow = moment(); \
  \
@@ -418,6 +421,7 @@ data: { \
 datasets: dss \
 }, \
 options: { \
+maintainAspectRatio: false, \
 animation: false, \
 scales: { \
 xAxes: [{ \
@@ -488,6 +492,9 @@ $('#config-standbyDuration-min')[0].value = res[\"standbyDurationMs\"] / 1000.0 
 $('#config-fullpowerDuration-min')[0].value = res[\"fullpowerDurationMs\"] / 1000.0 / 60.0; \
 $('#config-texternGTESysOff')[0].value = res[\"texternGTESysOff\"]; \
 $('#config-tbottomGTEFanOn')[0].value = res[\"tbottomGTEFanOn\"]; \
+$('#config-fanlessMode').prop('checked', res[\"fanlessMode\"]); \
+$('#config-portDurationMs-min')[0].value = res[\"portDurationMs\"] / 1000.0 / 60.0; \
+$('#config-portOverlapDurationMs-min')[0].value = res[\"portOverlapDurationMs\"] / 1000.0 / 60.0; \
 } \
  \
 setInterval(autorefresh, 1000); \
@@ -521,22 +528,13 @@ function sleep(ms) { \
 return new Promise(resolve => setTimeout(resolve, ms)); \
 } \
  \
-function manageResize() { \
-if (window.innerWidth < 1400) { \
-$('#myChart2').prop(\"height\", 60); \
-$('#myChart3').prop(\"height\", 120); \
-} else { \
-$('#myChart2').prop(\"height\", 30); \
-$('#myChart3').prop(\"height\", 80); \
-} \
-} \
+function manageResize() {} \
  \
 async function myfn() { \
-$(document).ready(function () { \
+ \
 manageResize(); \
 $(window).resize(function () { \
 manageResize(); \
-}); \
 }); \
  \
 autorefreshInProgress = true; \
@@ -606,7 +604,9 @@ $('#tbody-temp')[0].innerHTML = h; \
 autorefreshInProgress = false; \
 } \
  \
+$(document).ready(function () { \
 myfn(); \
+}); \
  \
 async function saveConfig() { \
 showSpin(); \
@@ -628,7 +628,9 @@ standbyPort: parseInt($('#config-standbyPort')[0].value), \
 fullpowerDurationMs: parseFloat($('#config-fullpowerDuration-min')[0].value) * 1000 * 60, \
 standbyDurationMs: parseFloat($('#config-standbyDuration-min')[0].value) * 1000 * 60, \
 texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value), \
-tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value) \
+tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value), \
+portDurationMs: parseFloat($('#config-portDurationMs-min')[0].value) * 1000 * 60, \
+portOverlapDurationMs: parseFloat($('#config-portOverlapDurationMs-min')[0].value) * 1000 * 60 \
 }; \
  \
 while (!finished) { \

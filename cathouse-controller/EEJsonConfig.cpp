@@ -38,9 +38,12 @@ void EEJsonConfig::Save(Print &prn, bool forWebapi)
         .property("texternGTESysOff", texternGTESysOff)
         .property("adcWeightDeltaCat", adcWeightDeltaCat)
         .property("manualMode", manualMode)
+        .property("fanlessMode", fanlessMode)
+        .property("portDurationMs", portDurationMs)
+        .property("portOverlapDurationMs", portOverlapDurationMs)
         .property("tbottomGTEFanOn", tbottomGTEFanOn);
 
-    if (forWebapi)
+    if (forWebapi) // saveconfig webapi includes view of these variabiles coming from eeStaticConfig
     {
         json.property("firmwareVersion", FIRMWARE_VER)
             .property("wifiSSID", eeStaticConfig.wifiSSID)
@@ -111,6 +114,9 @@ void EEJsonConfig::Clear()
     adcWeightDeltaCat = FACTORY_ADC_WEIGHT_DELTA_CAT;
     tbottomGTEFanOn = FACTORY_TBOTTOM_GTE_FAN_ON;
     manualMode = FACTORY_MANULA_MODE;
+    fanlessMode = FACTORY_FANLESS_MODE;
+    portDurationMs = FACTORY_PORT_DURATION_MS;
+    portOverlapDurationMs = FACTORY_PORT_OVERLAP_DURATION_MS;
 }
 
 //-----------------------------------------
@@ -274,6 +280,12 @@ void EEJsonConfigParseListener::value(String value)
         eeJsonConfig.tbottomGTEFanOn = atof(value.c_str());
     else if (lastKey == "manualMode")
         eeJsonConfig.manualMode = (value == "true") ? true : false;
+    else if (lastKey == "fanlessMode")
+        eeJsonConfig.fanlessMode = (value == "true") ? true : false;
+    else if (lastKey == "portDurationMs")
+        eeJsonConfig.portDurationMs = atol(value.c_str());
+    else if (lastKey == "portOverlapDurationMs")
+        eeJsonConfig.portOverlapDurationMs = atol(value.c_str());
 
     //Serial.println("value: " + value);
 }

@@ -1,22 +1,28 @@
 #include "Config.h"
 
-int heatPortIndexToPin(int idx)
+int portToPin(int pin)
 {
-    switch (idx)
+    switch (pin)
     {
-    case 0:
+    case 1:
         return MOSFET_P1;
         break;
-    case 1:
+    case 2:
         return MOSFET_P2;
         break;
-    case 2:
+    case 3:
         return MOSFET_P3;
         break;
-    case 3:
+    case 4:
         return MOSFET_P4;
+        break;
+    case 5:
+        return LED_PIN;
+        break;
+    case 6:
+        return FAN_PIN;
         break;
     }
 
-    return MOSFET_P1;
+    return LED_PIN;
 }

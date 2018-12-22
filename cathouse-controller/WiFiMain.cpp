@@ -7,6 +7,7 @@
 #include "TempDev.h"
 #include "Stats.h"
 #include "WeightDev.h"
+#include "Engine.h"
 
 #include <ArduinoJson.h>
 
@@ -231,7 +232,7 @@ bool manageWifi()
             for (int i = 0; i < 4; ++i)
             {
               client.printf(", \"p%d\": ", i + 1);
-              auto port = heatPortIndexToPin(i);
+              auto port = portToPin(i + 1);
               if (digitalRead(port) == HIGH)
                 client.print("true");
               else
@@ -427,7 +428,12 @@ bool manageWifi()
             }
             Serial.printf("saving config [%s]\n", s.c_str());
 
+            auto wasFanlessMode = eeJsonConfig.fanlessMode;
             eeJsonConfig.Load(s.c_str());
+            if (wasFanlessMode && !eeJsonConfig.fanlessMode)
+            {
+              currentCycle = none; // reset current cycle
+            }
             eeJsonConfig.SaveToEEProm();
             if (eeStaticConfigDirty)
             {

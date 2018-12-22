@@ -20,6 +20,9 @@ public:
   // if true ports will not changed automatically by the mcu but can managed through webapi
   bool manualMode;
 
+  // if true it will cycle through all ports using given fanless ports intervals
+  bool fanlessMode;
+
   // if bottom temp >= tbottomLimit heat ports gets disabled for cooldownTimeMs
   double tbottomLimit;
 
@@ -29,17 +32,23 @@ public:
   // if ambient temp >= tambientLimit heat ports gets disabled for cooldownTimeMs
   double tambientLimit;
 
-  // duration of cooldown if cooldown condition occurs (see tbottomLimit, twoodLimit, tambientLimit)
+  // (fanmode) duration of cooldown if cooldown condition occurs (see tbottomLimit, twoodLimit, tambientLimit)
   unsigned long cooldownTimeMs;
 
-  // duration of standby cycle
+  // (fanmode) duration of standby cycle
   unsigned long standbyDurationMs;
 
-  // port to maintain enabled during standby (1-4 or 0 for none)
+  // (fanmode) port to maintain enabled during standby (1-4 or 0 for none)
   int standbyPort;  
 
-  // duration of fullpower cycle
+  // (fanmode) duration of fullpower cycle
   unsigned long fullpowerDurationMs;
+
+  // (fanless) duration of port on before to switch to next
+  unsigned long portDurationMs;
+
+  // (fanless) overlap duration between switching ports
+  unsigned long portOverlapDurationMs;
 
   // if textern >= texternGTESysOff system enter disable state
   double texternGTESysOff;
@@ -48,7 +57,7 @@ public:
   int adcWeightDeltaCat;
 
   // when in fullpower mode fan activate if tbottom >= T
-  double tbottomGTEFanOn;
+  double tbottomGTEFanOn;  
 
   // serialize this config in json format using overridable Printer write method
   void Save(Print &prn, bool forWebapi = false);
