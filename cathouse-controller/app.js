@@ -29,11 +29,15 @@ function hideSpin() {
 function showHome() {
     $('.j-containers').addClass('collapse');
     $('.j-home').removeClass('collapse');
+    $('.j-menu').removeClass('fstrong');
+    $('.menu-home').addClass('fstrong');
 }
 
 function showConfig() {
     $('.j-containers').addClass('collapse');
     $('.j-config').removeClass('collapse');
+    $('.j-menu').removeClass('fstrong');
+    $('.menu-config').addClass('fstrong');
 }
 
 // updated from /info api
@@ -88,7 +92,7 @@ function toggleCatInThere() {
 }
 
 async function _toggleCatInThere() {
-    console.log("processing toggling");
+    //console.log("processing toggling");
     showSpin();
     let finished = false;
     let res = null;
@@ -142,11 +146,13 @@ async function togglePort(p) {
             }
         }
         hideSpin();
+
+        await reloadInfo();
     }
 }
 
 async function reloadInfo() {
-    console.log("--> reloadInfo");
+    //console.log("--> reloadInfo");
     showSpin();
     let finished = false;
     let res = null;
@@ -288,7 +294,7 @@ async function reloadInfo() {
 }
 
 async function reloadAllTemp() {
-    console.log("--> reloadAllTemp");
+    //console.log("--> reloadAllTemp");
     $('.tempdev').each(async function (idx) {
         let v = this.innerText;
         await reloadTemp(v);
@@ -296,7 +302,7 @@ async function reloadAllTemp() {
 }
 
 async function reloadCharts() {
-    console.log("--> reloadCharts");
+    //console.log("--> reloadCharts");
     // temperature charts
     {
         let finished = false;
