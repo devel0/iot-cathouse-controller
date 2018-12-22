@@ -91,7 +91,7 @@ void readTemperatures()
     tbottom_assigned = twood_assigned = tambient_assigned = textern_assigned = false;
     for (int i = 0; i < temperatureDeviceCount; ++i)
     {
-        auto id = (char *)tempDevAddress[i];
+        auto id = tempDevHexAddress[i];
         auto temp = DS18B20.getTempC(tempDevAddress[i]);        
 
         if (strncmp(id, eeStaticConfig.tbottomId, DS18B20_ID_STRLENMAX) == 0)
