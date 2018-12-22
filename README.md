@@ -8,6 +8,8 @@
   * [set temperature sensor ids](#set-temperature-sensor-ids)
 - [debug](#debug)
 
+**this is a beta release**
+
 ## features
 
 - complete cathouse project ( building walls, heating system, weight detect, wifi control )
