@@ -70,22 +70,22 @@
                         <h2>Ports</h2>
                         <div class="row">
                             <div class="col-auto">
-                                <div class="port-p1">P1</div>
+                                <button class="btn btn-link" onclick='togglePort(1)'><span class='port-p1'>P1</span></button>
                             </div>
                             <div class="col-auto">
-                                <div class="port-p2">P2</div>
+                                <button class="btn btn-link" onclick='togglePort(2)'><span class='port-p2'>P2</span></button>
                             </div>
                             <div class="col-auto">
-                                <div class="port-p3">P3</div>
+                                <button class="btn btn-link" onclick='togglePort(3)'><span class='port-p3'>P3</span></button>
                             </div>
                             <div class="col-auto">
-                                <div class="port-p4">P4</div>
+                                <button class="btn btn-link" onclick='togglePort(4)'><span class='port-p4'>P4</span></button>
                             </div>
                             <div class="col-auto">
-                                <div class="port-led">LED</div>
+                                <button class="btn btn-link" onclick='togglePort(5)'><span class='port-led'>LED</span></button>
                             </div>
                             <div class="col-auto">
-                                <div class="port-fan">FAN</div>
+                                <button class="btn btn-link" onclick='togglePort(6)'><span class='port-fan'>FAN</span></button>
                             </div>
                         </div>
                     </div>
@@ -97,23 +97,23 @@
                             <div class="col-12">
                                 <table>
                                     <tr>
-                                        <td class="text-right">Power (mean)</td>
+                                        <td class="text-right text-nowrap">Power (mean)</td>
                                         <td><span class='h3 mean-power ml-3'></span><span class="h3">W</span></td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Freeram</td>
+                                        <td class="text-right text-nowrap">Freeram</td>
                                         <td><span class='free-ram ml-3'></span></td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">ADC weight (mean)</td>
+                                        <td class="text-right text-nowrap">ADC weight (mean)</td>
                                         <td><span class='adc-weight ml-3'></span></td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">ADC weight latest 10 samples (mean)</td>
+                                        <td class="text-right text-nowrap">ADC weight latest 10 samples (mean)</td>
                                         <td><span class='adc-weight-latest ml-3'></span></td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Cat is in there</td>
+                                        <td class="text-right text-nowrap">Cat is in there</td>
                                         <td>
                                             <button class="btn btn-link" onclick='toggleCatInThere()'><span class='cat-is-in-there ml-3'></span></button>
                                         </td>
@@ -220,7 +220,7 @@
                             <td><input type='number' step='0.01' class='form-control' id='config-standbyDuration-min'></input></td>
                             <td class='align-middle'>min</td>
                             <td class='cfg-notes'>duration of standby cycle</td>
-                        </tr>                        
+                        </tr>
                         <tr>
                             <td class='cfg-lbl-hot align-middle'>Standby port</td>
                             <td><input type='number' step='1' min="0" max="4" class='form-control' id='config-standbyPort'></input></td>
@@ -233,7 +233,7 @@
                             <td><input type='number' step='0.01' class='form-control' id='config-fullpowerDuration-min'></input></td>
                             <td class='align-middle'>min</td>
                             <td class='cfg-notes'>duration of fullpower cycle</td>
-                        </tr>                        
+                        </tr>
                         <tr>
                             <td class='cfg-lbl-hot align-middle'>TBottom >= T fan on</td>
                             <td><input type='number' step='0.1' class='form-control' id='config-tbottomGTEFanOn'></input></td>

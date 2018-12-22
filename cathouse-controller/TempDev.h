@@ -9,6 +9,7 @@
 
 extern int temperatureDeviceCount;
 #define TEMPERATURE_ADDRESS_BYTES 8
+extern DeviceAddress *tempDevAddress; // DeviceAddress defined as uint8_t[8]
 extern char **tempDevHexAddress;
 extern float *temperatures;
 extern float **temperatureHistory;

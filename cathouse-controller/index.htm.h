@@ -71,22 +71,22 @@ crossorigin=\"anonymous\"> \
 <h2>Ports</h2> \
 <div class=\"row\"> \
 <div class=\"col-auto\"> \
-<div class=\"port-p1\">P1</div> \
+<button class=\"btn btn-link port-p1\" onclick='togglePort(1)'>P1</button> \
 </div> \
 <div class=\"col-auto\"> \
-<div class=\"port-p2\">P2</div> \
+<button class=\"btn btn-link port-p2\" onclick='togglePort(2)'>P2</button> \
 </div> \
 <div class=\"col-auto\"> \
-<div class=\"port-p3\">P3</div> \
+<button class=\"btn btn-link port-p3\" onclick='togglePort(3)'>P3</button> \
 </div> \
 <div class=\"col-auto\"> \
-<div class=\"port-p4\">P4</div> \
+<button class=\"btn btn-link port-p4\" onclick='togglePort(4)'>P4</button> \
 </div> \
 <div class=\"col-auto\"> \
-<div class=\"port-led\">LED</div> \
+<button class=\"btn btn-link port-led\" onclick='togglePort(5)'>LED</button> \
 </div> \
 <div class=\"col-auto\"> \
-<div class=\"port-fan\">FAN</div> \
+<button class=\"btn btn-link port-fan\" onclick='togglePort(6)'>FAN</button> \
 </div> \
 </div> \
 </div> \
@@ -98,23 +98,23 @@ crossorigin=\"anonymous\"> \
 <div class=\"col-12\"> \
 <table> \
 <tr> \
-<td class=\"text-right\">Power (mean)</td> \
+<td class=\"text-right text-nowrap\">Power (mean)</td> \
 <td><span class='h3 mean-power ml-3'></span><span class=\"h3\">W</span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right\">Freeram</td> \
+<td class=\"text-right text-nowrap\">Freeram</td> \
 <td><span class='free-ram ml-3'></span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right\">ADC weight (mean)</td> \
+<td class=\"text-right text-nowrap\">ADC weight (mean)</td> \
 <td><span class='adc-weight ml-3'></span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right\">ADC weight latest 10 samples (mean)</td> \
+<td class=\"text-right text-nowrap\">ADC weight latest 10 samples (mean)</td> \
 <td><span class='adc-weight-latest ml-3'></span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right\">Cat is in there</td> \
+<td class=\"text-right text-nowrap\">Cat is in there</td> \
 <td> \
 <button class=\"btn btn-link\" onclick='toggleCatInThere()'><span class='cat-is-in-there ml-3'></span></button> \
 </td> \

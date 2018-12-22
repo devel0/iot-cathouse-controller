@@ -38,6 +38,7 @@ function showConfig() {
 
 // updated from /info api
 var history_interval_sec = 10;
+var manualMode = false;
 
 var baseurl = '';
 if (debug) baseurl = 'http://10.10.3.9';
@@ -122,6 +123,28 @@ async function _toggleCatInThere() {
     //alert('toggled to ' + ((catIsInThere ? '1' : '0')));
 }
 
+async function togglePort(p) {
+    if (!manualMode) {
+        alert("can't toggle port in automatic mode");
+    } else {
+        showSpin();
+        let finished = false;
+        let res = null;
+        while (!finished) {
+            try {
+                res = await $.ajax({
+                    url: baseurl + '/port/toggle/' + p,
+                    type: 'GET'
+                });
+                finished = true;
+            } catch (e) {
+                await sleep(1000);
+            }
+        }
+        hideSpin();
+    }
+}
+
 async function reloadInfo() {
     console.log("--> reloadInfo");
     showSpin();
@@ -140,6 +163,8 @@ async function reloadInfo() {
     }
     hideSpin();
     //$('#info')[0].innerHTML = JSON.stringify(res, null, 2);
+
+    manualMode = res["manualMode"];
 
     if (res["p1"] == true)
         $('.port-p1').addClass('port-on');
@@ -412,7 +437,7 @@ async function reloadCharts() {
             options: {
                 animation: false,
                 scales: {
-                    xAxes: [{                        
+                    xAxes: [{
                         type: 'time'
                     }],
                     yAxes: [{
@@ -513,11 +538,23 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function myfn() {
-    if (window.innerWidth < 800) {
+function manageResize() {
+    if (window.innerWidth < 1400) {
         $('#myChart2').prop("height", 60);
         $('#myChart3').prop("height", 120);
+    } else {
+        $('#myChart2').prop("height", 30);
+        $('#myChart3').prop("height", 80);
     }
+}
+
+async function myfn() {
+    $(document).ready(function () {
+        manageResize();
+        $(window).resize(function () {
+            manageResize();
+        });
+    });
 
     autorefreshInProgress = true;
     // retrieve temperature devices and populate table

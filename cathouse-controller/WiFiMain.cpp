@@ -201,6 +201,9 @@ bool manageWifi()
             client.print(F(", \"temperatureHistoryOff\":"));
             client.print(temperatureHistoryOff);
 
+            client.print(F(", \"manualMode\":"));
+            client.print(eeJsonConfig.manualMode ? "true" : "false");
+
             client.print(F(", \"adcWeightArraySize\":"));
             client.print(adcWeightArraySize);
 
@@ -285,7 +288,7 @@ bool manageWifi()
               client.print(analogRead(A0));
           }
           //--------------------------
-          // /port/set/{1,2,3,4,5}/{0,1}
+          // /port/set/{1,2,3,4,5,6}/{0,1}
           // note: 5 is led, 6 is fan
           //--------------------------
           else if (header.indexOf("GET /port/set/") >= 0)
@@ -329,6 +332,49 @@ bool manageWifi()
               digitalWrite(portpin, HIGH);
             else
               digitalWrite(portpin, LOW);
+
+            client.print("OK");
+          }
+          //--------------------------
+          // /port/toggle/{1,2,3,4,5,6}
+          // note: 5 is led, 6 is fan
+          //--------------------------
+          else if (header.indexOf("GET /port/toggle/") >= 0)
+          {
+            clientOk(client, TEXT);
+
+            auto str = header.substring(17);
+            auto port = str.substring(0, str.indexOf(" "));
+
+            auto portnr = atoi(port.c_str());
+
+            int portpin = MOSFET_P1;
+
+            switch (portnr)
+            {
+            case 1:
+              portpin = MOSFET_P1;
+              break;
+            case 2:
+              portpin = MOSFET_P2;
+              break;
+            case 3:
+              portpin = MOSFET_P3;
+              break;
+            case 4:
+              portpin = MOSFET_P4;
+              break;
+            case 5:
+              portpin = LED_PIN;
+              break;
+            case 6:
+              portpin = FAN_PIN;
+              break;
+            }
+
+            auto v = digitalRead(portpin);
+            Serial.printf("manual> toggling port %d from %d\n", portnr, v);
+            digitalWrite(portpin, (v == LOW) ? HIGH : LOW);
 
             client.print("OK");
           }
