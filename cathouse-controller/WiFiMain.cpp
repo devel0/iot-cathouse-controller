@@ -347,7 +347,7 @@ bool manageWifi()
             else
               catInThere = true;
 
-            Serial.printf("catInThere = %d\n", catInThere ? 1 : 0);
+            Serial.printf("engine> override catInThere = %d\n", catInThere ? 1 : 0);
 
             client.print("OK");
           }
