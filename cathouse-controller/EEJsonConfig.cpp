@@ -117,9 +117,9 @@ void EEJsonConfig::Clear()
 // EEPrinter
 //-----------------------------------------
 
-EEPrinter::EEPrinter(int offset)
+EEPrinter::EEPrinter(int _offset)
 {
-    this->offset = offset;
+    offset = _offset;
 }
 
 size_t EEPrinter::write(uint8_t c)

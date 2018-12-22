@@ -8,9 +8,9 @@ int ipow(int b, int exp)
     return res;
 }
 
-BitArray::BitArray(int capacity)
+BitArray::BitArray(int _capacity)
 {
-    this->capacity = capacity;
+    capacity = _capacity;
     arr = new uint8_t[capacity / 8];
 }
 
