@@ -38,24 +38,19 @@
     crossorigin="anonymous">
 
 <body>
-    <div class="container-fluid">
-        <div class="row">
+    <!-- HOME -->
+    <div class="container-fluid j-containers j-home">
+        <div class="row mt-3">
             <div class="col-auto">
+                <h1>Cathouse controller</h1>
+            </div>
+            <div class="col">
                 <div class="btn-group" role="group">
                     <button class="btn btn-link" onclick='showHome()'>Home</button>
                     <button class="btn btn-link" onclick='showConfig()'>Config</button>
                     <button class="btn btn-link" onclick="window.open('https://github.com/devel0/iot-cathouse-controller')">About</button>
                     <div class="col"><i class="fas fa-spin fa-spinner j-spin collapse"></i></div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- HOME -->
-    <div class="container-fluid j-containers j-home">
-        <div class="row mt-3">
-            <div class="col">
-                <h1>Cathouse controller</h1>
             </div>
         </div>
         <div class="row">
@@ -100,11 +95,12 @@
                         <h2>Stats</h2>
                         <div class="row">
                             <div class="col-12">
-                                <div class="table table-striped">
+                                <div class="table table-striped table-sm">
                                     <table class="table">
                                         <tr>
                                             <td class="text-right text-nowrap align-middle">Power (mean)</td>
-                                            <td class="align-middle"><span class='h3 mean-power ml-3'></span><span class="h3">W</span></td>
+                                            <td class="align-middle"><span class='h3 mean-power ml-3'></span><span
+                                                    class="h3">W</span></td>
                                         </tr>
                                         <tr>
                                             <td class="text-right text-nowrap align-middle">Freeram</td>
@@ -134,7 +130,7 @@
                     <div class="col">
                         <h2>Tabular</h2>
                         <div class="table-container">
-                            <div class="table table-striped">
+                            <div class="table table-striped table-sm">
                                 <table class="table">
                                     <thead>
                                         <tr>
