@@ -71,22 +71,22 @@ crossorigin=\"anonymous\"> \
 <h2>Ports</h2> \
 <div class=\"row\"> \
 <div class=\"col-auto\"> \
-<button class=\"btn btn-link port-p1\" onclick='togglePort(1)'>P1</button> \
+<button class=\"btn btn-link\" onclick='togglePort(1)'><span class='port-p1'>P1</span></button> \
 </div> \
 <div class=\"col-auto\"> \
-<button class=\"btn btn-link port-p2\" onclick='togglePort(2)'>P2</button> \
+<button class=\"btn btn-link\" onclick='togglePort(2)'><span class='port-p2'>P2</span></button> \
 </div> \
 <div class=\"col-auto\"> \
-<button class=\"btn btn-link port-p3\" onclick='togglePort(3)'>P3</button> \
+<button class=\"btn btn-link\" onclick='togglePort(3)'><span class='port-p3'>P3</span></button> \
 </div> \
 <div class=\"col-auto\"> \
-<button class=\"btn btn-link port-p4\" onclick='togglePort(4)'>P4</button> \
+<button class=\"btn btn-link\" onclick='togglePort(4)'><span class='port-p4'>P4</span></button> \
 </div> \
 <div class=\"col-auto\"> \
-<button class=\"btn btn-link port-led\" onclick='togglePort(5)'>LED</button> \
+<button class=\"btn btn-link\" onclick='togglePort(5)'><span class='port-led'>LED</span></button> \
 </div> \
 <div class=\"col-auto\"> \
-<button class=\"btn btn-link port-fan\" onclick='togglePort(6)'>FAN</button> \
+<button class=\"btn btn-link\" onclick='togglePort(6)'><span class='port-fan'>FAN</span></button> \
 </div> \
 </div> \
 </div> \

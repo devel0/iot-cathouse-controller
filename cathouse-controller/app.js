@@ -210,7 +210,7 @@ async function reloadInfo() {
     // adc weight array chart
     // cat in there chart
     {
-        var ctx = document.getElementById("myChart3").getContext('2d');
+        var ctx = document.getElementById("weightChart").getContext('2d');
 
         var dtnow = moment();
         let ary = res["adcWeightArray"];
@@ -275,6 +275,7 @@ async function reloadInfo() {
                 datasets: dss
             },
             options: {
+                maintainAspectRatio: false,
                 animation: false,
                 scales: {
                     xAxes: [{
@@ -313,7 +314,7 @@ async function reloadCharts() {
         }
 
         var colors = ['orange', 'yellow', 'green', 'blue', 'violet', 'black', 'red'];
-        var ctx = document.getElementById("myChart").getContext('2d');
+        var ctx = document.getElementById("tempChart").getContext('2d');
 
         var dtnow = moment();
 
@@ -400,7 +401,7 @@ async function reloadCharts() {
             }
         }
 
-        var ctx = document.getElementById("myChart2").getContext('2d');
+        var ctx = document.getElementById("catinChart").getContext('2d');
 
         var dtnow = moment();
 
@@ -433,8 +434,9 @@ async function reloadCharts() {
             type: 'line',
             data: {
                 datasets: dss
-            },
+            },            
             options: {
+                maintainAspectRatio: false,
                 animation: false,
                 scales: {
                     xAxes: [{
@@ -538,22 +540,14 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function manageResize() {
-    if (window.innerWidth < 1400) {
-        $('#myChart2').prop("height", 60);
-        $('#myChart3').prop("height", 120);
-    } else {
-        $('#myChart2').prop("height", 30);
-        $('#myChart3').prop("height", 80);
-    }
+function manageResize() {    
 }
 
 async function myfn() {
-    $(document).ready(function () {
+
+    manageResize();
+    $(window).resize(function () {
         manageResize();
-        $(window).resize(function () {
-            manageResize();
-        });
     });
 
     autorefreshInProgress = true;
@@ -630,7 +624,9 @@ async function myfn() {
     autorefreshInProgress = false;
 }
 
-myfn();
+$(document).ready(function () {
+    myfn();
+});
 
 async function saveConfig() {
     showSpin();
