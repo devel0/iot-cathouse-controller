@@ -318,6 +318,7 @@ void engineProcess()
         {
         case standby:
         case fullpower:
+        case fanless:
         {
             prevCycle = currentCycle;
             prevCycleBegin = currentCycleBegin;
