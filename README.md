@@ -13,8 +13,6 @@
 
 ![img](doc/config.png)
 
-![img](doc/config2.png)
-
 ## features
 
 - complete cathouse project ( building walls, heating system, weight detect, wifi control )
