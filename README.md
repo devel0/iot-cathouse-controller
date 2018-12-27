@@ -1,5 +1,6 @@
 # iot-cathouse-controller
 
+- [features](#features)
 - [requirements](#requirements)
   * [thirdy part libraries](#thirdy-part-libraries)
 - [initial setup](#initial-setup)
@@ -8,7 +9,9 @@
   * [set temperature sensor ids](#set-temperature-sensor-ids)
 - [debug](#debug)
 
-**this is a beta release**
+![img](doc/home.png)
+
+![img](doc/config.png)
 
 ## features
 
@@ -19,7 +22,7 @@
 
 - hardware
   - [billing of materials](doc/bom.xlsx)
-  - instructables to build and assembly cathouse parts (TODO)
+  - [instructables](https://www.instructables.com/id/DomoticCathouse/) to build and assembly cathouse parts
   - [nodemcu esp8266](https://www.google.com/search?q=nodemcu+esp8266)
   - [global schematics](https://easyeda.com/editor#id=|c888d1d962eb41688482b3634ec3ae96)
     - [mosfet driver](https://easyeda.com/editor#id=|8c9be83bc0324be699e9c5582d8d355a|41530c0b5fc0479b98395b739bd6d0e3)
