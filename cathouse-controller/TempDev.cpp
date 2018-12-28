@@ -12,7 +12,6 @@ DeviceAddress *tempDevAddress; // DeviceAddress defined as uint8_t[8]
 char **tempDevHexAddress;
 
 float *temperatures = NULL; // current temp
-#define TEMPERATURE_INTERVAL_MS 5000
 unsigned long lastTemperatureRead;
 
 // each sensor history for 48hour each 1 min record data
