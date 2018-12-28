@@ -57,6 +57,52 @@ connect to serial interface of esp8266 through usb cable with minicom at 115200 
 in order to allow the system recognition of temperature sensor for bottom, wood, ambient and extern first there is the need to write down their ids ; use one of existing inet [articles](https://www.google.com/search?q=arduino+ds18b20+id) to find out.
 write correspondent temperature IDs in fields ( 16 hex char foreach device )
 
+## operating modes ( fanless or active fan )
+
+- if fanless mode is checked
+ - heat ports will be enabled one by one in sequence for `Port duration` specified interval
+ - between ports activation if `Port overlap duration` greater than 0 two ports works sharing port duration
+- if fanless mode is not checked
+ - when cat is in there fullpower ( all 4 ports ) activated for given `Fullpower duration` interval
+ - fan activates during fullpower if bottom temperatures great or equals `TBottom >= T fan on` parameter
+ - after fullpower duration only one port still active `Standby port` for a duration given from `Standby duration` parameter
+ 
+### cooldown and system off
+
+- if some limit condition occurs
+ - bottom temperature great or equals `Bottom temperature limit`
+ - wood temperature great or equals `Wood temperature limit`
+ - ambient temperature great or equals `Ambient temperature limit`
+- then the system goes off for given `Cooldown time`
+- if external temperature great or equals `Extern >= T sys OFF` then system goes off independently cat is in there or not
+
+### manual mode
+
+- enabling manual mode system cooldown still works but ports/fan activation disabled for a manual controls through webapi
+
+### webapi
+
+| **address** | **content-type** | **result example** |
+|---|---|---|
+| `/tempdevices` | json | `{"tempdevices":["28b03724070000c8","28f00a3b05000038","28e2cc23070000d8","28d12b5b0500001c"]}` |
+| `/temp/devid` | text | retrieve temperature C of given `devid` device |
+| `/info` | json | `{"statIntervalSec":2, "freeram":10896, "freeram_min":4008, "history_size":1517, "history_interval_sec":113, "temperatureHistoryFillCnt":1517, "temperatureHistoryOff":545, "manualMode":false, "adcWeightArraySize":2048, "adcWeightArrayOff":681, "adcWeightArrayFillCnt":2048, "adcWeightArray":[222,219],"catIsInThere":false, "p1": false, "p2": false, "p3": false, "p4": false, "led": false, "fan": false, "runtime_hr": 112.552439, "Wh": 2731.811464}` |
+| `/temphistory` | json | `[{"28b03724070000c8":[8.00,9.00]},{"28f00a3b05000038":[4.44,4]}]` |
+| `/catinhistory` | json | `[false,false,true]` |
+| `/port/get/X` | text | `0` |
+| `/port/set/X/{0,1}` | text | `OK` |
+| `/port/toggle/X` | text | `OK` |
+| `/setcatinthere/{0,1}` | text | `OK` |
+| `/getconfig` | json | `{"tbottomLimit":40.00,"twoodLimit":50.00,"tambientLimit":17.00,"cooldownTimeMs":120000,"standbyDurationMs":1800000,"standbyPort":2,"fullpowerDurationMs":1200000,"texternGTESysOff":14.00,"adcWeightDeltaCat":18,"manualMode":false,"fanlessMode":true,"portDurationMs":600000,"portOverlapDurationMs":420000,"tbottomGTEFanOn":20.00,"firmwareVersion":"cathouse-0.82","wifiSSID":"labwlan","tbottomId":"28b03724070000c8","twoodId":"28e2cc23070000d8","tambientId":"28f00a3b05000038","texternId":"28d12b5b0500001c"}` |
+| `/saveconfig` | json POST | |
+
+notes
+- `temphistory`, `adcWeightArray`, `catinhistory` are a set of measure where latest sample if the current one and previous are distant between each one from specified `history_interval_sec`
+- valid ports in `/port/get` and `/port/set` are
+  - heating ports ( 1, 2, 3, 4 )
+  - led port ( 5 )
+  - fan port ( 6 )
+
 ## debug
 
 ```
@@ -66,3 +112,8 @@ code .
 
 - to build or check compilation `CTRL+SHIFT+R`
 - to upload through USB-serial `CTRL+SHIFT+U`
+
+## security considerations
+
+- in release mode set [**ENABLE_CORS**](https://github.com/devel0/iot-cathouse-controller/blob/dbb4c67158c6660667ba5c55b46a064916e80611/cathouse-controller/Config.h#L10) to 0 to avoid browser requests from non owner html page
+- on a internet facing page there is the need of a nginx proxy using a letsencrypt **https** certificate to ensure traffic flows in an encrypted channel ; plus there is the need to enable a page **basic authentication** ; see [here](https://github.com/devel0/knowledge/blob/cc771417542ff2cd5af335eec530da644a98c15a/webdevel/nginx-webapi-conf.md) for details
