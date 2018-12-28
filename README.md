@@ -7,7 +7,12 @@
   * [set wifi ssid and pwd](#set-wifi-ssid-and-pwd)
   * [parameter configurations](#parameter-configurations)
   * [set temperature sensor ids](#set-temperature-sensor-ids)
+- [operating modes ( fanless or active fan )](#operating-modes--fanless-or-active-fan-)
+  * [cooldown and system off](#cooldown-and-system-off)
+  * [manual mode](#manual-mode)
+  * [webapi](#webapi)
 - [debug](#debug)
+- [security considerations](#security-considerations)
 
 ![img](doc/home.png)
 
