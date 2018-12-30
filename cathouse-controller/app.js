@@ -561,7 +561,7 @@ async function myfn() {
     autorefreshInProgress = true;
     // retrieve temperature devices and populate table
 
-    hideSpin();
+    showSpin();
     let res = null;
     let finished = false;
     while (!finished) {
