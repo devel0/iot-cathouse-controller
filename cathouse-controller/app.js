@@ -518,8 +518,6 @@ async function reloadConfig() {
     $('#config-portOverlapDurationMs-min')[0].value = res["portOverlapDurationMs"] / 1000.0 / 60.0;
 }
 
-setInterval(autorefresh, 1000);
-
 var infoLastLoad;
 var tempLastLoad;
 var chartLastLoad;
@@ -553,6 +551,8 @@ function manageResize() {}
 
 async function myfn() {
 
+    setInterval(autorefresh, 1000);
+    
     manageResize();
     $(window).resize(function () {
         manageResize();
