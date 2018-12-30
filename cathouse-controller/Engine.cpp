@@ -212,12 +212,12 @@ void engineProcess()
                     digitalWrite(portToPin(fanlessCurrentPort), LOW);
                     fanlessCurrentPort = fanlessNextPort;
                     fanlessCurrentPortBegin = fanlessNextPortBegin;
-                    digitalWrite(portToPin(fanlessCurrentPort), HIGH);                    
+                    digitalWrite(portToPin(fanlessCurrentPort), HIGH);
                 }
                 else // elsewhere start it
-                {                                        
+                {
                     digitalWrite(portToPin(fanlessCurrentPort), LOW);
-                    ++fanlessCurrentPort;                    
+                    ++fanlessCurrentPort;
                     if (fanlessCurrentPort > 4)
                         fanlessCurrentPort = 1;
                     fanlessCurrentPortBegin = millis();
@@ -230,7 +230,7 @@ void engineProcess()
             else if (eeJsonConfig.portOverlapDurationMs > 0 && fanlessNextPortBegin <= fanlessCurrentPortBegin)
             {
                 if (timeDiff(fanlessCurrentPortBegin, millis()) > eeJsonConfig.portDurationMs - eeJsonConfig.portOverlapDurationMs)
-                {                    
+                {
                     fanlessNextPort = fanlessCurrentPort + 1;
                     if (fanlessNextPort > 4)
                         fanlessNextPort = 1;
@@ -326,12 +326,11 @@ void engineProcess()
             currentCycle = none;
             currentCycleBegin = millis();
 
-            setDisablePorts();
-
             Serial.printf("engine> goes off because cat exited\n");
         }
         break;
         }
+        setDisablePorts();
     }
 
     lastEngineProcessExec = millis();
