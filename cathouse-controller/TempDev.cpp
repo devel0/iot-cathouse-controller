@@ -64,7 +64,7 @@ void setupTemperatureDevices()
         auto ramsize = freeMemorySum() - threshold - ADCWEIGHT_HISTORY_BACKLOG_KB * 1024 - 3 * 1024; // 3 kb diff for wifi
         temperatureHistorySize = ramsize / temperatureDeviceCount / sizeof(float);
 
-        auto backloghr = TEMPERATURE_HISTORY_BACKLOG_HOURS;
+        auto backloghr = (unsigned long)TEMPERATURE_HISTORY_BACKLOG_HOURS;
         temperatureHistoryIntervalSec = backloghr * 60 * 60 / temperatureHistorySize;
 
         for (int i = 0; i < temperatureDeviceCount; ++i)
