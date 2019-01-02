@@ -417,7 +417,7 @@ bool manageWifi()
             clientOk(client, TEXT);
 
             String s;
-            while (client.peek() != -1) // read all frames
+            while (client.available() || (client.peek() != -1)) // read all frames
             {
               while (client.available())
               {
