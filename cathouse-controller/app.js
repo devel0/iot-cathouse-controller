@@ -658,7 +658,8 @@ async function saveConfig() {
         texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value),
         tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value),
         portDurationMs: parseFloat($('#config-portDurationMs-min')[0].value) * 1000 * 60,
-        portOverlapDurationMs: parseFloat($('#config-portOverlapDurationMs-min')[0].value) * 1000 * 60
+        portOverlapDurationMs: parseFloat($('#config-portOverlapDurationMs-min')[0].value) * 1000 * 60,
+        fanlessMode: $('#config-fanlessMode').is(":checked")
     };
 
     while (!finished) {
