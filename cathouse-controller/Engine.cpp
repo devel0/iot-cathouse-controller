@@ -51,6 +51,27 @@ void setDisablePorts()
     digitalWrite(LED_PIN, LOW);
 }
 
+String getCycleStr(CycleTypes cycle)
+{
+    switch (cycle)
+    {
+    case none:
+        return "none";
+    case fullpower:
+        return "fullpower";
+    case standby:
+        return "standby";
+    case cooldown:
+        return "cooldown";
+    case disabled:
+        return "disabled";
+    case fanless:
+        return "fanless";
+    default:
+        return "unknown";
+    }
+}
+
 void engineProcess()
 {
     if (timeDiff(lastEngineProcessExec, millis()) < ENGINE_POOL_INTERVAL_MS)
@@ -74,7 +95,7 @@ void engineProcess()
             currentCycleBegin = millis();
             setDisablePorts();
 
-            Serial.printf("engine> disabled because textern %f >= %f\n", textern, eeJsonConfig.texternGTESysOff);
+            Serial.printf("engine[%ld]> disabled because textern %f >= %f\n", millis() / 1000, textern, eeJsonConfig.texternGTESysOff);
         }
         else
         {
@@ -88,7 +109,7 @@ void engineProcess()
                     currentCycle = none;
                     currentCycleBegin = millis();
 
-                    Serial.printf("engine> enabled because textern %f < %f\n", textern, eeJsonConfig.texternGTESysOff);
+                    Serial.printf("engine[%ld]> enabled because textern %f < %f\n", millis() / 1000, textern, eeJsonConfig.texternGTESysOff);
                 }
             }
             break;
@@ -105,7 +126,10 @@ void engineProcess()
                     currentCycle = cooldown;
                     currentCycleBegin = millis();
 
-                    Serial.printf("engine> cooldown because tbottom %f>=%f or twood %f>=%f or tambient %f>=%f\n",
+                    setDisablePorts();
+
+                    Serial.printf("engine[%ld]> cooldown because tbottom %f>=%f or twood %f>=%f or tambient %f>=%f\n",
+                                  millis() / 1000,
                                   tbottom, eeJsonConfig.tbottomLimit,
                                   twood, eeJsonConfig.twoodLimit,
                                   tambient, eeJsonConfig.tambientLimit);
@@ -121,9 +145,11 @@ void engineProcess()
                     currentCycle = prevCycle;
                     currentCycleBegin = prevCycleBegin;
                     prevCycle = cooldown;
-                    prevCycleBegin = cooldownBegin;
+                    prevCycleBegin = cooldownBegin;                    
 
-                    Serial.printf("engine> resume previous cycle from cooldown because cooldown time %lu min expired\n",
+                    Serial.printf("engine[%ld]> resume previous cycle [%s] from cooldown because cooldown time %lu min expired\n",
+                                  millis() / 1000,
+                                  getCycleStr(prevCycle).c_str(),
                                   eeJsonConfig.cooldownTimeMs / 1000 / 60);
                 }
             }
@@ -163,7 +189,8 @@ void engineProcess()
 
                     setFullpowerPorts();
 
-                    Serial.printf("engine> back to fullpower from off cycle because prev cycle expired and cat is in there\n");
+                    Serial.printf("engine[%ld]> back to fullpower from off cycle because prev cycle expired and cat is in there\n",
+                                  millis() / 1000);
                 }
                 else
                 {
@@ -175,14 +202,16 @@ void engineProcess()
                     case fullpower:
                     {
                         setFullpowerPorts();
-                        Serial.printf("engine> back to fullpower from off cycle because prev cycle still valid and cat is in there\n");
+                        Serial.printf("engine[%ld]> back to fullpower from off cycle because prev cycle still valid and cat is in there\n",
+                                      millis() / 1000);
                     }
                     break;
 
                     case standby:
                     {
                         setStandbyPorts();
-                        Serial.printf("engine> back to standby from off cycle because prev cycle still valid and cat is in there\n");
+                        Serial.printf("engine[%ld]> back to standby from off cycle because prev cycle still valid and cat is in there\n",
+                                      millis() / 1000);
                     }
                     break;
                     }
@@ -199,7 +228,7 @@ void engineProcess()
                 fanlessCurrentPortBegin = millis();
                 digitalWrite(portToPin(fanlessCurrentPort), HIGH);
                 fanlessStarted = true;
-                Serial.printf("engine> initiate fanless port=%d\n", fanlessCurrentPort);
+                Serial.printf("engine[%ld]> initiate fanless port=%d\n", millis() / 1000, fanlessCurrentPort);
             }
             // if current port expired
             else if (currentPortAge > eeJsonConfig.portDurationMs)
@@ -207,7 +236,7 @@ void engineProcess()
                 // if next port already started make it current
                 if (fanlessNextPortBegin > fanlessCurrentPortBegin)
                 {
-                    Serial.printf("engine> switch from port=%d to %d\n", fanlessCurrentPort, fanlessNextPort);
+                    Serial.printf("engine[%ld]> switch from port=%d to %d\n", millis() / 1000, fanlessCurrentPort, fanlessNextPort);
 
                     digitalWrite(portToPin(fanlessCurrentPort), LOW);
                     fanlessCurrentPort = fanlessNextPort;
@@ -223,7 +252,7 @@ void engineProcess()
                     fanlessCurrentPortBegin = millis();
                     digitalWrite(portToPin(fanlessCurrentPort), HIGH);
 
-                    Serial.printf("engine> current port is now %d\n", fanlessCurrentPort);
+                    Serial.printf("engine[%ld]> current port is now %d\n", millis() / 1000, fanlessCurrentPort);
                 }
             }
             // elsewhere checks for nextport start
@@ -237,7 +266,7 @@ void engineProcess()
                     fanlessNextPortBegin = millis();
                     digitalWrite(portToPin(fanlessNextPort), HIGH);
 
-                    Serial.printf("engine> starts nextport %d\n", fanlessNextPort);
+                    Serial.printf("engine[%ld]> starts nextport %d\n", millis() / 1000, fanlessNextPort);
                 }
             }
         }
@@ -255,12 +284,16 @@ void engineProcess()
                 if (tbottom >= eeJsonConfig.tbottomGTEFanOn && pfan == LOW)
                 {
                     digitalWrite(FAN_PIN, HIGH);
-                    Serial.printf("engine> enable fan because tbottom %f>=%f in fullpower cycle\n", tbottom, eeJsonConfig.tbottomGTEFanOn);
+                    Serial.printf("engine[%ld]> enable fan because tbottom %f>=%f in fullpower cycle\n",
+                                  millis() / 1000,
+                                  tbottom, eeJsonConfig.tbottomGTEFanOn);
                 }
                 else if (tbottom < eeJsonConfig.tbottomGTEFanOn && pfan == HIGH)
                 {
                     digitalWrite(FAN_PIN, LOW);
-                    Serial.printf("engine> disable fan because tbottom %f<%f in fullpower cycle\n", tbottom, eeJsonConfig.tbottomGTEFanOn);
+                    Serial.printf("engine[%ld]> disable fan because tbottom %f<%f in fullpower cycle\n",
+                                  millis() / 1000,
+                                  tbottom, eeJsonConfig.tbottomGTEFanOn);
                 }
             }
             else // fallback if not assigned id to temp device to detect bottom enable fan in fullpower
@@ -268,7 +301,8 @@ void engineProcess()
                 if (pfan == LOW)
                 {
                     digitalWrite(FAN_PIN, HIGH);
-                    Serial.printf("engine> enable fan because tbottom can't detect due to unassigned temp device id in fullpower cycle\n");
+                    Serial.printf("engine[%ld]> enable fan because tbottom can't detect due to unassigned temp device id in fullpower cycle\n",
+                                  millis() / 1000);
                     Serial.printf("engine>   tbottom_id = [%s]\n", eeStaticConfig.tbottomId);
                     Serial.printf("engine>   available ids:\n");
                     for (int i = 0; i < temperatureDeviceCount; ++i)
@@ -286,7 +320,7 @@ void engineProcess()
                 currentCycleBegin = millis();
                 setStandbyPorts();
 
-                Serial.printf("engine> switch to standby cycle because fullpower expired\n");
+                Serial.printf("engine[%ld]> switch to standby cycle because fullpower expired\n", millis() / 1000);
             }
         }
         break;
@@ -302,7 +336,7 @@ void engineProcess()
                 currentCycleBegin = millis();
                 setFullpowerPorts();
 
-                Serial.printf("engine> switch to fullpower cycle because standby expired\n");
+                Serial.printf("engine[%ld]> switch to fullpower cycle because standby expired\n", millis() / 1000);
             }
         }
         break;
@@ -326,7 +360,7 @@ void engineProcess()
             currentCycle = none;
             currentCycleBegin = millis();
 
-            Serial.printf("engine> goes off because cat exited\n");
+            Serial.printf("engine[%ld]> goes off because cat exited\n", millis() / 1000);
         }
         break;
         }

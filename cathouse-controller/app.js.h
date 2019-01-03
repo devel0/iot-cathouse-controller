@@ -193,6 +193,9 @@ let runtime_hr = res.runtime_hr; \
  \
 $('.mean-power')[0].innerText = (Wh / runtime_hr).toFixed(0); \
 $('.free-ram')[0].innerText = human_readable_filesize(res.freeram); \
+$('.temp-history-interval-min')[0].innerText = res.temp_history_interval_min.toFixed(1); \
+$('.current-state')[0].innerText = res.current_state; \
+$('.cycle-prev-current')[0].innerText = res.prev_cycle + \"/\" + res.current_cycle; \
 $('.cat-is-in-there')[0].innerText = res.catIsInThere ? 'yes' : 'no'; \
 if (res.catIsInThere) \
 $('.cat-is-in-there').addClass('port-on'); \
@@ -497,8 +500,6 @@ $('#config-portDurationMs-min')[0].value = res[\"portDurationMs\"] / 1000.0 / 60
 $('#config-portOverlapDurationMs-min')[0].value = res[\"portOverlapDurationMs\"] / 1000.0 / 60.0; \
 } \
  \
-setInterval(autorefresh, 1000); \
- \
 var infoLastLoad; \
 var tempLastLoad; \
 var chartLastLoad; \
@@ -532,6 +533,8 @@ function manageResize() {} \
  \
 async function myfn() { \
  \
+setInterval(autorefresh, 1000); \
+ \
 manageResize(); \
 $(window).resize(function () { \
 manageResize(); \
@@ -539,7 +542,7 @@ manageResize(); \
  \
 autorefreshInProgress = true; \
  \
-hideSpin(); \
+showSpin(); \
 let res = null; \
 let finished = false; \
 while (!finished) { \
@@ -630,7 +633,8 @@ standbyDurationMs: parseFloat($('#config-standbyDuration-min')[0].value) * 1000 
 texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value), \
 tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value), \
 portDurationMs: parseFloat($('#config-portDurationMs-min')[0].value) * 1000 * 60, \
-portOverlapDurationMs: parseFloat($('#config-portOverlapDurationMs-min')[0].value) * 1000 * 60 \
+portOverlapDurationMs: parseFloat($('#config-portOverlapDurationMs-min')[0].value) * 1000 * 60, \
+fanlessMode: $('#config-fanlessMode').is(\":checked\") \
 }; \
  \
 while (!finished) { \

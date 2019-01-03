@@ -249,6 +249,10 @@ bool manageWifi()
             else
               client.printf(", \"fan\": false");
 
+            client.printf(", \"temp_history_interval_min\": %f", temperatureHistoryIntervalSec/60.0);
+            client.printf(", \"prev_cycle\": \"%s\"",  getCycleStr(prevCycle).c_str());
+            client.printf(", \"current_cycle\": \"%s\"",  getCycleStr(currentCycle).c_str());
+
             client.printf(", \"runtime_hr\": %f", runtime_hr);
             client.printf(", \"Wh\": %f", Wh);
 

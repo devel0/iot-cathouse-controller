@@ -13,8 +13,10 @@ enum CycleTypes
     fanless
 };
 
+extern CycleTypes prevCycle;
 extern CycleTypes currentCycle;
 
 void engineProcess();
+String getCycleStr(CycleTypes cycle);
 
 #endif
