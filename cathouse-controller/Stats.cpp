@@ -30,10 +30,7 @@ void statsUpdate()
         EvalAdcWeight();
     }
 
-    {
-        freeram = freeMemorySum();
-        freeram_min = min(freeram, freeram_min);
-    }
+    
 
     {
         auto hr = ((double)tdelta) / ((double)1000.0 * 60 * 60);

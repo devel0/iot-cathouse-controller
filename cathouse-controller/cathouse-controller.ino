@@ -58,7 +58,7 @@ void setup()
     //long m = millis();
     //while (timeDiff(m, millis()) < 5000) ;
     delay(5000);
-  }  
+  }
 
   Serial.printf("STARTUP\n");
 
@@ -86,14 +86,22 @@ bool systemIsOn = false;
 
 void loop()
 {
+  {
+    freeram = freeMemorySum();
+    freeram_min = min(freeram, freeram_min);
+  }
+
   if (manageWifi())
     return;
 
-  if (!serialOsActivated) statsUpdate();
+  if (!serialOsActivated)
+    statsUpdate();
 
-  if (!serialOsActivated) manageTemp();
+  if (!serialOsActivated)
+    manageTemp();
 
-  if (!serialOsActivated) engineProcess();
+  if (!serialOsActivated)
+    engineProcess();
 
   if (Serial.available())
   {
