@@ -4,7 +4,7 @@
 #include "EEJsonConfig.h"
 #include "WeightDev.h"
 
-double runtime_hr = 0.0;
+double runtime_hr = INITIAL_EMPTY_RUNTIME_HR;
 double Wh = 0.0;
 
 uint32_t freeram_min = 80 * 1024, freeram = 80 * 1024;

@@ -5,6 +5,7 @@ var infoUpdateIntervalMs = 5000; \
 var tempUpdateIntervalMs = 10000; \
  \
  \
+var LED_PORT = 5; \
 var sensorDesc = []; \
  \
 requirejs.config({ \
@@ -116,7 +117,7 @@ hideSpin(); \
 } \
  \
 async function togglePort(p) { \
-if (!manualMode) { \
+if (!manualMode && p != LED_PORT) { \
 alert(\"can't toggle port in automatic mode\"); \
 } else { \
 showSpin(); \
@@ -192,9 +193,10 @@ let Wh = res.Wh; \
 let runtime_hr = res.runtime_hr; \
  \
 $('.mean-power')[0].innerText = (Wh / runtime_hr).toFixed(0); \
+$('.runtime-hr')[0].innerText = runtime_hr.toFixed(1); \
 $('.free-ram')[0].innerText = human_readable_filesize(res.freeram); \
+$('.free-ram-min')[0].innerText = human_readable_filesize(res.freeram_min); \
 $('.temp-history-interval-min')[0].innerText = res.temp_history_interval_min.toFixed(1); \
-$('.current-state')[0].innerText = res.current_state; \
 $('.cycle-prev-current')[0].innerText = res.prev_cycle + \"/\" + res.current_cycle; \
 $('.cat-is-in-there')[0].innerText = res.catIsInThere ? 'yes' : 'no'; \
 if (res.catIsInThere) \

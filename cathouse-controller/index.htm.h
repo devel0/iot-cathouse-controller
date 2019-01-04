@@ -113,8 +113,16 @@ crossorigin=\"anonymous\"> \
 class=\"h3\">W</span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right text-nowrap align-middle\">Freeram</td> \
+<td class=\"text-right text-nowrap align-middle\">Runtime (hr)</td> \
+<td class=\"align-middle\"><span class='runtime-hr ml-3'></span></td> \
+</tr> \
+<tr> \
+<td class=\"text-right text-nowrap align-middle\">Freeram current</td> \
 <td class=\"align-middle\"><span class='free-ram ml-3'></span></td> \
+</tr> \
+<tr> \
+<td class=\"text-right text-nowrap align-middle\">Freeram min</td> \
+<td class=\"align-middle\"><span class='free-ram-min ml-3'></span></td> \
 </tr> \
 <tr> \
 <td class=\"text-right text-nowrap align-middle\">ADC weight (mean)</td> \

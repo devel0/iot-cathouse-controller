@@ -24,6 +24,9 @@
 // measured system power / 4
 #define W_PORT 26.75
 
+// ease initial simulation of daily cat out there 8 hr
+#define INITIAL_EMPTY_RUNTIME_HR 8
+
 #define UPDATE_STATS_INTERVAL_MS 2000
 #define UPDATE_TEMPERATURE_INTERVAL_MS 5000
 #define FREERAM_THRESHOLD_MIN_BYTES (10*1024)
