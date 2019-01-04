@@ -207,6 +207,7 @@ async function reloadInfo() {
     let runtime_hr = res.runtime_hr;
 
     $('.mean-power')[0].innerText = (Wh / runtime_hr).toFixed(0);
+    $('.runtime-hr')[0].innerText = runtime_hr.toFixed(1);
     $('.free-ram')[0].innerText = human_readable_filesize(res.freeram);
     $('.free-ram-min')[0].innerText = human_readable_filesize(res.freeram_min);
     $('.temp-history-interval-min')[0].innerText = res.temp_history_interval_min.toFixed(1);    
