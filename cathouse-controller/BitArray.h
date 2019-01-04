@@ -5,16 +5,16 @@
 
 class BitArray
 {
-    int capacity;
-    uint8_t *arr;
+  int capacity;
+  uint8_t *arr;
 
-  public:
-    BitArray(int capacity);
-    ~BitArray();
-
-    int Capacity() const;
-    bool Get(int idx) const;
-    void Set(int idx, bool value);
+public:
+  BitArray(int capacity);
+  ~BitArray();
+  
+  int Capacity() const;
+  bool Get(int idx) const;
+  void Set(int idx, bool value);
 };
 
 #endif

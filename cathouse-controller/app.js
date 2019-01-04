@@ -210,7 +210,7 @@ async function reloadInfo() {
     $('.runtime-hr')[0].innerText = runtime_hr.toFixed(1);
     $('.free-ram')[0].innerText = human_readable_filesize(res.freeram);
     $('.free-ram-min')[0].innerText = human_readable_filesize(res.freeram_min);
-    $('.temp-history-interval-min')[0].innerText = res.temp_history_interval_min.toFixed(1);    
+    $('.temp-history-interval-min')[0].innerText = res.temp_history_interval_min.toFixed(1);
     $('.cycle-prev-current')[0].innerText = res.prev_cycle + "/" + res.current_cycle;
     $('.cat-is-in-there')[0].innerText = res.catIsInThere ? 'yes' : 'no';
     if (res.catIsInThere)
@@ -403,7 +403,7 @@ async function reloadCharts() {
         while (!finished) {
             try {
                 res = await $.ajax({
-                    url: baseurl + "/catinhistory",
+                    url: baseurl + "/bithistories",
                     type: 'GET'
                 });
                 finished = true;
@@ -412,34 +412,226 @@ async function reloadCharts() {
             }
         }
 
-        var ctx = document.getElementById("catinChart").getContext('2d');
+        var ctx = document.getElementById("bitChart").getContext('2d');
 
-        var dtnow = moment();
+        var dtnow = moment();        
 
-        var i = 0;
-        var dss = []; {
-            dts = [];
-            let valcnt = res.length;
-            $.each(res, function (idx, val) {
-                secbefore = (valcnt - idx - 1) * history_interval_sec;
-                tt = moment(dtnow).subtract(secbefore, 'seconds');
-                dts.push({
-                    t: tt,
-                    y: val ? 1 : 0
+        {
+            var dss = [];
+            let rr = res.catInThereHistory;
+            var i = 0; {
+                dts = [];
+                let valcnt = rr.length;
+                $.each(rr, function (idx, val) {
+                    secbefore = (valcnt - idx - 1) * history_interval_sec;
+                    tt = moment(dtnow).subtract(secbefore, 'seconds');
+                    dts.push({
+                        t: tt,
+                        y: val
+                    });
                 });
-            });
 
-            dss.push({
-                borderColor: '#F0B8FF',
-                //backgroundColor: '#F0B8FF',
-                fill: true,
-                label: 'cat in there',
-                data: dts,
-                pointRadius: 0
-            });
+                dss.push({
+                    borderColor: '#3b9004',
+                    backgroundColor:'#3b9004',
+                    fill: true,
+                    label: 'cat in there',
+                    data: dts,
+                    pointRadius: 0
+                });
 
-            ++i;
-        };
+                ++i;
+            };
+        }
+
+        {
+            let rr = res.p1History;
+            var i = 0; {
+                dts = [];
+                let valcnt = rr.length;
+                $.each(rr, function (idx, val) {
+                    secbefore = (valcnt - idx - 1) * history_interval_sec;
+                    tt = moment(dtnow).subtract(secbefore, 'seconds');
+                    dts.push({
+                        t: tt,
+                        y: val
+                    });
+                });
+
+                dss.push({
+                    borderColor: '#b70013',
+                    backgroundColor: '#b70013',
+                    fill: true,
+                    label: 'P1',
+                    data: dts,
+                    pointRadius: 0
+                });
+
+                ++i;
+            };
+        }
+
+        {
+            let rr = res.p2History;
+            var i = 0; {
+                dts = [];
+                let valcnt = rr.length;
+                $.each(rr, function (idx, val) {
+                    secbefore = (valcnt - idx - 1) * history_interval_sec;
+                    tt = moment(dtnow).subtract(secbefore, 'seconds');
+                    dts.push({
+                        t: tt,
+                        y: val
+                    });
+                });
+
+                dss.push({
+                    borderColor: '#df263c',
+                    backgroundColor: '#df263c',
+                    fill: true,
+                    label: 'P2',
+                    data: dts,
+                    pointRadius: 0
+                });
+
+                ++i;
+            };
+        }
+
+        {
+            let rr = res.p3History;
+            var i = 0; {
+                dts = [];
+                let valcnt = rr.length;
+                $.each(rr, function (idx, val) {
+                    secbefore = (valcnt - idx - 1) * history_interval_sec;
+                    tt = moment(dtnow).subtract(secbefore, 'seconds');
+                    dts.push({
+                        t: tt,
+                        y: val
+                    });
+                });
+
+                dss.push({
+                    borderColor: '#ff4558',
+                    backgroundColor: '#ff4558',
+                    fill: true,
+                    label: 'P3',
+                    data: dts,
+                    pointRadius: 0
+                });
+
+                ++i;
+            };
+        }
+
+        {
+            let rr = res.p4History;
+            var i = 0; {
+                dts = [];
+                let valcnt = rr.length;
+                $.each(rr, function (idx, val) {
+                    secbefore = (valcnt - idx - 1) * history_interval_sec;
+                    tt = moment(dtnow).subtract(secbefore, 'seconds');
+                    dts.push({
+                        t: tt,
+                        y: val
+                    });
+                });
+
+                dss.push({
+                    borderColor: '#ff6a79',
+                    backgroundColor: '#ff6a79',
+                    fill: true,
+                    label: 'P4',
+                    data: dts,
+                    pointRadius: 0
+                });
+
+                ++i;
+            };
+        }
+
+        {
+            let rr = res.fanHistory;
+            var i = 0; {
+                dts = [];
+                let valcnt = rr.length;
+                $.each(rr, function (idx, val) {
+                    secbefore = (valcnt - idx - 1) * history_interval_sec;
+                    tt = moment(dtnow).subtract(secbefore, 'seconds');
+                    dts.push({
+                        t: tt,
+                        y: val
+                    });
+                });
+
+                dss.push({
+                    borderColor: '#fff06b',
+                    backgroundColor: '#fff06b',
+                    fill: true,
+                    label: 'fan',
+                    data: dts,
+                    pointRadius: 0
+                });
+
+                ++i;
+            };
+        }
+
+        {
+            let rr = res.disabledHistory;
+            var i = 0; {
+                dts = [];
+                let valcnt = rr.length;
+                $.each(rr, function (idx, val) {
+                    secbefore = (valcnt - idx - 1) * history_interval_sec;
+                    tt = moment(dtnow).subtract(secbefore, 'seconds');
+                    dts.push({
+                        t: tt,
+                        y: val
+                    });
+                });
+
+                dss.push({
+                    borderColor: '#989898',
+                    backgroundColor: '#989898',
+                    fill: true,
+                    label: 'disabled',
+                    data: dts,
+                    pointRadius: 0
+                });
+
+                ++i;
+            };
+        }
+
+        {
+            let rr = res.cooldownHistory;
+            var i = 0; {
+                dts = [];
+                let valcnt = rr.length;
+                $.each(rr, function (idx, val) {
+                    secbefore = (valcnt - idx - 1) * history_interval_sec;
+                    tt = moment(dtnow).subtract(secbefore, 'seconds');
+                    dts.push({
+                        t: tt,
+                        y: val
+                    });
+                });
+
+                dss.push({
+                    borderColor: '#0abbda',
+                    backgroundColor: '#0abbda',
+                    fill: true,
+                    label: 'cooldown',
+                    data: dts,
+                    pointRadius: 0
+                });
+
+                ++i;
+            };
+        }
 
         var myChart = new Chart(ctx, {
             type: 'line',
@@ -451,13 +643,15 @@ async function reloadCharts() {
                 animation: false,
                 scales: {
                     xAxes: [{
-                        type: 'time'
+                        type: 'time',
+                        stacked: true
                     }],
                     yAxes: [{
-                        ticks: {
+                        /*ticks: {
                             min: 0,
                             max: 1
-                        }
+                        },*/
+                        stacked: true
                     }]
                 }
             }

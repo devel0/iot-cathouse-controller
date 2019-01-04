@@ -23,7 +23,7 @@ uint16_t temperatureHistoryFillCnt = 0;
 unsigned long lastTemperatureHistoryRecord;
 uint16_t temperatureHistoryIntervalSec = 5 * 60; // computed
 
-BitArray *catInThereHistory;
+BitArray *catInThereHistory, *p1History, *p2History, *p3History, *p4History, *fanHistory, *cooldownHistory, *disabledHistory;
 
 OneWire tempOneWire(ONEWIRE_PIN);
 DallasTemperature DS18B20(&tempOneWire);
@@ -61,7 +61,14 @@ void setupTemperatureDevices()
         temperatureHistory = (float **)malloc(sizeof(float *) * temperatureDeviceCount);
 
         auto threshold = FREERAM_THRESHOLD_MIN_BYTES;
-        auto ramsize = freeMemorySum() - threshold - ADCWEIGHT_HISTORY_BACKLOG_KB * 1024 - 3 * 1024; // 3 kb diff for wifi
+
+        auto wifiramsize = 3 * 1024;
+        auto adcweightramsize = ADCWEIGHT_HISTORY_BACKLOG_KB * 1024;
+
+        auto ramsize = freeMemorySum() - threshold - adcweightramsize - wifiramsize;
+        auto _temperatureHistorySize = ramsize / temperatureDeviceCount / sizeof(float);
+        auto bithistoryarrcnt = 8; // catin,p1,p2,p3,p4,fan,disabled,cooldown
+        ramsize -= (_temperatureHistorySize / 8) * bithistoryarrcnt;
         temperatureHistorySize = ramsize / temperatureDeviceCount / sizeof(float);
 
         auto backloghr = (unsigned long)TEMPERATURE_HISTORY_BACKLOG_HOURS;
@@ -73,6 +80,13 @@ void setupTemperatureDevices()
         lastTemperatureHistoryRecord = millis();
 
         catInThereHistory = new BitArray(temperatureHistorySize);
+        p1History = new BitArray(temperatureHistorySize);
+        p2History = new BitArray(temperatureHistorySize);
+        p3History = new BitArray(temperatureHistorySize);
+        p4History = new BitArray(temperatureHistorySize);
+        fanHistory = new BitArray(temperatureHistorySize);
+        cooldownHistory = new BitArray(temperatureHistorySize);
+        disabledHistory = new BitArray(temperatureHistorySize);
     }
     readTemperatures();
 }
@@ -91,7 +105,7 @@ void readTemperatures()
     for (int i = 0; i < temperatureDeviceCount; ++i)
     {
         auto id = tempDevHexAddress[i];
-        auto temp = DS18B20.getTempC(tempDevAddress[i]);        
+        auto temp = DS18B20.getTempC(tempDevAddress[i]);
 
         if (strncmp(id, eeStaticConfig.tbottomId, DS18B20_ID_STRLENMAX) == 0)
         {
@@ -128,23 +142,5 @@ void manageTemp()
         auto delta = timeDiff(lastTemperatureRead, millis());
         if (delta >= UPDATE_TEMPERATURE_INTERVAL_MS)
             readTemperatures();
-    }
-
-    if (temperatureHistory != NULL &&
-        (timeDiff(lastTemperatureHistoryRecord, millis()) > 1000UL * temperatureHistoryIntervalSec))
-    {
-        if (temperatureHistoryFillCnt < temperatureHistorySize)
-            ++temperatureHistoryFillCnt;
-
-        if (temperatureHistoryOff == temperatureHistorySize)
-            temperatureHistoryOff = 0;
-
-        for (int i = 0; i < temperatureDeviceCount; ++i)
-            temperatureHistory[i][temperatureHistoryOff] = temperatures[i];
-
-        catInThereHistory->Set(temperatureHistoryOff, catInThere);
-
-        ++temperatureHistoryOff;
-        lastTemperatureHistoryRecord = millis();
     }
 }

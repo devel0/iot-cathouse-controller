@@ -15,6 +15,7 @@ extern float *temperatures;
 extern float **temperatureHistory;
 extern uint16_t temperatureHistoryFillCnt;
 extern uint16_t temperatureHistoryOff;
+extern unsigned long lastTemperatureHistoryRecord;
 
 // computed : nr of sample foreach temperature device
 extern uint16_t temperatureHistorySize;
@@ -22,7 +23,7 @@ extern uint16_t temperatureHistorySize;
 // computed : interval of recording foreach temp device in order to span over desired TEMPERATURE_HISTORY_BACKLOG_HOURS
 extern uint16_t temperatureHistoryIntervalSec;
 
-extern BitArray *catInThereHistory;
+extern BitArray *catInThereHistory, *p1History, *p2History, *p3History, *p4History, *fanHistory, *cooldownHistory, *disabledHistory;
 
 void setupTemperatureDevices();
 void readTemperatures();

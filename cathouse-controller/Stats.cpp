@@ -3,6 +3,8 @@
 #include "Config.h"
 #include "EEJsonConfig.h"
 #include "WeightDev.h"
+#include "TempDev.h"
+#include "Engine.h"
 
 double runtime_hr = INITIAL_EMPTY_RUNTIME_HR;
 double Wh = 0.0;
@@ -19,6 +21,36 @@ void statsInit()
         p_was_active[i] = false;
 }
 
+void updateHistory()
+{
+    if (temperatureHistory != NULL &&
+        (timeDiff(lastTemperatureHistoryRecord, millis()) > 1000UL * temperatureHistoryIntervalSec))
+    {
+        if (temperatureHistoryFillCnt < temperatureHistorySize)
+            ++temperatureHistoryFillCnt;
+
+        if (temperatureHistoryOff == temperatureHistorySize)
+            temperatureHistoryOff = 0;
+
+        for (int i = 0; i < temperatureDeviceCount; ++i)
+            temperatureHistory[i][temperatureHistoryOff] = temperatures[i];
+
+        catInThereHistory->Set(temperatureHistoryOff, catInThere);
+        p1History->Set(temperatureHistoryOff, digitalRead(MOSFET_P1) == HIGH);
+        p2History->Set(temperatureHistoryOff, digitalRead(MOSFET_P2) == HIGH);
+        p3History->Set(temperatureHistoryOff, digitalRead(MOSFET_P3) == HIGH);
+        p4History->Set(temperatureHistoryOff, digitalRead(MOSFET_P4) == HIGH);
+        fanHistory->Set(temperatureHistoryOff, digitalRead(FAN_PIN) == HIGH);
+        disabledHistory->Set(temperatureHistoryOff, currentCycle == disabled);
+        cooldownHistory->Set(temperatureHistoryOff, currentCycle == cooldown);
+
+        ++temperatureHistoryOff;
+        lastTemperatureHistoryRecord = millis();
+    }
+
+    lastStatsUpdate = millis();
+}
+
 void statsUpdate()
 {
     auto tdelta = timeDiff(lastStatsUpdate, millis());
@@ -29,8 +61,6 @@ void statsUpdate()
 
         EvalAdcWeight();
     }
-
-    
 
     {
         auto hr = ((double)tdelta) / ((double)1000.0 * 60 * 60);
@@ -49,5 +79,5 @@ void statsUpdate()
         runtime_hr += hr;
     }
 
-    lastStatsUpdate = millis();
+    updateHistory();
 }

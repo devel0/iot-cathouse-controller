@@ -153,24 +153,137 @@ bool manageWifi()
             client.print(']');
           }
           //--------------------------
-          // /catinhistory
+          // /bithistories
           //--------------------------
-          else if (header.indexOf("GET /catinhistory ") >= 0)
+          else if (header.indexOf("GET /bithistories ") >= 0)
           {
             clientOk(client, JSON);
 
-            client.print('[');
-            auto j = (temperatureHistoryFillCnt == temperatureHistorySize) ? temperatureHistoryOff : 0;
+            client.print('{');
+            auto startoff = (temperatureHistoryFillCnt == temperatureHistorySize) ? temperatureHistoryOff : 0;
             auto size = min(temperatureHistoryFillCnt, temperatureHistorySize);
-            for (int k = 0; k < size; ++k)
+
             {
-              if (j == temperatureHistorySize)
-                j = 0;
-              client.print(catInThereHistory->Get(j++) ? "true" : "false");
-              if (k < size - 1)
-                client.print(',');
+              client.print("\"catInThereHistory\":[");
+              auto j = startoff;
+              for (int k = 0; k < size; k++)
+              {
+                if (j == temperatureHistorySize)
+                  j = 0;
+                client.print(catInThereHistory->Get(j++) ? "1" : "0");
+
+                if (k < size - 1)
+                  client.print(',');
+              }
+              client.print("]");
             }
-            client.print(']');
+
+            {
+              client.print(",\"p1History\":[");
+              auto j = startoff;
+              for (int k = 0; k < size; k++)
+              {
+                if (j == temperatureHistorySize)
+                  j = 0;
+                client.print(p1History->Get(j++) ? "1" : "0");
+
+                if (k < size - 1)
+                  client.print(',');
+              }
+              client.print("]");
+            }
+
+            {
+              client.print(",\"p2History\":[");
+              auto j = startoff;
+              for (int k = 0; k < size; k++)
+              {
+                if (j == temperatureHistorySize)
+                  j = 0;
+                client.print(p2History->Get(j++) ? "1" : "0");
+
+                if (k < size - 1)
+                  client.print(',');
+              }
+              client.print("]");
+            }
+
+            {
+              client.print(",\"p3History\":[");
+              auto j = startoff;
+              for (int k = 0; k < size; k++)
+              {
+                if (j == temperatureHistorySize)
+                  j = 0;
+                client.print(p3History->Get(j++) ? "1" : "0");
+
+                if (k < size - 1)
+                  client.print(',');
+              }
+              client.print("]");
+            }
+
+            {
+              client.print(",\"p4History\":[");
+              auto j = startoff;
+              for (int k = 0; k < size; k++)
+              {
+                if (j == temperatureHistorySize)
+                  j = 0;
+                client.print(p4History->Get(j++) ? "1" : "0");
+
+                if (k < size - 1)
+                  client.print(',');
+              }
+              client.print("]");
+            }
+
+            {
+              client.print(",\"fanHistory\":[");
+              auto j = startoff;
+              for (int k = 0; k < size; k++)
+              {
+                if (j == temperatureHistorySize)
+                  j = 0;
+                client.print(fanHistory->Get(j++) ? "1" : "0");
+
+                if (k < size - 1)
+                  client.print(',');
+              }
+              client.print("]");
+            }
+
+            {
+              client.print(",\"disabledHistory\":[");
+              auto j = startoff;
+              for (int k = 0; k < size; k++)
+              {
+                if (j == temperatureHistorySize)
+                  j = 0;
+                client.print(disabledHistory->Get(j++) ? "1" : "0");
+
+                if (k < size - 1)
+                  client.print(',');
+              }
+              client.print("]");
+            }
+
+            {
+              client.print(",\"cooldownHistory\":[");
+              auto j = startoff;
+              for (int k = 0; k < size; k++)
+              {
+                if (j == temperatureHistorySize)
+                  j = 0;
+                client.print(cooldownHistory->Get(j++) ? "1" : "0");
+
+                if (k < size - 1)
+                  client.print(',');
+              }
+              client.print("]");
+            }
+
+            client.print('}');
           }
           //--------------------------
           // /info

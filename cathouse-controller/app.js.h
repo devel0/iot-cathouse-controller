@@ -383,7 +383,7 @@ let res = null; \
 while (!finished) { \
 try { \
 res = await $.ajax({ \
-url: baseurl + \"/catinhistory\", \
+url: baseurl + \"/bithistories\", \
 type: 'GET' \
 }); \
 finished = true; \
@@ -392,20 +392,23 @@ await sleep(1000); \
 } \
 } \
  \
-var ctx = document.getElementById(\"catinChart\").getContext('2d'); \
+var ctx = document.getElementById(\"bitChart\").getContext('2d'); \
  \
 var dtnow = moment(); \
  \
+ \
+{ \
+let rr = res.catInThereHistory; \
 var i = 0; \
 var dss = []; { \
 dts = []; \
-let valcnt = res.length; \
-$.each(res, function (idx, val) { \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
 secbefore = (valcnt - idx - 1) * history_interval_sec; \
 tt = moment(dtnow).subtract(secbefore, 'seconds'); \
 dts.push({ \
 t: tt, \
-y: val ? 1 : 0 \
+y: val \
 }); \
 }); \
  \
@@ -419,9 +422,172 @@ pointRadius: 0 \
  \
 ++i; \
 }; \
+} \
+ \
+{ \
+let rr = res.p1History; \
+var i = 0; \
+var dss = []; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: 'orange', \
+fill: true, \
+label: 'P1', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+{ \
+let rr = res.p2History; \
+var i = 0; \
+var dss = []; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: 'yellow', \
+fill: true, \
+label: 'P2', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+{ \
+let rr = res.p3History; \
+var i = 0; \
+var dss = []; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: 'green', \
+fill: true, \
+label: 'P3', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+{ \
+let rr = res.p4History; \
+var i = 0; \
+var dss = []; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: 'blue', \
+fill: true, \
+label: 'P4', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+{ \
+let rr = res.disabledHistory; \
+var i = 0; \
+var dss = []; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: 'violet', \
+fill: true, \
+label: 'disabled', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+{ \
+let rr = res.cooldownHistory; \
+var i = 0; \
+var dss = []; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: 'cyan', \
+fill: true, \
+label: 'cooldown', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
  \
 var myChart = new Chart(ctx, { \
-type: 'line', \
+type: 'bar', \
 data: { \
 datasets: dss \
 }, \
@@ -430,13 +596,15 @@ maintainAspectRatio: false, \
 animation: false, \
 scales: { \
 xAxes: [{ \
-type: 'time' \
+type: 'time', \
+stacked: true \
 }], \
 yAxes: [{ \
 ticks: { \
 min: 0, \
 max: 1 \
-} \
+}, \
+stacked: true \
 }] \
 } \
 } \

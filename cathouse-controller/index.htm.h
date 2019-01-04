@@ -66,8 +66,8 @@ crossorigin=\"anonymous\"> \
 <div class=\"row j-containers j-home\"> \
 <div class=\"col col-sm-12 col-lg-7\"> \
 <h2>Charts</h2> \
-<div class=\"catinChartDiv\" style=\"position: relative\"> \
-<canvas id=\"catinChart\"></canvas> \
+<div class=\"bitChartDiv\" style=\"position: relative\"> \
+<canvas id=\"bitChart\"></canvas> \
 </div> \
 <div class=\"tempChartDiv\" style=\"position: relative\"> \
 <canvas id=\"tempChart\"></canvas> \
