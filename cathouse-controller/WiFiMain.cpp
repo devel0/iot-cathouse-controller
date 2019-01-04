@@ -249,9 +249,9 @@ bool manageWifi()
             else
               client.printf(", \"fan\": false");
 
-            client.printf(", \"temp_history_interval_min\": %f", temperatureHistoryIntervalSec/60.0);
-            client.printf(", \"prev_cycle\": \"%s\"",  getCycleStr(prevCycle).c_str());
-            client.printf(", \"current_cycle\": \"%s\"",  getCycleStr(currentCycle).c_str());
+            client.printf(", \"temp_history_interval_min\": %f", temperatureHistoryIntervalSec / 60.0);
+            client.printf(", \"prev_cycle\": \"%s\"", getCycleStr(prevCycle).c_str());
+            client.printf(", \"current_cycle\": \"%s\"", getCycleStr(currentCycle).c_str());
 
             client.printf(", \"runtime_hr\": %f", runtime_hr);
             client.printf(", \"Wh\": %f", Wh);
@@ -377,11 +377,18 @@ bool manageWifi()
               break;
             }
 
-            auto v = digitalRead(portpin);
-            Serial.printf("manual> toggling port %d from %d\n", portnr, v);
-            digitalWrite(portpin, (v == LOW) ? HIGH : LOW);
+            if (eeJsonConfig.manualMode && portpin != LED_PIN)
+            {
+              client.print("DENIED");
+            }
+            else
+            {
+              auto v = digitalRead(portpin);
+              Serial.printf("manual> toggling port %d from %d\n", portnr, v);
+              digitalWrite(portpin, (v == LOW) ? HIGH : LOW);
 
-            client.print("OK");
+              client.print("OK");
+            }
           }
           //--------------------------
           // /setcatinthere/{0,1}

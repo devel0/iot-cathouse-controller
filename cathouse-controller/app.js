@@ -12,6 +12,7 @@ var tempUpdateIntervalMs = 10000;
 
 //==============================================================================
 
+var LED_PORT = 5;
 var sensorDesc = [];
 
 requirejs.config({
@@ -128,7 +129,7 @@ async function _toggleCatInThere() {
 }
 
 async function togglePort(p) {
-    if (!manualMode) {
+    if (!manualMode && p != LED_PORT) {
         alert("can't toggle port in automatic mode");
     } else {
         showSpin();
