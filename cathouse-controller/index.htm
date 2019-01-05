@@ -52,12 +52,12 @@
             <div class="col-auto">
                 <h1>Cathouse controller</h1>
             </div>
+            <div class="col"><i class="fas fa-sync-alt fa-spin j-spin collapse"></i></div>
             <div class="col">
                 <div class="btn-group" role="group">
                     <button class="btn btn-link" onclick='showHome()'><span class='menu-home fstrong j-menu'>Home</span></button>
                     <button class="btn btn-link" onclick='showConfig()'><span class='menu-config j-menu'>Config</span></button>
                     <button class="btn btn-link" onclick="window.open('https://github.com/devel0/iot-cathouse-controller')">About</button>
-                    <div class="col"><i class="fas fa-spin fa-spinner j-spin collapse"></i></div>
                 </div>
             </div>
         </div>
@@ -68,9 +68,10 @@
                     <div class="col-auto">
                         <h2>Charts</h2>
                     </div>
-                    <div class="col">
+                    <div class="col-auto">
                         <input type="button" class="btn btn-link" id="bitExport" value='Download CSV' />
                     </div>
+                    <div class="col"><small><i class="fas fa-sync-alt j-spin-chart collapse"></i></small></div>
                 </div>
 
                 <div class="bitChartDiv" style="position: relative; height: 160px">
@@ -86,10 +87,60 @@
                 </div>
 
             </div>
+
             <div class="col col-sm-12 col-lg-5">
                 <div class="row">
+                    <!-- tabular -->
                     <div class="col-12">
-                        <h2>Ports</h2>
+                        <div class="row">
+                            <div class="col-auto">
+                                <h2>Tabular</h2>
+                            </div>
+                            <div class="col"><small><i class="fas fa-sync-alt j-spin-temp collapse"></i></small></div>
+                        </div>
+                        <div class="table-container">
+                            <div class="table table-striped table-sm">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col"><b>Address</b></th>
+                                            <th scope="col"><b>Description</b></th>
+                                            <th scope="col"><b>Value (C)</b></th>
+                                            <th scope="col"><b>Trend</b></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-temp"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- weight -->
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-auto">
+                                <h3>ADC Weight</h3>
+                            </div>
+                            <div class="col"><small><i class="fas fa-sync-alt j-spin-info collapse"></i></small></div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="weightChartDiv" style="position: relative">
+                                    <canvas id="weightChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ports -->
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-auto">
+                                <h2>Ports</h2>
+                            </div>
+                            <div class="col"><small><i class="fas fa-sync-alt j-spin-info collapse"></i></small></div>
+                        </div>
+
                         <div class="row">
                             <div class="col-auto">
                                 <button class="btn btn-link" onclick='togglePort(1)'><span class='port-p1'>P1</span></button>
@@ -111,10 +162,15 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <h2>Stats</h2>
+
+                    <!-- stats -->
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-auto">
+                                <h2>Stats</h2>
+                            </div>
+                            <div class="col"><small><i class="fas fa-sync-alt j-spin-info collapse"></i></small></div>
+                        </div>
                         <div class="row">
                             <div class="col-12">
                                 <div class="table table-striped table-sm">
@@ -164,32 +220,6 @@
                                 </div>
 
                             </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <h2>Tabular</h2>
-                        <div class="table-container">
-                            <div class="table table-striped table-sm">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col"><b>Address</b></th>
-                                            <th scope="col"><b>Description</b></th>
-                                            <th scope="col"><b>Value (C)</b></th>
-                                            <th scope="col"><b>Trend</b></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbody-temp"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12">
-                        <h3>ADC Weight</h3>
-                        <div class="weightChartDiv" style="position: relative">
-                            <canvas id="weightChart"></canvas>
                         </div>
                     </div>
                 </div>

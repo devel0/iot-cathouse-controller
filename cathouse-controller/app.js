@@ -24,9 +24,29 @@ requirejs.config({
 function showSpin() {
     $('.j-spin').removeClass("collapse");
 }
-
 function hideSpin() {
     $('.j-spin').addClass("collapse");
+}
+
+function showSpinInfo() {
+    $('.j-spin-info').removeClass("collapse");
+}
+function hideSpinInfo() {
+    $('.j-spin-info').addClass("collapse");
+}
+
+function showSpinChart() {
+    $('.j-spin-chart').removeClass("collapse");
+}
+function hideSpinChart() {
+    $('.j-spin-chart').addClass("collapse");
+}
+
+function showSpinTemp() {
+    $('.j-spin-temp').removeClass("collapse");
+}
+function hideSpinTemp() {
+    $('.j-spin-temp').addClass("collapse");
 }
 
 function showHome() {
@@ -52,7 +72,7 @@ if (debug) baseurl = 'http://10.10.3.9';
 //if (debug) baseurl = 'http://10.10.3.11';
 
 async function reloadTemp(addr) {
-    showSpin();
+    showSpinTemp();
     let finished = false;
     let res = null;
     while (!finished) {
@@ -66,7 +86,7 @@ async function reloadTemp(addr) {
             await sleep(1000);
         }
     }
-    hideSpin();
+    hideSpinTemp();
     $('#t' + addr)[0].innerText = res;
 }
 
@@ -156,7 +176,7 @@ async function togglePort(p) {
 
 async function reloadInfo() {
     //console.log("--> reloadInfo");
-    showSpin();
+    showSpinInfo();
     let finished = false;
     let res = null;
     while (!finished) {
@@ -170,7 +190,7 @@ async function reloadInfo() {
             await sleep(1000);
         }
     }
-    hideSpin();
+    hideSpinInfo();
     //$('#info')[0].innerHTML = JSON.stringify(res, null, 2);
 
     manualMode = res["manualMode"];
@@ -311,6 +331,7 @@ async function reloadAllTemp() {
 async function getBitHistoriesDataSource() {
     var dtnow = moment();
 
+    showSpinChart();
     let finished = false;
     var res = null;
     while (!finished) {
@@ -324,6 +345,7 @@ async function getBitHistoriesDataSource() {
             await sleep(1000);
         }
     }
+    hideSpinChart();
 
     var dss = []; {
         let rr = res.catInThereHistory;
@@ -549,6 +571,7 @@ async function getTempHistoryDataSource() {
 
     var dss = [];
 
+    showSpinChart();
     let finished = false;
     let res = null;
     while (!finished) {
@@ -562,6 +585,7 @@ async function getTempHistoryDataSource() {
             await sleep(1000);
         }
     }
+    hideSpinChart();
 
     var colors = ['orange', 'yellow', 'green', 'blue', 'violet', 'black', 'red'];
 
