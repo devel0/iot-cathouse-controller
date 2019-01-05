@@ -613,6 +613,38 @@ async function getTempHistoryDataSource() {
     return dss;
 }
 
+function getTempRelDataSource(dss) {
+    // add ambient-extern dataset     
+
+    let ambientDss = null;
+    let externDss = null;
+    for (j = 0; j < dss.length; ++j) {
+        if (dss[j].label == 'ambient')
+            ambientDss = dss[j];
+        else if (dss[j].label == 'extern')
+            externDss = dss[j];
+    }
+
+    var dssRel = [];
+    if (ambientDss != null && externDss != null) {
+        dts = [];
+        for (w = 0; w < ambientDss.data.length; ++w) {
+            dts.push({
+                t: ambientDss.data[w].t,
+                y: ambientDss.data[w].y - externDss.data[w].y
+            });
+        }
+        dssRel.push({
+            borderColor: 'red',
+            label: 'ambient - extern',
+            data: dts,
+            pointRadius: 0
+        });
+    }
+
+    return dssRel;
+}
+
 async function reloadCharts() {
     var dtnow = moment();
 
@@ -627,6 +659,31 @@ async function reloadCharts() {
                 datasets: dss
             },
             options: {
+                maintainAspectRatio: false,
+                animation: false,
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            displayFormats: {
+                                'hour': 'HH:mm'
+                            }
+                        },
+                        position: 'bottom'
+                    }]
+                }
+            }
+        });
+
+        dssRel = getTempRelDataSource(dss);
+        var relCtx = document.getElementById("tempRelChart").getContext('2d');
+        var myChart2 = new Chart(relCtx, {
+            type: 'line',
+            data: {
+                datasets: dssRel
+            },
+            options: {
+                maintainAspectRatio: false,
                 animation: false,
                 scales: {
                     xAxes: [{
@@ -643,7 +700,7 @@ async function reloadCharts() {
         });
     }
 
-    // cat in there chart
+    // bit charts
     {
         var ctx = document.getElementById("bitChart").getContext('2d');
 
@@ -662,7 +719,7 @@ async function reloadCharts() {
                         type: 'time',
                         stacked: true
                     }],
-                    yAxes: [{                        
+                    yAxes: [{
                         stacked: true
                     }]
                 }
@@ -684,7 +741,7 @@ async function exportDataSet(bitdss, filename) {
             if (i != bitdssl - 1)
                 csv = csv.concat(sep);
             else
-                csv = csv.concat(String.fromCharCode(13,10));
+                csv = csv.concat(String.fromCharCode(13, 10));
         }
         let j = 0;
         while (j < datadepth) {
@@ -698,7 +755,7 @@ async function exportDataSet(bitdss, filename) {
                 if (i != bitdssl - 1)
                     csv = csv.concat(sep);
                 else
-                    csv = csv.concat(String.fromCharCode(13,10));
+                    csv = csv.concat(String.fromCharCode(13, 10));
             }
             ++j;
         }
