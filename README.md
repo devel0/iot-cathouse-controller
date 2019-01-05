@@ -93,7 +93,7 @@ write correspondent temperature IDs in fields ( 16 hex char foreach device )
 | `/temp/devid` | text | retrieve temperature C of given `devid` device |
 | `/info` | json | `{"statIntervalSec":2, "freeram":10896, "freeram_min":4008, "history_size":1517, "history_interval_sec":113, "temperatureHistoryFillCnt":1517, "temperatureHistoryOff":545, "manualMode":false, "adcWeightArraySize":2048, "adcWeightArrayOff":681, "adcWeightArrayFillCnt":2048, "adcWeightArray":[222,219],"catIsInThere":false, "p1": false, "p2": false, "p3": false, "p4": false, "led": false, "fan": false, "runtime_hr": 112.552439, "Wh": 2731.811464}` |
 | `/temphistory` | json | `[{"28b03724070000c8":[8.00,9.00]},{"28f00a3b05000038":[4.44,4]}]` |
-| `/catinhistory` | json | `[false,false,true]` |
+| `/bithistories` | json | `{"catInThereHistory":[0,1,1],"p1History":[0,1,1],"p2History":[0,0,0],"p3History":[0,0,0],"p4History":[0,1,1],"fanHistory":[0,0,0],"disabledHistory":[0,0,0],"cooldownHistory":[0,0,0]}` |
 | `/port/get/X` | text | `0` |
 | `/port/set/X/{0,1}` | text | `OK` |
 | `/port/toggle/X` | text | `OK` |
@@ -117,6 +117,8 @@ code .
 
 - to build or check compilation `CTRL+SHIFT+R`
 - to upload through USB-serial `CTRL+SHIFT+U`
+
+- when ENABLE_CORS enabled client side can be debugged without need to upload firmware again simply dragging `index.htm` to the browser so that `app.js` will loaded from local disk
 
 ## security considerations
 
