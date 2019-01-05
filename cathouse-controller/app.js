@@ -684,7 +684,7 @@ async function exportDataSet(bitdss, filename) {
             if (i != bitdssl - 1)
                 csv = csv.concat(sep);
             else
-                csv = csv.concat("\r\n");
+                csv = csv.concat(String.fromCharCode(13,10));
         }
         let j = 0;
         while (j < datadepth) {
@@ -698,7 +698,7 @@ async function exportDataSet(bitdss, filename) {
                 if (i != bitdssl - 1)
                     csv = csv.concat(sep);
                 else
-                    csv = csv.concat("\r\n");
+                    csv = csv.concat(String.fromCharCode(13,10));
             }
             ++j;
         }
