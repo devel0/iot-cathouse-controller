@@ -65,19 +65,19 @@ write correspondent temperature IDs in fields ( 16 hex char foreach device )
 ## operating modes ( fanless or active fan )
 
 - if fanless mode is checked
- - heat ports will be enabled one by one in sequence for `Port duration` specified interval
- - between ports activation if `Port overlap duration` greater than 0 two ports works sharing port duration
+    - heat ports will be enabled one by one in sequence for `Port duration` specified interval
+    - between ports activation if `Port overlap duration` greater than 0 two ports works sharing port duration
 - if fanless mode is not checked
- - when cat is in there fullpower ( all 4 ports ) activated for given `Fullpower duration` interval
- - fan activates during fullpower if bottom temperatures great or equals `TBottom >= T fan on` parameter
- - after fullpower duration only one port still active `Standby port` for a duration given from `Standby duration` parameter
+    - when cat is in there fullpower ( all 4 ports ) activated for given `Fullpower duration` interval
+    - fan activates during fullpower if bottom temperatures great or equals `TBottom >= T fan on` parameter
+    - after fullpower duration only one port still active `Standby port` for a duration given from `Standby duration` parameter
  
 ### cooldown and system off
 
 - if some limit condition occurs
- - bottom temperature great or equals `Bottom temperature limit`
- - wood temperature great or equals `Wood temperature limit`
- - ambient temperature great or equals `Ambient temperature limit`
+    - bottom temperature great or equals `Bottom temperature limit`
+    - wood temperature great or equals `Wood temperature limit`
+    - ambient temperature great or equals `Ambient temperature limit`
 - then the system goes off for given `Cooldown time`
 - if external temperature great or equals `Extern >= T sys OFF` then system goes off independently cat is in there or not
 
