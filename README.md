@@ -102,7 +102,7 @@ write correspondent temperature IDs in fields ( 16 hex char foreach device )
 | `/saveconfig` | json POST | |
 
 notes
-- `temphistory`, `adcWeightArray`, `catinhistory` are a set of measure where latest sample if the current one and previous are distant between each one from specified `history_interval_sec`
+- `temphistory`, `adcWeightArray`, `bithistories` are a set of measure where latest sample if the current one and previous are distant between each one from specified `history_interval_sec`
 - valid ports in `/port/get` and `/port/set` are
   - heating ports ( 1, 2, 3, 4 )
   - led port ( 5 )
