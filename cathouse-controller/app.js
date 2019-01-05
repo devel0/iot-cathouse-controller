@@ -15,7 +15,7 @@ var tempUpdateIntervalMs = 10000;
 var LED_PORT = 5;
 var sensorDesc = [];
 
-var decimalSep = '.'; // auto updated from the browser
+var decimalSep = '.';
 
 requirejs.config({
     "moment": "://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"
@@ -662,11 +662,7 @@ async function reloadCharts() {
                         type: 'time',
                         stacked: true
                     }],
-                    yAxes: [{
-                        /*ticks: {
-                            min: 0,
-                            max: 1
-                        },*/
+                    yAxes: [{                        
                         stacked: true
                     }]
                 }
@@ -677,7 +673,7 @@ async function reloadCharts() {
 
 async function exportDataSet(bitdss, filename) {
     var csv = '';
-    var sep = (decimalSep == '.') ? ',' : ';'
+    var sep = (decimalSep == '.') ? ',' : ';';
 
     if (bitdss.length > 0) {
         var bitdssl = bitdss.length;
