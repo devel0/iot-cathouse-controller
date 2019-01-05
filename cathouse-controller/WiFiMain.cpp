@@ -490,7 +490,7 @@ bool manageWifi()
               break;
             }
 
-            if (!eeJsonConfig.manualMode || portpin != LED_PIN)
+            if (!eeJsonConfig.manualMode && portpin != LED_PIN)
             {
               client.print("DENIED");
             }
