@@ -7,16 +7,15 @@
   * [set wifi ssid and pwd](#set-wifi-ssid-and-pwd)
   * [parameter configurations](#parameter-configurations)
   * [set temperature sensor ids](#set-temperature-sensor-ids)
-- [operating modes ( fanless or active fan )](#operating-modes--fanless-or-active-fan-)
+- [config](#config)
   * [cooldown and system off](#cooldown-and-system-off)
   * [manual mode](#manual-mode)
   * [webapi](#webapi)
+- [export csv data](#export-csv-data)
 - [debug](#debug)
 - [security considerations](#security-considerations)
 
 ![img](doc/home.png)
-
-![img](doc/config.png)
 
 ## features
 
@@ -62,7 +61,9 @@ connect to serial interface of esp8266 through usb cable with minicom at 115200 
 in order to allow the system recognition of temperature sensor for bottom, wood, ambient and extern first there is the need to write down their ids ; use one of existing inet [articles](https://www.google.com/search?q=arduino+ds18b20+id) to find out.
 write correspondent temperature IDs in fields ( 16 hex char foreach device )
 
-## operating modes ( fanless or active fan )
+## config
+
+![img](doc/config.png)
 
 - if fanless mode is checked
     - heat ports will be enabled one by one in sequence for `Port duration` specified interval
@@ -107,6 +108,12 @@ notes
   - heating ports ( 1, 2, 3, 4 )
   - led port ( 5 )
   - fan port ( 6 )
+
+## export csv data
+
+![img](doc/exportcsv.png)
+
+- data will be exported using decimal separator dot or comma accordingly to browser locale
 
 ## debug
 
