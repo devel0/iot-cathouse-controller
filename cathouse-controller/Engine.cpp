@@ -138,7 +138,7 @@ void backPrevCycle()
     prevCycleBegin = cb;
 }
 
-#define TBOTTOM_LAST_SAMPLES_CNT 10
+#define TBOTTOM_LAST_SAMPLES_CNT 20
 float tbottomLastSamples[TBOTTOM_LAST_SAMPLES_CNT];
 bool tbottomLastSamplesInitialized = false;
 int tbottomLastSamplesIdx = 0;
@@ -152,16 +152,20 @@ enum TTrendTypes
 TTrendTypes getTBottomTrend()
 {
     auto idxCur = tbottomLastSamplesIdx;
-    auto idxBefore = (tbottomLastSamplesIdx + TBOTTOM_LAST_SAMPLES_CNT - 1) % TBOTTOM_LAST_SAMPLES_CNT;
+    auto idxBefore = (tbottomLastSamplesIdx + 1) % TBOTTOM_LAST_SAMPLES_CNT;
     auto diff = tbottomLastSamples[idxCur] - tbottomLastSamples[idxBefore];
+    Serial.printf("engine> eval tbottom trend cur[idx=%d]=%f before[idx=%d]=%f = %f\n",
+                  idxCur, tbottomLastSamples[idxCur], idxBefore, tbottomLastSamples[idxBefore], diff);
 
-    if (diff > .2)
+    if (diff > TBOTTOM_TREND_DELTA_C)
         return increasing;
-    else if (diff < -.2)
+    else if (diff < -TBOTTOM_TREND_DELTA_C)
         return decreasing;
 
     return stable;
 }
+
+unsigned long lastStandbyTrendEval = millis();
 
 void engineProcess()
 {
@@ -287,25 +291,34 @@ void engineProcess()
 
             case standby:
             {
-                if (tbottom_assigned && tbottomLastSamplesInitialized)
+                if (tbottom_assigned && tbottomLastSamplesInitialized &&
+                    timeDiff(lastStandbyTrendEval, millis()) > ENGINE_POOL_INTERVAL_MS * TBOTTOM_LAST_SAMPLES_CNT)
                 {
+                    //lastStandbyTrendEval
                     auto trend = getTBottomTrend();
                     auto ports = getPorts();
                     switch (trend)
                     {
                     case increasing:
                     {
-                        setPorts(ports - 1);
-                        Serial.printf("engine> set %d ports quantity due to increasing tbottom trend\n", ports);
+                        if (ports > 0)
+                        {
+                            setPorts(ports - 1);
+                            Serial.printf("engine> set %d ports quantity due to increasing tbottom trend\n", ports - 1);
+                        }
                     }
                     break;
                     case decreasing:
                     {
-                        setPorts(ports + 1);
-                        Serial.printf("engine> set %d ports quantity due to decreasing tbottom trend\n", ports);
+                        if (ports < 4)
+                        {
+                            setPorts(ports + 1);
+                            Serial.printf("engine> set %d ports quantity due to decreasing tbottom trend\n", ports + 1);
+                        }
                     }
                     break;
                     }
+                    lastStandbyTrendEval = millis();
                 }
             }
             break;

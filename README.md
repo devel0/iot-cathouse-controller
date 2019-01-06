@@ -73,9 +73,11 @@ write correspondent temperature IDs in fields ( 16 hex char foreach device )
 
 - when cat enters all ports enabled until reaches 1C before tbottom limit then it goes to standby mode
     - during fullpower mode if tbottom great or equals than `TBottom >= T fan on` fan enables to speed up ambient t increase
-- in standby mode last 50sec of bottom temperature samples are evaluted to balance
+- in standby mode last 100sec of bottom temperature samples are evaluted to balance
     - if tbottom trend increase 1 port will disabled
     - if tbottom trend decrease 1 port will enabled
+    - ports are selected in order of preference as from [Config.h](cathouse-controller/Config.h) PORT_PREF
+    - trend delta can be configured in [Config.h](cathouse-controller/Config.h) TBOTTOM_TREND_DELTA_C
 
 - if some limit condition occurs
     - bottom temperature great or equals `Bottom temperature limit`
