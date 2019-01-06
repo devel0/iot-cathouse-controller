@@ -63,6 +63,7 @@
         </div>
 
         <div class="row j-containers j-home">
+            <!-- left col ( charts ) -->
             <div class="col col-sm-12 col-lg-7">
                 <div class="row">
                     <div class="col-auto">
@@ -88,50 +89,9 @@
 
             </div>
 
+            <!-- right col ( stats, weights, tabulars, info ) -->
             <div class="col col-sm-12 col-lg-5">
                 <div class="row">
-                    <!-- tabular -->
-                    <div class="col-12">
-                        <div class="row">
-                            <div class="col-auto">
-                                <h2>Tabular</h2>
-                            </div>
-                            <div class="col"><small><i class="fas fa-sync-alt j-spin-temp collapse"></i></small></div>
-                        </div>
-                        <div class="table-container">
-                            <div class="table table-striped table-sm">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col"><b>Address</b></th>
-                                            <th scope="col"><b>Description</b></th>
-                                            <th scope="col"><b>Value (C)</b></th>
-                                            <th scope="col"><b>Trend</b></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbody-temp"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- weight -->
-                    <div class="col-12">
-                        <div class="row">
-                            <div class="col-auto">
-                                <h3>ADC Weight</h3>
-                            </div>
-                            <div class="col"><small><i class="fas fa-sync-alt j-spin-info collapse"></i></small></div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="weightChartDiv" style="position: relative">
-                                    <canvas id="weightChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- ports -->
                     <div class="col-12">
                         <div class="row">
@@ -213,12 +173,55 @@
                                         <tr>
                                             <td class="text-right text-nowrap align-middle">Cat is in there</td>
                                             <td class="align-middle">
-                                                <button class="btn btn-link" onclick='toggleCatInThere()'><span class='cat-is-in-there ml-3'></span></button>
+                                                <button class="btn btn-link" onclick='toggleCatInThere()' style="padding:0"><span
+                                                        class='cat-is-in-there ml-3'></span></button>
                                             </td>
                                         </tr>
                                     </table>
                                 </div>
 
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- tabular -->
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-auto">
+                                <h2>Tabular</h2>
+                            </div>
+                            <div class="col"><small><i class="fas fa-sync-alt j-spin-temp collapse"></i></small></div>
+                        </div>
+                        <div class="table-container">
+                            <div class="table table-striped table-sm">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col"><b>Address</b></th>
+                                            <th scope="col"><b>Description</b></th>
+                                            <th scope="col"><b>Value (C)</b></th>
+                                            <th scope="col"><b>Trend</b></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-temp"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- weight -->
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-auto">
+                                <h3>ADC Weight</h3>
+                            </div>
+                            <div class="col"><small><i class="fas fa-sync-alt j-spin-info collapse"></i></small></div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="weightChartDiv" style="position: relative">
+                                    <canvas id="weightChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>

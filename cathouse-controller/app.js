@@ -29,10 +29,10 @@ function hideSpin() {
 }
 
 function showSpinInfo() {
-    $('.j-spin-info').removeClass("collapse");
+//    $('.j-spin-info').removeClass("collapse");
 }
 function hideSpinInfo() {
-    $('.j-spin-info').addClass("collapse");
+//    $('.j-spin-info').addClass("collapse");
 }
 
 function showSpinChart() {
@@ -43,10 +43,10 @@ function hideSpinChart() {
 }
 
 function showSpinTemp() {
-    $('.j-spin-temp').removeClass("collapse");
+//    $('.j-spin-temp').removeClass("collapse");
 }
 function hideSpinTemp() {
-    $('.j-spin-temp').addClass("collapse");
+//    $('.j-spin-temp').addClass("collapse");
 }
 
 function showHome() {
