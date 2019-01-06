@@ -208,14 +208,15 @@ void engineProcess()
         (tambient_assigned && tambient >= eeJsonConfig.tambientLimit))
     {
         if (currentCycle != cooldown)
+        {
             setCurrentCycle(cooldown);
+            Serial.printf("engine> cooldown because tbottom %f>=%f or twood %f>=%f or tambient %f>=%f\n",
+                          tbottom, eeJsonConfig.tbottomLimit,
+                          twood, eeJsonConfig.twoodLimit,
+                          tambient, eeJsonConfig.tambientLimit);
+        }
 
         setPorts(0);
-
-        Serial.printf("engine> cooldown because tbottom %f>=%f or twood %f>=%f or tambient %f>=%f\n",
-                      tbottom, eeJsonConfig.tbottomLimit,
-                      twood, eeJsonConfig.twoodLimit,
-                      tambient, eeJsonConfig.tambientLimit);
     }
 
     // back from cooldown to prev
@@ -267,9 +268,10 @@ void engineProcess()
                     auto tFromLimit = eeJsonConfig.tbottomLimit - tbottom;
                     if (tFromLimit <= 1)
                     {
-                        Serial.printf("engine> switch to standby cycle\n");
+                        Serial.printf("engine> switch to standby cycle disabling fan if any\n");
                         setCurrentCycle(standby);
                         setPorts(1);
+                        digitalWrite(FAN_PIN, LOW);
                     }
                     else
                     {
