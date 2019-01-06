@@ -274,7 +274,7 @@ void engineProcess()
                     {
                         Serial.printf("engine> switch to standby cycle disabling fan if any\n");
                         setCurrentCycle(standby);
-                        setPorts(1);
+                        setPorts(2);
                         digitalWrite(FAN_PIN, LOW);
                     }
                     else
