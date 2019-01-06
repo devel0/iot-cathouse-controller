@@ -5,12 +5,21 @@
 
 enum CycleTypes
 {
+    // initial
     none,
+
+    // heat first phase
     fullpower,
+    // heat continuous
     standby,
+
+    // tbottom or twood or tambient exceeded
     cooldown,
+
+    // textern exceeded
     disabled,
-    fanless
+    
+    manual
 };
 
 extern CycleTypes prevCycle;
@@ -18,5 +27,6 @@ extern CycleTypes currentCycle;
 
 void engineProcess();
 String getCycleStr(CycleTypes cycle);
+void setManual();
 
 #endif

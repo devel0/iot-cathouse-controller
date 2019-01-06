@@ -31,16 +31,10 @@ void EEJsonConfig::Save(Print &prn, bool forWebapi)
         .property("tbottomLimit", tbottomLimit)
         .property("twoodLimit", twoodLimit)
         .property("tambientLimit", tambientLimit)
-        .property("cooldownTimeMs", cooldownTimeMs)
-        .property("standbyDurationMs", standbyDurationMs)
-        .property("standbyPort", standbyPort)
-        .property("fullpowerDurationMs", fullpowerDurationMs)
+        .property("cooldownTimeMs", cooldownTimeMs)        
         .property("texternGTESysOff", texternGTESysOff)
         .property("adcWeightDeltaCat", adcWeightDeltaCat)
-        .property("manualMode", manualMode)
-        .property("fanlessMode", fanlessMode)
-        .property("portDurationMs", portDurationMs)
-        .property("portOverlapDurationMs", portOverlapDurationMs)
+        .property("manualMode", manualMode)        
         .property("tbottomGTEFanOn", tbottomGTEFanOn);
 
     if (forWebapi) // saveconfig webapi includes view of these variabiles coming from eeStaticConfig
@@ -106,17 +100,11 @@ void EEJsonConfig::Clear()
     tbottomLimit = FACTORY_TBOTTOM_LIMIT;
     twoodLimit = FACTORY_TWOOD_LIMIT;
     tambientLimit = FACTORY_TAMBIENT_LIMIT;
-    cooldownTimeMs = FACTORY_COOLDOWN_TIME_MS;
-    standbyDurationMs = FACTORY_STANDBY_DURATION_MS;
-    standbyPort = FACTORY_STANDBY_PORT;
-    fullpowerDurationMs = FACTORY_FULLPOWER_DURATION_MS;
+    cooldownTimeMs = FACTORY_COOLDOWN_TIME_MS;    
     texternGTESysOff = FACTORY_TEXTERN_GTE_SYS_OFF;
     adcWeightDeltaCat = FACTORY_ADC_WEIGHT_DELTA_CAT;
     tbottomGTEFanOn = FACTORY_TBOTTOM_GTE_FAN_ON;
-    manualMode = FACTORY_MANULA_MODE;
-    fanlessMode = FACTORY_FANLESS_MODE;
-    portDurationMs = FACTORY_PORT_DURATION_MS;
-    portOverlapDurationMs = FACTORY_PORT_OVERLAP_DURATION_MS;
+    manualMode = FACTORY_MANULA_MODE;    
 }
 
 //-----------------------------------------
@@ -265,13 +253,7 @@ void EEJsonConfigParseListener::value(String value)
     else if (lastKey == "tambientLimit")
         eeJsonConfig.tambientLimit = atof(value.c_str());
     else if (lastKey == "cooldownTimeMs")
-        eeJsonConfig.cooldownTimeMs = atol(value.c_str());
-    else if (lastKey == "standbyDurationMs")
-        eeJsonConfig.standbyDurationMs = atol(value.c_str());
-    else if (lastKey == "standbyPort")
-        eeJsonConfig.standbyPort = atoi(value.c_str());
-    else if (lastKey == "fullpowerDurationMs")
-        eeJsonConfig.fullpowerDurationMs = atol(value.c_str());
+        eeJsonConfig.cooldownTimeMs = atol(value.c_str());    
     else if (lastKey == "texternGTESysOff")
         eeJsonConfig.texternGTESysOff = atof(value.c_str());
     else if (lastKey == "adcWeightDeltaCat")
@@ -279,13 +261,7 @@ void EEJsonConfigParseListener::value(String value)
     else if (lastKey == "tbottomGTEFanOn")
         eeJsonConfig.tbottomGTEFanOn = atof(value.c_str());
     else if (lastKey == "manualMode")
-        eeJsonConfig.manualMode = (value == "true") ? true : false;
-    else if (lastKey == "fanlessMode")
-        eeJsonConfig.fanlessMode = (value == "true") ? true : false;
-    else if (lastKey == "portDurationMs")
-        eeJsonConfig.portDurationMs = atol(value.c_str());
-    else if (lastKey == "portOverlapDurationMs")
-        eeJsonConfig.portOverlapDurationMs = atol(value.c_str());
+        eeJsonConfig.manualMode = (value == "true") ? true : false;    
 
     //Serial.println("value: " + value);
 }

@@ -8,6 +8,8 @@ var tempUpdateIntervalMs = 10000; \
 var LED_PORT = 5; \
 var sensorDesc = []; \
  \
+var decimalSep = '.'; \
+ \
 requirejs.config({ \
 \"moment\": \"://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js\" \
 }); \
@@ -15,9 +17,25 @@ requirejs.config({ \
 function showSpin() { \
 $('.j-spin').removeClass(\"collapse\"); \
 } \
- \
 function hideSpin() { \
 $('.j-spin').addClass(\"collapse\"); \
+} \
+ \
+function showSpinInfo() { \
+} \
+function hideSpinInfo() { \
+} \
+ \
+function showSpinChart() { \
+$('.j-spin-chart').removeClass(\"collapse\"); \
+} \
+function hideSpinChart() { \
+$('.j-spin-chart').addClass(\"collapse\"); \
+} \
+ \
+function showSpinTemp() { \
+} \
+function hideSpinTemp() { \
 } \
  \
 function showHome() { \
@@ -41,7 +59,7 @@ var baseurl = ''; \
 if (debug) baseurl = 'http://10.10.3.9'; \
  \
 async function reloadTemp(addr) { \
-showSpin(); \
+showSpinTemp(); \
 let finished = false; \
 let res = null; \
 while (!finished) { \
@@ -55,7 +73,7 @@ finished = true; \
 await sleep(1000); \
 } \
 } \
-hideSpin(); \
+hideSpinTemp(); \
 $('#t' + addr)[0].innerText = res; \
 } \
  \
@@ -141,7 +159,7 @@ await reloadInfo(); \
 } \
  \
 async function reloadInfo() { \
-showSpin(); \
+showSpinInfo(); \
 let finished = false; \
 let res = null; \
 while (!finished) { \
@@ -155,7 +173,7 @@ finished = true; \
 await sleep(1000); \
 } \
 } \
-hideSpin(); \
+hideSpinInfo(); \
  \
 manualMode = res[\"manualMode\"]; \
  \
@@ -289,8 +307,250 @@ await reloadTemp(v); \
 }); \
 } \
  \
-async function reloadCharts() { \
+async function getBitHistoriesDataSource() { \
+var dtnow = moment(); \
+ \
+showSpinChart(); \
+let finished = false; \
+var res = null; \
+while (!finished) { \
+try { \
+res = await $.ajax({ \
+url: baseurl + \"/bithistories\", \
+type: 'GET' \
+}); \
+finished = true; \
+} catch (e) { \
+await sleep(1000); \
+} \
+} \
+hideSpinChart(); \
+ \
+var dss = []; { \
+let rr = res.catInThereHistory; \
+var i = 0; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: '#3b9004', \
+backgroundColor: '#3b9004', \
+fill: true, \
+label: 'cat in there', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
 { \
+let rr = res.p1History; \
+var i = 0; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: '#b70013', \
+backgroundColor: '#b70013', \
+fill: true, \
+label: 'P1', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+{ \
+let rr = res.p2History; \
+var i = 0; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: '#df263c', \
+backgroundColor: '#df263c', \
+fill: true, \
+label: 'P2', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+{ \
+let rr = res.p3History; \
+var i = 0; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: '#ff4558', \
+backgroundColor: '#ff4558', \
+fill: true, \
+label: 'P3', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+{ \
+let rr = res.p4History; \
+var i = 0; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: '#ff6a79', \
+backgroundColor: '#ff6a79', \
+fill: true, \
+label: 'P4', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+{ \
+let rr = res.fanHistory; \
+var i = 0; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: '#fff06b', \
+backgroundColor: '#fff06b', \
+fill: true, \
+label: 'fan', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+{ \
+let rr = res.disabledHistory; \
+var i = 0; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: '#989898', \
+backgroundColor: '#989898', \
+fill: true, \
+label: 'disabled', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+{ \
+let rr = res.cooldownHistory; \
+var i = 0; { \
+dts = []; \
+let valcnt = rr.length; \
+$.each(rr, function (idx, val) { \
+secbefore = (valcnt - idx - 1) * history_interval_sec; \
+tt = moment(dtnow).subtract(secbefore, 'seconds'); \
+dts.push({ \
+t: tt, \
+y: val \
+}); \
+}); \
+ \
+dss.push({ \
+borderColor: '#0abbda', \
+backgroundColor: '#0abbda', \
+fill: true, \
+label: 'cooldown', \
+data: dts, \
+pointRadius: 0 \
+}); \
+ \
+++i; \
+}; \
+} \
+ \
+return dss; \
+} \
+ \
+async function getTempHistoryDataSource() { \
+var dtnow = moment(); \
+ \
+var dss = []; \
+ \
+showSpinChart(); \
 let finished = false; \
 let res = null; \
 while (!finished) { \
@@ -304,14 +564,12 @@ finished = true; \
 await sleep(1000); \
 } \
 } \
+hideSpinChart(); \
  \
 var colors = ['orange', 'yellow', 'green', 'blue', 'violet', 'black', 'red']; \
-var ctx = document.getElementById(\"tempChart\").getContext('2d'); \
- \
-var dtnow = moment(); \
  \
 var i = 0; \
-var dss = []; \
+ \
 $.each(res, function (idx, data) { \
 id = Object.keys(data)[0]; \
 desc = id; \
@@ -355,12 +613,78 @@ pointRadius: 0 \
 ++i; \
 }); \
  \
+return dss; \
+} \
+ \
+function getTempRelDataSource(dss) { \
+ \
+let ambientDss = null; \
+let externDss = null; \
+for (j = 0; j < dss.length; ++j) { \
+if (dss[j].label == 'ambient') \
+ambientDss = dss[j]; \
+else if (dss[j].label == 'extern') \
+externDss = dss[j]; \
+} \
+ \
+var dssRel = []; \
+if (ambientDss != null && externDss != null) { \
+dts = []; \
+for (w = 0; w < ambientDss.data.length; ++w) { \
+dts.push({ \
+t: ambientDss.data[w].t, \
+y: ambientDss.data[w].y - externDss.data[w].y \
+}); \
+} \
+dssRel.push({ \
+borderColor: 'red', \
+label: 'ambient - extern', \
+data: dts, \
+pointRadius: 0 \
+}); \
+} \
+ \
+return dssRel; \
+} \
+ \
+async function reloadCharts() { \
+var dtnow = moment(); \
+ \
+{ \
+var ctx = document.getElementById(\"tempChart\").getContext('2d'); \
+var dss = await getTempHistoryDataSource(); \
+ \
 var myChart = new Chart(ctx, { \
 type: 'line', \
 data: { \
 datasets: dss \
 }, \
 options: { \
+maintainAspectRatio: false, \
+animation: false, \
+scales: { \
+xAxes: [{ \
+type: 'time', \
+time: { \
+displayFormats: { \
+'hour': 'HH:mm' \
+} \
+}, \
+position: 'bottom' \
+}] \
+} \
+} \
+}); \
+ \
+dssRel = getTempRelDataSource(dss); \
+var relCtx = document.getElementById(\"tempRelChart\").getContext('2d'); \
+var myChart2 = new Chart(relCtx, { \
+type: 'line', \
+data: { \
+datasets: dssRel \
+}, \
+options: { \
+maintainAspectRatio: false, \
 animation: false, \
 scales: { \
 xAxes: [{ \
@@ -378,216 +702,12 @@ position: 'bottom' \
 } \
  \
 { \
-let finished = false; \
-let res = null; \
-while (!finished) { \
-try { \
-res = await $.ajax({ \
-url: baseurl + \"/bithistories\", \
-type: 'GET' \
-}); \
-finished = true; \
-} catch (e) { \
-await sleep(1000); \
-} \
-} \
- \
 var ctx = document.getElementById(\"bitChart\").getContext('2d'); \
  \
-var dtnow = moment(); \
- \
- \
-{ \
-let rr = res.catInThereHistory; \
-var i = 0; \
-var dss = []; { \
-dts = []; \
-let valcnt = rr.length; \
-$.each(rr, function (idx, val) { \
-secbefore = (valcnt - idx - 1) * history_interval_sec; \
-tt = moment(dtnow).subtract(secbefore, 'seconds'); \
-dts.push({ \
-t: tt, \
-y: val \
-}); \
-}); \
- \
-dss.push({ \
-borderColor: '#F0B8FF', \
-fill: true, \
-label: 'cat in there', \
-data: dts, \
-pointRadius: 0 \
-}); \
- \
-++i; \
-}; \
-} \
- \
-{ \
-let rr = res.p1History; \
-var i = 0; \
-var dss = []; { \
-dts = []; \
-let valcnt = rr.length; \
-$.each(rr, function (idx, val) { \
-secbefore = (valcnt - idx - 1) * history_interval_sec; \
-tt = moment(dtnow).subtract(secbefore, 'seconds'); \
-dts.push({ \
-t: tt, \
-y: val \
-}); \
-}); \
- \
-dss.push({ \
-borderColor: 'orange', \
-fill: true, \
-label: 'P1', \
-data: dts, \
-pointRadius: 0 \
-}); \
- \
-++i; \
-}; \
-} \
- \
-{ \
-let rr = res.p2History; \
-var i = 0; \
-var dss = []; { \
-dts = []; \
-let valcnt = rr.length; \
-$.each(rr, function (idx, val) { \
-secbefore = (valcnt - idx - 1) * history_interval_sec; \
-tt = moment(dtnow).subtract(secbefore, 'seconds'); \
-dts.push({ \
-t: tt, \
-y: val \
-}); \
-}); \
- \
-dss.push({ \
-borderColor: 'yellow', \
-fill: true, \
-label: 'P2', \
-data: dts, \
-pointRadius: 0 \
-}); \
- \
-++i; \
-}; \
-} \
- \
-{ \
-let rr = res.p3History; \
-var i = 0; \
-var dss = []; { \
-dts = []; \
-let valcnt = rr.length; \
-$.each(rr, function (idx, val) { \
-secbefore = (valcnt - idx - 1) * history_interval_sec; \
-tt = moment(dtnow).subtract(secbefore, 'seconds'); \
-dts.push({ \
-t: tt, \
-y: val \
-}); \
-}); \
- \
-dss.push({ \
-borderColor: 'green', \
-fill: true, \
-label: 'P3', \
-data: dts, \
-pointRadius: 0 \
-}); \
- \
-++i; \
-}; \
-} \
- \
-{ \
-let rr = res.p4History; \
-var i = 0; \
-var dss = []; { \
-dts = []; \
-let valcnt = rr.length; \
-$.each(rr, function (idx, val) { \
-secbefore = (valcnt - idx - 1) * history_interval_sec; \
-tt = moment(dtnow).subtract(secbefore, 'seconds'); \
-dts.push({ \
-t: tt, \
-y: val \
-}); \
-}); \
- \
-dss.push({ \
-borderColor: 'blue', \
-fill: true, \
-label: 'P4', \
-data: dts, \
-pointRadius: 0 \
-}); \
- \
-++i; \
-}; \
-} \
- \
-{ \
-let rr = res.disabledHistory; \
-var i = 0; \
-var dss = []; { \
-dts = []; \
-let valcnt = rr.length; \
-$.each(rr, function (idx, val) { \
-secbefore = (valcnt - idx - 1) * history_interval_sec; \
-tt = moment(dtnow).subtract(secbefore, 'seconds'); \
-dts.push({ \
-t: tt, \
-y: val \
-}); \
-}); \
- \
-dss.push({ \
-borderColor: 'violet', \
-fill: true, \
-label: 'disabled', \
-data: dts, \
-pointRadius: 0 \
-}); \
- \
-++i; \
-}; \
-} \
- \
-{ \
-let rr = res.cooldownHistory; \
-var i = 0; \
-var dss = []; { \
-dts = []; \
-let valcnt = rr.length; \
-$.each(rr, function (idx, val) { \
-secbefore = (valcnt - idx - 1) * history_interval_sec; \
-tt = moment(dtnow).subtract(secbefore, 'seconds'); \
-dts.push({ \
-t: tt, \
-y: val \
-}); \
-}); \
- \
-dss.push({ \
-borderColor: 'cyan', \
-fill: true, \
-label: 'cooldown', \
-data: dts, \
-pointRadius: 0 \
-}); \
- \
-++i; \
-}; \
-} \
+var dss = await getBitHistoriesDataSource(); \
  \
 var myChart = new Chart(ctx, { \
-type: 'bar', \
+type: 'line', \
 data: { \
 datasets: dss \
 }, \
@@ -600,16 +720,51 @@ type: 'time', \
 stacked: true \
 }], \
 yAxes: [{ \
-ticks: { \
-min: 0, \
-max: 1 \
-}, \
 stacked: true \
 }] \
 } \
 } \
 }); \
 } \
+} \
+ \
+async function exportDataSet(bitdss, filename) { \
+var csv = ''; \
+var sep = (decimalSep == '.') ? ',' : ';'; \
+ \
+if (bitdss.length > 0) { \
+var bitdssl = bitdss.length; \
+var datadepth = bitdss[0].data.length; \
+csv = csv.concat('\"time\",'); \
+for (i = 0; i < bitdssl; ++i) { \
+csv = csv.concat('\"' + bitdss[i].label + '\"'); \
+if (i != bitdssl - 1) \
+csv = csv.concat(sep); \
+else \
+csv = csv.concat(String.fromCharCode(13, 10)); \
+} \
+let j = 0; \
+while (j < datadepth) { \
+for (i = 0; i < bitdssl; ++i) { \
+if (i == 0) { \
+let t = moment(bitdss[i].data[j].t).format(\"HH:mm\"); \
+csv = csv.concat('\"' + t + '\",'); \
+} \
+csv = csv.concat(bitdss[i].data[j].y); \
+ \
+if (i != bitdssl - 1) \
+csv = csv.concat(sep); \
+else \
+csv = csv.concat(String.fromCharCode(13, 10)); \
+} \
+++j; \
+} \
+} \
+ \
+var blob = new Blob([csv], { \
+type: \"text/plain;charset=utf-8\" \
+}); \
+saveAs(blob, filename); \
 } \
  \
 async function reloadConfig() { \
@@ -660,14 +815,8 @@ $('#config-tbottomLimit')[0].value = res[\"tbottomLimit\"]; \
 $('#config-twoodLimit')[0].value = res[\"twoodLimit\"]; \
 $('#config-tambientLimit')[0].value = res[\"tambientLimit\"]; \
 $('#config-cooldownTimeMs-min')[0].value = res[\"cooldownTimeMs\"] / 1000.0 / 60.0; \
-$('#config-standbyPort')[0].value = res[\"standbyPort\"]; \
-$('#config-standbyDuration-min')[0].value = res[\"standbyDurationMs\"] / 1000.0 / 60.0; \
-$('#config-fullpowerDuration-min')[0].value = res[\"fullpowerDurationMs\"] / 1000.0 / 60.0; \
 $('#config-texternGTESysOff')[0].value = res[\"texternGTESysOff\"]; \
 $('#config-tbottomGTEFanOn')[0].value = res[\"tbottomGTEFanOn\"]; \
-$('#config-fanlessMode').prop('checked', res[\"fanlessMode\"]); \
-$('#config-portDurationMs-min')[0].value = res[\"portDurationMs\"] / 1000.0 / 60.0; \
-$('#config-portOverlapDurationMs-min')[0].value = res[\"portOverlapDurationMs\"] / 1000.0 / 60.0; \
 } \
  \
 var infoLastLoad; \
@@ -702,6 +851,8 @@ return new Promise(resolve => setTimeout(resolve, ms)); \
 function manageResize() {} \
  \
 async function myfn() { \
+ \
+decimalSep = 0.1.toLocaleString().replace(/\d/g, ''); \
  \
 setInterval(autorefresh, 1000); \
  \
@@ -774,6 +925,15 @@ h += \"</tr>\"; \
  \
 $('#tbody-temp')[0].innerHTML = h; \
  \
+ \
+$('#bitExport').click(async function () { \
+let dss1 = await getBitHistoriesDataSource(); \
+dss2 = await getTempHistoryDataSource(); \
+ \
+let dss = dss1.concat(dss2); \
+exportDataSet(dss, 'full.csv'); \
+}); \
+ \
 autorefreshInProgress = false; \
 } \
  \
@@ -795,16 +955,10 @@ manualMode: $('#config-manualMode').is(\":checked\"), \
 adcWeightDeltaCat: $('#config-adcWeightDeltaCat')[0].value, \
 tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value), \
 twoodLimit: parseFloat($('#config-twoodLimit')[0].value), \
-tambientLimitxx: parseFloat($('#config-tambientLimit')[0].value), \
+tambientLimit: parseFloat($('#config-tambientLimit')[0].value), \
 cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60, \
-standbyPort: parseInt($('#config-standbyPort')[0].value), \
-fullpowerDurationMs: parseFloat($('#config-fullpowerDuration-min')[0].value) * 1000 * 60, \
-standbyDurationMs: parseFloat($('#config-standbyDuration-min')[0].value) * 1000 * 60, \
 texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value), \
-tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value), \
-portDurationMs: parseFloat($('#config-portDurationMs-min')[0].value) * 1000 * 60, \
-portOverlapDurationMs: parseFloat($('#config-portOverlapDurationMs-min')[0].value) * 1000 * 60, \
-fanlessMode: $('#config-fanlessMode').is(\":checked\") \
+tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value) \
 }; \
  \
 while (!finished) { \

@@ -838,15 +838,9 @@ async function reloadConfig() {
     $('#config-tbottomLimit')[0].value = res["tbottomLimit"];
     $('#config-twoodLimit')[0].value = res["twoodLimit"];
     $('#config-tambientLimit')[0].value = res["tambientLimit"];
-    $('#config-cooldownTimeMs-min')[0].value = res["cooldownTimeMs"] / 1000.0 / 60.0;
-    $('#config-standbyPort')[0].value = res["standbyPort"];
-    $('#config-standbyDuration-min')[0].value = res["standbyDurationMs"] / 1000.0 / 60.0;
-    $('#config-fullpowerDuration-min')[0].value = res["fullpowerDurationMs"] / 1000.0 / 60.0;
+    $('#config-cooldownTimeMs-min')[0].value = res["cooldownTimeMs"] / 1000.0 / 60.0;    
     $('#config-texternGTESysOff')[0].value = res["texternGTESysOff"];
-    $('#config-tbottomGTEFanOn')[0].value = res["tbottomGTEFanOn"];
-    $('#config-fanlessMode').prop('checked', res["fanlessMode"]);
-    $('#config-portDurationMs-min')[0].value = res["portDurationMs"] / 1000.0 / 60.0;
-    $('#config-portOverlapDurationMs-min')[0].value = res["portOverlapDurationMs"] / 1000.0 / 60.0;
+    $('#config-tbottomGTEFanOn')[0].value = res["tbottomGTEFanOn"];    
 }
 
 var infoLastLoad;
@@ -994,16 +988,10 @@ async function saveConfig() {
         adcWeightDeltaCat: $('#config-adcWeightDeltaCat')[0].value,
         tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value),
         twoodLimit: parseFloat($('#config-twoodLimit')[0].value),
-        tambientLimitxx: parseFloat($('#config-tambientLimit')[0].value),
-        cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60,
-        standbyPort: parseInt($('#config-standbyPort')[0].value),
-        fullpowerDurationMs: parseFloat($('#config-fullpowerDuration-min')[0].value) * 1000 * 60,
-        standbyDurationMs: parseFloat($('#config-standbyDuration-min')[0].value) * 1000 * 60,
+        tambientLimit: parseFloat($('#config-tambientLimit')[0].value),
+        cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60,        
         texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value),
-        tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value),
-        portDurationMs: parseFloat($('#config-portDurationMs-min')[0].value) * 1000 * 60,
-        portOverlapDurationMs: parseFloat($('#config-portOverlapDurationMs-min')[0].value) * 1000 * 60,
-        fanlessMode: $('#config-fanlessMode').is(":checked")
+        tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value)        
     };
 
     while (!finished) {

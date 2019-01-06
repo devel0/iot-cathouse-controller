@@ -18,10 +18,7 @@ class EEJsonConfig
 {
 public:
   // if true ports will not changed automatically by the mcu but can managed through webapi
-  bool manualMode;
-
-  // if true it will cycle through all ports using given fanless ports intervals
-  bool fanlessMode;
+  bool manualMode;  
 
   // if bottom temp >= tbottomLimit heat ports gets disabled for cooldownTimeMs
   double tbottomLimit;
@@ -33,23 +30,8 @@ public:
   double tambientLimit;
 
   // (fanmode) duration of cooldown if cooldown condition occurs (see tbottomLimit, twoodLimit, tambientLimit)
-  unsigned long cooldownTimeMs;
-
-  // (fanmode) duration of standby cycle
-  unsigned long standbyDurationMs;
-
-  // (fanmode) port to maintain enabled during standby (1-4 or 0 for none)
-  int standbyPort;  
-
-  // (fanmode) duration of fullpower cycle
-  unsigned long fullpowerDurationMs;
-
-  // (fanless) duration of port on before to switch to next
-  unsigned long portDurationMs;
-
-  // (fanless) overlap duration between switching ports
-  unsigned long portOverlapDurationMs;
-
+  unsigned long cooldownTimeMs;  
+    
   // if textern >= texternGTESysOff system enter disable state
   double texternGTESysOff;
 

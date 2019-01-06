@@ -446,12 +446,23 @@ bool manageWifi()
               break;
             }
 
-            if (modenr)
-              digitalWrite(portpin, HIGH);
+            if (!eeJsonConfig.manualMode && portpin != LED_PIN)
+            {
+              client.print("DENIED");
+            }
             else
-              digitalWrite(portpin, LOW);
+            {
+              auto v = digitalRead(portpin);
+              if (modenr)
+                digitalWrite(portpin, HIGH);
+              else
+                digitalWrite(portpin, LOW);
 
-            client.print("OK");
+              Serial.printf("manual> set port %d from %d\n", portnr, v);
+              setManual();
+
+              client.print("OK");
+            }
           }
           //--------------------------
           // /port/toggle/{1,2,3,4,5,6}
@@ -499,6 +510,7 @@ bool manageWifi()
               auto v = digitalRead(portpin);
               Serial.printf("manual> toggling port %d from %d\n", portnr, v);
               digitalWrite(portpin, (v == LOW) ? HIGH : LOW);
+              setManual();
 
               client.print("OK");
             }
@@ -551,13 +563,8 @@ bool manageWifi()
               client.flush();
             }
             Serial.printf("saving config [%s]\n", s.c_str());
-
-            auto wasFanlessMode = eeJsonConfig.fanlessMode;
+            
             eeJsonConfig.Load(s.c_str());
-            if (wasFanlessMode && !eeJsonConfig.fanlessMode)
-            {
-              currentCycle = none; // reset current cycle
-            }
             eeJsonConfig.SaveToEEProm();
             if (eeStaticConfigDirty)
             {

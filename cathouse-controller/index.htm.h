@@ -53,31 +53,55 @@ crossorigin=\"anonymous\"> \
 <div class=\"col-auto\"> \
 <h1>Cathouse controller</h1> \
 </div> \
-<div class=\"col\"> \
+<div class=\"col-auto\"> \
 <div class=\"btn-group\" role=\"group\"> \
 <button class=\"btn btn-link\" onclick='showHome()'><span class='menu-home fstrong j-menu'>Home</span></button> \
 <button class=\"btn btn-link\" onclick='showConfig()'><span class='menu-config j-menu'>Config</span></button> \
 <button class=\"btn btn-link\" onclick=\"window.open('https://github.com/devel0/iot-cathouse-controller')\">About</button> \
-<div class=\"col\"><i class=\"fas fa-spin fa-spinner j-spin collapse\"></i></div> \
 </div> \
 </div> \
+<div class=\"col\"><i class=\"fas fa-sync-alt fa-spin j-spin collapse\"></i></div> \
 </div> \
  \
 <div class=\"row j-containers j-home\"> \
+<!-- left col ( charts ) --> \
 <div class=\"col col-sm-12 col-lg-7\"> \
+<div class=\"row\"> \
+<div class=\"col-auto\"> \
 <h2>Charts</h2> \
-<div class=\"bitChartDiv\" style=\"position: relative\"> \
+</div> \
+<div class=\"col-auto\"> \
+<input type=\"button\" class=\"btn btn-link\" id=\"bitExport\" value='Download CSV' /> \
+</div> \
+<div class=\"col\"><small><i class=\"fas fa-sync-alt j-spin-chart collapse\"></i></small></div> \
+</div> \
+ \
+<div class=\"bitChartDiv\" style=\"position: relative; height: 160px\"> \
 <canvas id=\"bitChart\"></canvas> \
 </div> \
-<div class=\"tempChartDiv\" style=\"position: relative\"> \
+ \
+<div class=\"tempRelChartDiv\" style=\"position: relative; height: 180px\"> \
+<canvas id=\"tempRelChart\"></canvas> \
+</div> \
+ \
+<div class=\"tempChartDiv\" style=\"position: relative; height: 360px\"> \
 <canvas id=\"tempChart\"></canvas> \
 </div> \
  \
 </div> \
+ \
+<!-- right col ( stats, weights, tabulars, info ) --> \
 <div class=\"col col-sm-12 col-lg-5\"> \
 <div class=\"row\"> \
+<!-- ports --> \
 <div class=\"col-12\"> \
+<div class=\"row\"> \
+<div class=\"col-auto\"> \
 <h2>Ports</h2> \
+</div> \
+<div class=\"col\"><small><i class=\"fas fa-sync-alt j-spin-info collapse\"></i></small></div> \
+</div> \
+ \
 <div class=\"row\"> \
 <div class=\"col-auto\"> \
 <button class=\"btn btn-link\" onclick='togglePort(1)'><span class='port-p1'>P1</span></button> \
@@ -99,10 +123,15 @@ crossorigin=\"anonymous\"> \
 </div> \
 </div> \
 </div> \
-</div> \
+ \
+<!-- stats --> \
+<div class=\"col-12\"> \
 <div class=\"row\"> \
-<div class=\"col\"> \
+<div class=\"col-auto\"> \
 <h2>Stats</h2> \
+</div> \
+<div class=\"col\"><small><i class=\"fas fa-sync-alt j-spin-info collapse\"></i></small></div> \
+</div> \
 <div class=\"row\"> \
 <div class=\"col-12\"> \
 <div class=\"table table-striped table-sm\"> \
@@ -134,7 +163,8 @@ samples (mean)</td> \
 <td class=\"align-middle\"><span class='adc-weight-latest ml-3'></span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right text-nowrap align-middle\">Temperature history interval (min)</td> \
+<td class=\"text-right text-nowrap align-middle\">Temperature history \
+interval (min)</td> \
 <td class=\"align-middle\"><span class='temp-history-interval-min ml-3'></span></td> \
 </tr> \
 <tr> \
@@ -144,7 +174,8 @@ samples (mean)</td> \
 <tr> \
 <td class=\"text-right text-nowrap align-middle\">Cat is in there</td> \
 <td class=\"align-middle\"> \
-<button class=\"btn btn-link\" onclick='toggleCatInThere()'><span class='cat-is-in-there ml-3'></span></button> \
+<button class=\"btn btn-link\" onclick='toggleCatInThere()' style=\"padding:0\"><span \
+class='cat-is-in-there ml-3'></span></button> \
 </td> \
 </tr> \
 </table> \
@@ -153,8 +184,15 @@ samples (mean)</td> \
 </div> \
 </div> \
 </div> \
-<div class=\"col\"> \
+ \
+<!-- tabular --> \
+<div class=\"col-12\"> \
+<div class=\"row\"> \
+<div class=\"col-auto\"> \
 <h2>Tabular</h2> \
+</div> \
+<div class=\"col\"><small><i class=\"fas fa-sync-alt j-spin-temp collapse\"></i></small></div> \
+</div> \
 <div class=\"table-container\"> \
 <div class=\"table table-striped table-sm\"> \
 <table class=\"table\"> \
@@ -171,12 +209,21 @@ samples (mean)</td> \
 </div> \
 </div> \
 </div> \
+ \
+<!-- weight --> \
+<div class=\"col-12\"> \
+<div class=\"row\"> \
+<div class=\"col-auto\"> \
+<h3>ADC Weight</h3> \
+</div> \
+<div class=\"col\"><small><i class=\"fas fa-sync-alt j-spin-info collapse\"></i></small></div> \
 </div> \
 <div class=\"row\"> \
-<div class=\"col-12\"> \
-<h3>ADC Weight</h3> \
+<div class=\"col\"> \
 <div class=\"weightChartDiv\" style=\"position: relative\"> \
 <canvas id=\"weightChart\"></canvas> \
+</div> \
+</div> \
 </div> \
 </div> \
 </div> \
@@ -247,45 +294,6 @@ ingress/egress of the cat</td> \
 <td class='cfg-notes'>extern temperature sensor id</td> \
 </tr> \
  \
-<tr> \
-<td class='cfg-lbl-fl align-middle'>Fanless mode</td> \
-<td><input type='checkbox' class='form-control' id='config-fanlessMode'></input></td> \
-<td></td> \
-<td class='cfg-notes'>if true it will cycle through all ports using given fanless \
-ports intervals</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl-fl align-middle'>Port duration</td> \
-<td><input type='number' step='0.01' class='form-control' id='config-portDurationMs-min'></input></td> \
-<td class='align-middle'>min</td> \
-<td class='cfg-notes'>duration of port on before to switch to next</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl-fl align-middle'>Port overlap duration</td> \
-<td><input type='number' step='0.01' class='form-control' id='config-portOverlapDurationMs-min'></input></td> \
-<td class='align-middle'>min</td> \
-<td class='cfg-notes'>overlap duration between switching ports</td> \
-</tr> \
- \
-<tr> \
-<td class='cfg-lbl-hot align-middle'>Standby duration</td> \
-<td><input type='number' step='0.01' class='form-control' id='config-standbyDuration-min'></input></td> \
-<td class='align-middle'>min</td> \
-<td class='cfg-notes'>duration of standby cycle</td> \
-</tr> \
-<tr> \
-<td class='cfg-lbl-hot align-middle'>Standby port</td> \
-<td><input type='number' step='1' min=\"0\" max=\"4\" class='form-control' id='config-standbyPort'></input></td> \
-<td class='align-middle'></td> \
-<td class='cfg-notes'>port to maintain enabled during standby (1-4 or 0 for none)</td> \
-</tr> \
- \
-<tr> \
-<td class='cfg-lbl-hot align-middle'>Fullpower duration</td> \
-<td><input type='number' step='0.01' class='form-control' id='config-fullpowerDuration-min'></input></td> \
-<td class='align-middle'>min</td> \
-<td class='cfg-notes'>duration of fullpower cycle</td> \
-</tr> \
 <tr> \
 <td class='cfg-lbl-hot align-middle'>TBottom >= T fan on</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tbottomGTEFanOn'></input></td> \
@@ -364,6 +372,7 @@ crossorigin=\"anonymous\"></script> \
 crossorigin=\"anonymous\"></script> \
 <script src=\"https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js\" integrity=\"sha256-G7A4JrJjJlFqP0yamznwPjAApIKPkadeHfyIwiaa9e0=\" \
 crossorigin=\"anonymous\"></script> \
+<script src=\"https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js\"></script> \
 <script src=\"app.js\"></script> \
 </body> \
  \

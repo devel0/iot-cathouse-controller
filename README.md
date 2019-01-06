@@ -61,19 +61,21 @@ connect to serial interface of esp8266 through usb cable with minicom at 115200 
 in order to allow the system recognition of temperature sensor for bottom, wood, ambient and extern first there is the need to write down their ids ; use one of existing inet [articles](https://www.google.com/search?q=arduino+ds18b20+id) to find out.
 write correspondent temperature IDs in fields ( 16 hex char foreach device )
 
-## config
+### config
 
 ![img](doc/config.png)
 
-- if fanless mode is checked
-    - heat ports will be enabled one by one in sequence for `Port duration` specified interval
-    - between ports activation if `Port overlap duration` greater than 0 two ports works sharing port duration
-- if fanless mode is not checked
-    - when cat is in there fullpower ( all 4 ports ) activated for given `Fullpower duration` interval
-    - fan activates during fullpower if bottom temperatures great or equals `TBottom >= T fan on` parameter
-    - after fullpower duration only one port still active `Standby port` for a duration given from `Standby duration` parameter
- 
-### cooldown and system off
+## heat modes
+
+![img](doc/cycles.png)
+
+### auto mode
+
+- when cat enters all ports enabled until reaches 1C before tbottom limit then it goes to standby mode
+    - during fullpower mode if tbottom great or equals than `TBottom >= T fan on` fan enables to speed up ambient t increase
+- in standby mode last 50sec of bottom temperature samples are evaluted to balance
+    - if tbottom trend increase 1 port will disabled
+    - if tbottom trend decrease 1 port will enabled
 
 - if some limit condition occurs
     - bottom temperature great or equals `Bottom temperature limit`
@@ -84,7 +86,9 @@ write correspondent temperature IDs in fields ( 16 hex char foreach device )
 
 ### manual mode
 
-- enabling manual mode system cooldown still works but ports/fan activation disabled for a manual controls through webapi
+- in manual mode ports and fan can be controlled manually from web interface or webapi
+- limit conditions still apply automatically entering the system in cooldown or disabled cycle mode
+- led port can be toggled manually either in auto mode
 
 ### webapi
 
@@ -96,8 +100,8 @@ write correspondent temperature IDs in fields ( 16 hex char foreach device )
 | `/temphistory` | json | `[{"28b03724070000c8":[8.00,9.00]},{"28f00a3b05000038":[4.44,4]}]` |
 | `/bithistories` | json | `{"catInThereHistory":[0,1,1],"p1History":[0,1,1],"p2History":[0,0,0],"p3History":[0,0,0],"p4History":[0,1,1],"fanHistory":[0,0,0],"disabledHistory":[0,0,0],"cooldownHistory":[0,0,0]}` |
 | `/port/get/X` | text | `0` |
-| `/port/set/X/{0,1}` | text | `OK` |
-| `/port/toggle/X` | text | `OK` |
+| `/port/set/X/{0,1}` | text | `OK` or `DENIED` if manualMode false |
+| `/port/toggle/X` | text | `OK` or `DENIED` if manualMode false |
 | `/setcatinthere/{0,1}` | text | `OK` |
 | `/getconfig` | json | `{"tbottomLimit":40.00,"twoodLimit":50.00,"tambientLimit":17.00,"cooldownTimeMs":120000,"standbyDurationMs":1800000,"standbyPort":2,"fullpowerDurationMs":1200000,"texternGTESysOff":14.00,"adcWeightDeltaCat":18,"manualMode":false,"fanlessMode":true,"portDurationMs":600000,"portOverlapDurationMs":420000,"tbottomGTEFanOn":20.00,"firmwareVersion":"cathouse-0.82","wifiSSID":"labwlan","tbottomId":"28b03724070000c8","twoodId":"28e2cc23070000d8","tambientId":"28f00a3b05000038","texternId":"28d12b5b0500001c"}` |
 | `/saveconfig` | json POST | |
