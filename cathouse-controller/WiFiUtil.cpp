@@ -12,6 +12,11 @@ void reconnectWifi()
 
     Serial.printf("Trying connecting SSID:[%s]\n", eeStaticConfig.wifiSSID);
 
+    WiFi.enableSTA(true);
+
+    WiFi.setAutoConnect(true);
+    WiFi.setAutoReconnect(true);
+
     WiFi.begin(eeStaticConfig.wifiSSID, eeStaticConfig.wifiPwd);
 
     // check for the presence of the shield:
@@ -71,23 +76,23 @@ void clientOk(WiFiClient &client, CCTypes type)
     client.println("HTTP/1.1 200 OK");
     switch (type)
     {
-    case HTML:        
+    case HTML:
         client.println("Content-Type: text/html");
         break;
 
-    case JSON:        
+    case JSON:
         client.println("Content-Type: application/json");
         break;
 
-    case TEXT:        
+    case TEXT:
         client.println("Content-Type: text/plain");
         break;
 
-    case JAVASCRIPT:        
+    case JAVASCRIPT:
         client.println("Content-Type: text/javascript");
         break;
 
-    case PNG:        
+    case PNG:
         client.println("Content-Type: image/png");
         break;
     }
