@@ -95,13 +95,28 @@ void loop()
     return;
 
   if (!serialOsActivated)
+  {
+    auto t = millis();    
     statsUpdate();
+    auto tdiff = timeDiff(t, millis());
+    if (tdiff > 500) Serial.printf("statsUpdate took %ld\n", tdiff);
+  }
 
   if (!serialOsActivated)
+  {
+    auto t = millis();
     manageTemp();
+    auto tdiff = timeDiff(t, millis());
+    if (tdiff > 500) Serial.printf("manageTemp took %ld\n", tdiff);
+  }
 
   if (!serialOsActivated)
+  {
+    auto t = millis();
     engineProcess();
+    auto tdiff = timeDiff(t, millis());
+    if (tdiff > 500) Serial.printf("engineProcess took %ld\n", tdiff);
+  }
 
   if (Serial.available())
   {
