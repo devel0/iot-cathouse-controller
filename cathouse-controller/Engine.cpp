@@ -262,7 +262,7 @@ void engineProcess()
                         Serial.printf("engine> enable fan because tbottom %f>=%f in fullpower cycle\n",
                                       tbottom, eeJsonConfig.tbottomGTEFanOn);
                     }
-                    else if (tbottom < eeJsonConfig.tbottomGTEFanOn && pfan == HIGH)
+                    else if (tbottom < eeJsonConfig.tbottomGTEFanOn - 1 && pfan == HIGH)
                     {
                         digitalWrite(FAN_PIN, LOW);
                         Serial.printf("engine> disable fan because tbottom %f<%f in fullpower cycle\n",
