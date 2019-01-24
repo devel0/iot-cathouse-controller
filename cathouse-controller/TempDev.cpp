@@ -32,6 +32,10 @@ void setupTemperatureDevices()
 {
     DS18B20.begin();
     temperatureDeviceCount = DS18B20.getDeviceCount();
+
+    //DS18B20.setResolution(12);
+    DS18B20.setResolution(9);
+
     Serial.printf("temperature device count = %d\n", temperatureDeviceCount);
     if (temperatureDeviceCount > 0)
     {
@@ -54,8 +58,6 @@ void setupTemperatureDevices()
                     tempDevAddress[i][7]);
 
             Serial.printf("sensor [%d] address = %s\n", i, tempDevHexAddress[i]);
-
-            DS18B20.setResolution(12);
         }
 
         temperatureHistory = (float **)malloc(sizeof(float *) * temperatureDeviceCount);
