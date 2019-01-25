@@ -75,16 +75,16 @@ void EvalAdcWeight()
         }
         meanFromLastEvent /= (s - ADCWEIGHT_LASTSAMPLES_CNT);
 
-        if (s > ADCWEIGHT_LASTSAMPLES_CNT)
-        {            
+        if (s > 2 * ADCWEIGHT_LASTSAMPLES_CNT)
+        {
             if (meanFromLastEvent > meanLastSamples)
             {
                 if (meanFromLastEvent - meanLastSamples >= eeJsonConfig.adcWeightDeltaCat)
                 {
                     Serial.printf("engine> cat exited because %f-%f>=%d\n", meanFromLastEvent, meanLastSamples, eeJsonConfig.adcWeightDeltaCat);
                     catInThere = false;
-                    adcWeightArrayOffLastEvent = adcWeightArrayOff;                    
                     printAdcInfo();
+                    adcWeightArrayOffLastEvent = adcWeightArrayOff;
                 }
             }
             else
@@ -93,8 +93,8 @@ void EvalAdcWeight()
                 {
                     Serial.printf("engine> cat entered because %f-%f>=%d\n", meanLastSamples, meanFromLastEvent, eeJsonConfig.adcWeightDeltaCat);
                     catInThere = true;
-                    adcWeightArrayOffLastEvent = adcWeightArrayOff;                    
                     printAdcInfo();
+                    adcWeightArrayOffLastEvent = adcWeightArrayOff;
                 }
             }
         }
