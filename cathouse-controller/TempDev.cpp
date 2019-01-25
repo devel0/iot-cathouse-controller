@@ -34,7 +34,7 @@ void setupTemperatureDevices()
     temperatureDeviceCount = DS18B20.getDeviceCount();
 
     //DS18B20.setResolution(12);
-    DS18B20.setResolution(9);
+    DS18B20.setResolution(10);
 
     Serial.printf("temperature device count = %d\n", temperatureDeviceCount);
     if (temperatureDeviceCount > 0)
