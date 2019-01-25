@@ -524,13 +524,23 @@ bool manageWifi()
 
             auto arg = header.substring(19);
             auto str = arg.substring(0, arg.indexOf(" "));
+            auto changed = false;
 
             if (str == "0")
+            {
+              changed = catInThere;
               catInThere = false;
+            }
             else
+            {
+              changed = !catInThere;
               catInThere = true;
+            }
 
-            Serial.printf("engine> override catInThere = %d\n", catInThere ? 1 : 0);
+            if (changed)
+              adcWeightArrayOffLastEvent = adcWeightArrayOff;
+
+            Serial.printf("engine> override catInThere = %d (adcWeightArrayOffLastEvent=%d)\n", catInThere ? 1 : 0, adcWeightArrayOffLastEvent);
 
             client.print("OK");
           }
@@ -563,7 +573,9 @@ bool manageWifi()
               client.flush();
             }
             Serial.printf("saving config [%s]\n", s.c_str());
-            
+
+            auto wasManual = eeJsonConfig.manualMode;
+
             eeJsonConfig.Load(s.c_str());
             eeJsonConfig.SaveToEEProm();
             if (eeStaticConfigDirty)
@@ -571,6 +583,9 @@ bool manageWifi()
               saveEEStaticConfig();
               eeStaticConfigDirty = false;
             }
+
+            if (currentCycle == manual && !eeJsonConfig.manualMode)
+              unsetManual();
           }
 
           header = "";
