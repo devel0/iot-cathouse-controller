@@ -116,6 +116,7 @@ boolean WiFiReturns()
 
 auto tloop = millis();
 
+auto tWifiReconnectCheck = millis();
 auto wifiReconnecting = false;
 
 void loop()
@@ -128,9 +129,11 @@ void loop()
     if (tdiff > 500)
       Serial.printf("freeram_min took %ld\n", tdiff);
   }
-  
-  if (!WiFiReturns())
+
+  if (timeDiff(tWifiReconnectCheck, millis()) > 5000 && !WiFiReturns())
   {
+    tWifiReconnectCheck = millis();
+
     if (!wifiReconnecting)
     {
       Serial.printf("wifi reconnecting\n");
@@ -152,13 +155,13 @@ void loop()
       return;
   }
 
-/*
+  /*
   auto m = millis();
   if (timeDiff(tloop, m) > 5000)
   {
     Serial.printf("tloop[%ld]\n", m);
     tloop = m;
-  }*/    
+  }*/
 
   if (!serialOsActivated)
   {
