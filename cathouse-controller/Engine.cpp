@@ -124,8 +124,15 @@ void setCurrentCycle(CycleTypes cycle)
 
 void setManual()
 {
+    Serial.printf("engine> setManual");
     savePorts();
     setCurrentCycle(manual);
+}
+
+void unsetManual()
+{
+    Serial.printf("engine> unsetManual");
+    setCurrentCycle(none);
 }
 
 void backPrevCycle()
@@ -151,11 +158,14 @@ enum TTrendTypes
 };
 TTrendTypes getTBottomTrend()
 {
+    auto diff = tbottom - (eeJsonConfig.tbottomLimit - 2);
+
+    /*
     auto idxCur = tbottomLastSamplesIdx;
     auto idxBefore = (tbottomLastSamplesIdx + 1) % TBOTTOM_LAST_SAMPLES_CNT;
-    auto diff = tbottomLastSamples[idxCur] - tbottomLastSamples[idxBefore];
+    auto diff = tbottomLastSamples[idxCur] - tbottomLastSamples[idxBefore];   
     Serial.printf("engine> eval tbottom trend cur[idx=%d]=%f before[idx=%d]=%f = %f\n",
-                  idxCur, tbottomLastSamples[idxCur], idxBefore, tbottomLastSamples[idxBefore], diff);
+                  idxCur, tbottomLastSamples[idxCur], idxBefore, tbottomLastSamples[idxBefore], diff);*/
 
     if (diff > TBOTTOM_TREND_DELTA_C)
         return increasing;
@@ -294,6 +304,7 @@ void engineProcess()
                 if (tbottom_assigned && tbottomLastSamplesInitialized &&
                     timeDiff(lastStandbyTrendEval, millis()) > ENGINE_POOL_INTERVAL_MS * TBOTTOM_LAST_SAMPLES_CNT)
                 {
+
                     //lastStandbyTrendEval
                     auto trend = getTBottomTrend();
                     auto ports = getPorts();
@@ -317,8 +328,9 @@ void engineProcess()
                         }
                     }
                     break;
+
+                        lastStandbyTrendEval = millis();
                     }
-                    lastStandbyTrendEval = millis();
                 }
             }
             break;

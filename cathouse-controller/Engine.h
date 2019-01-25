@@ -28,5 +28,6 @@ extern CycleTypes currentCycle;
 void engineProcess();
 String getCycleStr(CycleTypes cycle);
 void setManual();
+void unsetManual();
 
 #endif
