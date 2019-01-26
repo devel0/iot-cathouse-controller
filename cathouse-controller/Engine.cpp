@@ -145,11 +145,6 @@ void backPrevCycle()
     prevCycleBegin = cb;
 }
 
-#define TBOTTOM_LAST_SAMPLES_CNT 20
-float tbottomLastSamples[TBOTTOM_LAST_SAMPLES_CNT];
-bool tbottomLastSamplesInitialized = false;
-int tbottomLastSamplesIdx = 0;
-
 enum TTrendTypes
 {
     increasing,
@@ -158,14 +153,7 @@ enum TTrendTypes
 };
 TTrendTypes getTBottomTrend()
 {
-    auto diff = tbottom - (eeJsonConfig.tbottomLimit);
-
-    /*
-    auto idxCur = tbottomLastSamplesIdx;
-    auto idxBefore = (tbottomLastSamplesIdx + 1) % TBOTTOM_LAST_SAMPLES_CNT;
-    auto diff = tbottomLastSamples[idxCur] - tbottomLastSamples[idxBefore];   
-    Serial.printf("engine> eval tbottom trend cur[idx=%d]=%f before[idx=%d]=%f = %f\n",
-                  idxCur, tbottomLastSamples[idxCur], idxBefore, tbottomLastSamples[idxBefore], diff);*/
+    auto diff = tbottom - (eeJsonConfig.tbottomLimit - ENGINE_STANDBY_TARGET_TEMP_DISTANCE);
 
     if (diff > TBOTTOM_TREND_DELTA_C)
         return increasing;
@@ -181,23 +169,6 @@ void engineProcess()
 {
     if (timeDiff(lastEngineProcessExec, millis()) < ENGINE_POOL_INTERVAL_MS)
         return;
-
-    if (tbottom_assigned)
-    {
-        if (!tbottomLastSamplesInitialized)
-        {
-            for (int i = 0; i < TBOTTOM_LAST_SAMPLES_CNT; ++i)
-                tbottomLastSamples[i] = tbottom;
-            tbottomLastSamplesInitialized = true;
-        }
-        else
-        {
-            ++tbottomLastSamplesIdx;
-            if (tbottomLastSamplesIdx >= TBOTTOM_LAST_SAMPLES_CNT)
-                tbottomLastSamplesIdx = 0;
-            tbottomLastSamples[tbottomLastSamplesIdx] = tbottom;
-        }
-    }
 
     if (eeJsonConfig.manualMode && currentCycle != manual)
         setManual();
@@ -283,7 +254,7 @@ void engineProcess()
                     }
 
                     auto tFromLimit = eeJsonConfig.tbottomLimit - tbottom;
-                    if (tFromLimit <= 1)
+                    if (tFromLimit <= ENGINE_STANDBY_TARGET_TEMP_DISTANCE)
                     {
                         Serial.printf("engine> switch to standby cycle disabling fan if any\n");
                         setCurrentCycle(standby);
@@ -304,42 +275,44 @@ void engineProcess()
 
             case standby:
             {
-                if (tbottom_assigned && tbottomLastSamplesInitialized &&
-                    timeDiff(lastStandbyTrendEval, millis()) > ENGINE_POOL_INTERVAL_MS * TBOTTOM_LAST_SAMPLES_CNT)
+                if (tbottom_assigned)
                 {
-
-                    //lastStandbyTrendEval
                     auto trend = getTBottomTrend();
-                    auto ports = getPorts();
-                    switch (trend)
-                    {
-                    case increasing:
-                    {
-                        if (ports > 0)
-                        {
-                            setPorts(ports - 1);
-                            Serial.printf("engine> set %d ports quantity due to increasing tbottom trend\n", ports - 1);
-                        }
-                    }
-                    break;
-                    case decreasing:
-                    {
-                        if (ports < 4)
-                        {
-                            setPorts(ports + 1);
-                            Serial.printf("engine> set %d ports quantity due to decreasing tbottom trend\n", ports + 1);
-                        }
-                    }
-                    break;
 
+                    if (trend == increasing ||
+                        timeDiff(lastStandbyTrendEval, millis()) > ENGINE_STANDBY_REACTION_INTERVAL_MS)
+                    {
+
+                        auto ports = getPorts();
+                        switch (trend)
+                        {
+                        case increasing:
+                        {
+                            if (ports > 0)
+                            {
+                                setPorts(ports - 1);
+                                Serial.printf("engine> set %d ports quantity due to increasing tbottom trend\n", ports - 1);
+                            }
+                        }
+                        break;
+                        case decreasing:
+                        {
+                            if (ports < 4)
+                            {
+                                setPorts(ports + 1);
+                                Serial.printf("engine> set %d ports quantity due to decreasing tbottom trend\n", ports + 1);
+                            }
+                        }
+                        break;
+                        }
                         lastStandbyTrendEval = millis();
                     }
+                    break;
                 }
             }
-            break;
             }
+
+            lastEngineProcessExec = millis();
         }
     }
-
-    lastEngineProcessExec = millis();
 }

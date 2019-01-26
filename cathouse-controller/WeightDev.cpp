@@ -50,7 +50,7 @@ void EvalAdcWeight()
             meanButLastSamples = 0.0;
             auto j = 0;
             if (adcWeightArrayOff < 2 * ADCWEIGHT_LASTSAMPLES_CNT)
-                j = adcWeightArrayFillCnt - (2 - ADCWEIGHT_LASTSAMPLES_CNT - adcWeightArrayOff);
+                j = adcWeightArrayFillCnt - (2 * ADCWEIGHT_LASTSAMPLES_CNT - adcWeightArrayOff);
             else
                 j = adcWeightArrayOff - 2 * ADCWEIGHT_LASTSAMPLES_CNT;
             for (int i = 0; i < ADCWEIGHT_LASTSAMPLES_CNT; ++i)
