@@ -34,7 +34,7 @@ void EvalAdcWeight()
     adcWeight = analogRead(ADCWEIGHT_PIN);
     auto enabled_ports_count = getPorts();
     auto adcWeightDeltaFullpower = eeJsonConfig.adcWeightDeltaFullpower;
-    adcWeight -= adcWeightDeltaFullpower / 4;
+    adcWeight -= (adcWeightDeltaFullpower / 4) * getPorts();
 
     if (adcWeightArrayOff == adcWeightArraySize)
         adcWeightArrayOff = 0;
@@ -79,23 +79,21 @@ void EvalAdcWeight()
         }
 
         {
-            if (meanLastSamples >= meanButLastSamples + eeJsonConfig.adcWeightDeltaCat)
+            if (!catInThere && meanLastSamples >= meanButLastSamples + eeJsonConfig.adcWeightDeltaCat)
             {
-                Serial.printf("engine> cat entered because %f >= %f+%d = %f\n",
+                Serial.printf("engine> cat entered because %f >= %f+%d\n",
                               meanLastSamples,
                               meanButLastSamples,
-                              eeJsonConfig.adcWeightDeltaCat,
-                              meanButLastSamples + eeJsonConfig.adcWeightDeltaCat);
+                              eeJsonConfig.adcWeightDeltaCat);
                 catInThere = true;
                 printAdcInfo();
             }
-            else if (meanLastSamples <= meanButLastSamples - eeJsonConfig.adcWeightDeltaCat)
+            else if (catInThere && meanLastSamples <= meanButLastSamples - eeJsonConfig.adcWeightDeltaCat)
             {
-                Serial.printf("engine> cat exited because %f <= %f-%d = %f\n",
+                Serial.printf("engine> cat exited because %f <= %f-%d\n",
                               meanLastSamples,
                               meanButLastSamples,
-                              eeJsonConfig.adcWeightDeltaCat,
-                              meanButLastSamples - eeJsonConfig.adcWeightDeltaCat);
+                              eeJsonConfig.adcWeightDeltaCat);
                 catInThere = false;
                 printAdcInfo();
             }
