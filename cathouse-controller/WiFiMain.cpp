@@ -535,12 +535,9 @@ bool manageWifi()
             {
               changed = !catInThere;
               catInThere = true;
-            }
+            }      
 
-            if (changed)
-              adcWeightArrayOffLastEvent = adcWeightArrayOff;
-
-            Serial.printf("engine> override catInThere = %d (adcWeightArrayOffLastEvent=%d)\n", catInThere ? 1 : 0, adcWeightArrayOffLastEvent);
+            Serial.printf("engine> override catInThere = %d\n", catInThere ? 1 : 0);
 
             client.print("OK");
           }

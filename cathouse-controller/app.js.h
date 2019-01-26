@@ -17,24 +17,28 @@ requirejs.config({ \
 function showSpin() { \
 $('.j-spin').removeClass(\"collapse\"); \
 } \
+ \
 function hideSpin() { \
 $('.j-spin').addClass(\"collapse\"); \
 } \
  \
 function showSpinInfo() { \
 } \
+ \
 function hideSpinInfo() { \
 } \
  \
 function showSpinChart() { \
 $('.j-spin-chart').removeClass(\"collapse\"); \
 } \
+ \
 function hideSpinChart() { \
 $('.j-spin-chart').addClass(\"collapse\"); \
 } \
  \
 function showSpinTemp() { \
 } \
+ \
 function hideSpinTemp() { \
 } \
  \
@@ -241,35 +245,63 @@ t: tt, \
 y: val \
 }); \
 }); \
-let meanw = _.reduce(ary, function (memo, num) { \
-return memo + num; \
-}, 0) / valcnt; \
+ \
+dtsmeanLastBut = []; \
+dtsmeanLast = []; \
+ \
+if (valcnt > 40) { \
+let meanwlatestbut = 0.0; { \
+let i = valcnt - 20 - 1; \
+let c = 0; \
+while (i >= 0 && c < 20) { \
+meanwlatestbut += ary[i--]; \
+++c; \
+} \
+meanwlatestbut /= 20; \
+} \
 let meanwlatest = 0.0; { \
 let i = valcnt - 1; \
 let c = 0; \
 while (i >= 0 && c < 20) { \
-meanwlatest += ary[i]; \
+meanwlatest += ary[i--]; \
 ++c; \
 } \
 meanwlatest /= 20; \
 } \
-$('.adc-weight')[0].innerText = meanw.toFixed(0); \
-$('.adc-weight-latest')[0].innerText = meanwlatest.toFixed(0); \
-dtsmean = []; \
-dtsmean.push({ \
-t: moment(dtnow).subtract((valcnt - 1) * interval_sec, 'seconds'), \
-y: meanw \
+$('.adc-weight-latest-but')[0].innerText = meanwlatestbut.toFixed(0); \
+$('.adc-weight-latest')[0].innerText = meanwlatest.toFixed(0) + ' ( ' + \
+((meanwlatest > meanwlatestbut) ? '+' : '') + (meanwlatest - meanwlatestbut).toFixed(0) + ' )'; \
+ \
+dtsmeanLastBut.push({ \
+t: moment(dtnow).subtract(40 * interval_sec, 'seconds'), \
+y: meanwlatestbut \
 }); \
-dtsmean.push({ \
-t: moment(dtnow), \
-y: meanw \
+dtsmeanLastBut.push({ \
+t: moment(dtnow).subtract(20 * interval_sec, 'seconds'), \
+y: meanwlatestbut \
 }); \
  \
+dtsmeanLast.push({ \
+t: moment(dtnow).subtract(20 * interval_sec, 'seconds'), \
+y: meanwlatest \
+}); \
+dtsmeanLast.push({ \
+t: moment(dtnow), \
+y: meanwlatest \
+}); \
+} \
+ \
 dss.push({ \
-borderColor: '#00ff00', \
+borderColor: 'blue', \
 fill: false, \
-label: 'mean', \
-data: dtsmean, \
+label: 'meanLastBut', \
+data: dtsmeanLastBut, \
+pointRadius: 0 \
+}, { \
+borderColor: 'red', \
+fill: false, \
+label: 'meanLast', \
+data: dtsmeanLast, \
 pointRadius: 0 \
 }, { \
 borderColor: '#00aa00', \
@@ -811,6 +843,7 @@ $('#config-tambientId')[0].value = res[\"tambientId\"]; \
 $('#config-texternId')[0].value = res[\"texternId\"]; \
 $('#config-manualMode').prop('checked', res[\"manualMode\"]); \
 $('#config-adcWeightDeltaCat')[0].value = res[\"adcWeightDeltaCat\"]; \
+$('#config-adcWeightDeltaFullpower')[0].value = res[\"adcWeightDeltaFullpower\"]; \
 $('#config-tbottomLimit')[0].value = res[\"tbottomLimit\"]; \
 $('#config-twoodLimit')[0].value = res[\"twoodLimit\"]; \
 $('#config-tambientLimit')[0].value = res[\"tambientLimit\"]; \
@@ -953,6 +986,7 @@ tambientId: $('#config-tambientId')[0].value, \
 texternId: $('#config-texternId')[0].value, \
 manualMode: $('#config-manualMode').is(\":checked\"), \
 adcWeightDeltaCat: $('#config-adcWeightDeltaCat')[0].value, \
+adcWeightDeltaFullpower: $('#config-adcWeightDeltaFullpower')[0].value, \
 tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value), \
 twoodLimit: parseFloat($('#config-twoodLimit')[0].value), \
 tambientLimit: parseFloat($('#config-tambientLimit')[0].value), \

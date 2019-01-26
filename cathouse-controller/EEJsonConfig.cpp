@@ -31,10 +31,11 @@ void EEJsonConfig::Save(Print &prn, bool forWebapi)
         .property("tbottomLimit", tbottomLimit)
         .property("twoodLimit", twoodLimit)
         .property("tambientLimit", tambientLimit)
-        .property("cooldownTimeMs", cooldownTimeMs)        
+        .property("cooldownTimeMs", cooldownTimeMs)
         .property("texternGTESysOff", texternGTESysOff)
         .property("adcWeightDeltaCat", adcWeightDeltaCat)
-        .property("manualMode", manualMode)        
+        .property("adcWeightDeltaFullpower", adcWeightDeltaFullpower)
+        .property("manualMode", manualMode)
         .property("tbottomGTEFanOn", tbottomGTEFanOn);
 
     if (forWebapi) // saveconfig webapi includes view of these variabiles coming from eeStaticConfig
@@ -100,11 +101,12 @@ void EEJsonConfig::Clear()
     tbottomLimit = FACTORY_TBOTTOM_LIMIT;
     twoodLimit = FACTORY_TWOOD_LIMIT;
     tambientLimit = FACTORY_TAMBIENT_LIMIT;
-    cooldownTimeMs = FACTORY_COOLDOWN_TIME_MS;    
+    cooldownTimeMs = FACTORY_COOLDOWN_TIME_MS;
     texternGTESysOff = FACTORY_TEXTERN_GTE_SYS_OFF;
     adcWeightDeltaCat = FACTORY_ADC_WEIGHT_DELTA_CAT;
+    adcWeightDeltaFullpower = FACTORY_ADC_WEIGHT_DELTA_FULLPOWER;
     tbottomGTEFanOn = FACTORY_TBOTTOM_GTE_FAN_ON;
-    manualMode = FACTORY_MANULA_MODE;    
+    manualMode = FACTORY_MANULA_MODE;
 }
 
 //-----------------------------------------
@@ -253,15 +255,17 @@ void EEJsonConfigParseListener::value(String value)
     else if (lastKey == "tambientLimit")
         eeJsonConfig.tambientLimit = atof(value.c_str());
     else if (lastKey == "cooldownTimeMs")
-        eeJsonConfig.cooldownTimeMs = atol(value.c_str());    
+        eeJsonConfig.cooldownTimeMs = atol(value.c_str());
     else if (lastKey == "texternGTESysOff")
         eeJsonConfig.texternGTESysOff = atof(value.c_str());
     else if (lastKey == "adcWeightDeltaCat")
         eeJsonConfig.adcWeightDeltaCat = atoi(value.c_str());
+    else if (lastKey == "adcWeightDeltaFullpower")
+        eeJsonConfig.adcWeightDeltaFullpower = atoi(value.c_str());
     else if (lastKey == "tbottomGTEFanOn")
         eeJsonConfig.tbottomGTEFanOn = atof(value.c_str());
     else if (lastKey == "manualMode")
-        eeJsonConfig.manualMode = (value == "true") ? true : false;    
+        eeJsonConfig.manualMode = (value == "true") ? true : false;
 
     //Serial.println("value: " + value);
 }

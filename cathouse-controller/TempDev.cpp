@@ -31,11 +31,7 @@ DallasTemperature DS18B20(&tempOneWire);
 void setupTemperatureDevices()
 {
     DS18B20.begin();
-    temperatureDeviceCount = DS18B20.getDeviceCount();
-
-    //DS18B20.setResolution(12);
-    DS18B20.setResolution(10);
-
+    temperatureDeviceCount = DS18B20.getDeviceCount();                
     Serial.printf("temperature device count = %d\n", temperatureDeviceCount);
     if (temperatureDeviceCount > 0)
     {
@@ -57,7 +53,9 @@ void setupTemperatureDevices()
                     tempDevAddress[i][6],
                     tempDevAddress[i][7]);
 
-            Serial.printf("sensor [%d] address = %s\n", i, tempDevHexAddress[i]);
+            Serial.printf("sensor [%d] address = %s\n", i, tempDevHexAddress[i]);            
+
+            DS18B20.setResolution(9);
         }
 
         temperatureHistory = (float **)malloc(sizeof(float *) * temperatureDeviceCount);
@@ -65,7 +63,7 @@ void setupTemperatureDevices()
         auto threshold = FREERAM_THRESHOLD_MIN_BYTES;
 
         auto wifiramsize = 3 * 1024;
-        auto adcweightramsize = ADCWEIGHT_HISTORY_BACKLOG_KB * 1024;
+        auto adcweightramsize = (int)( ADCWEIGHT_HISTORY_BACKLOG_KB * 1024);
 
         auto ramsize = freeMemorySum() - threshold - adcweightramsize - wifiramsize;
         auto _temperatureHistorySize = ramsize / temperatureDeviceCount / sizeof(float);
@@ -107,7 +105,7 @@ void readTemperatures()
     for (int i = 0; i < temperatureDeviceCount; ++i)
     {
         auto id = tempDevHexAddress[i];
-        auto temp = DS18B20.getTempC(tempDevAddress[i]);
+        auto temp = DS18B20.getTempC(tempDevAddress[i]);        
 
         if (strncmp(id, eeStaticConfig.tbottomId, DS18B20_ID_STRLENMAX) == 0)
         {
@@ -130,10 +128,10 @@ void readTemperatures()
             textern_assigned = true;
         }
 
-        //Serial.printf("temperature sensor [%d] = %f\n", i, temp);
-        //Serial.printf("tbottom [%f] ; twood [%f] ; tambient [%f] ; textern [%f]\n", tbottom, twood, tambient, textern);
+        //Serial.printf("temperature sensor [%d] = %f\n", i, temp);        
         temperatures[i] = temp;
     }
+    Serial.printf("tbottom [%f] ; twood [%f] ; tambient [%f] ; textern [%f]\n", tbottom, twood, tambient, textern);
 
     lastTemperatureRead = millis();
 }

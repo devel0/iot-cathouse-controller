@@ -25,6 +25,7 @@ enum CycleTypes
 extern CycleTypes prevCycle;
 extern CycleTypes currentCycle;
 
+int getPorts();
 void engineProcess();
 String getCycleStr(CycleTypes cycle);
 void setManual();

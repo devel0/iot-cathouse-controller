@@ -18,7 +18,7 @@ class EEJsonConfig
 {
 public:
   // if true ports will not changed automatically by the mcu but can managed through webapi
-  bool manualMode;  
+  bool manualMode;
 
   // if bottom temp >= tbottomLimit heat ports gets disabled for cooldownTimeMs
   double tbottomLimit;
@@ -30,16 +30,19 @@ public:
   double tambientLimit;
 
   // (fanmode) duration of cooldown if cooldown condition occurs (see tbottomLimit, twoodLimit, tambientLimit)
-  unsigned long cooldownTimeMs;  
-    
+  unsigned long cooldownTimeMs;
+
   // if textern >= texternGTESysOff system enter disable state
   double texternGTESysOff;
 
   // adc weight quantity delta between mean values (last 20sec) to detect ingress/egress of the cat
   int adcWeightDeltaCat;
 
+  // adc weight quantity delta between no ports enabled and all ports enabled to compensate noise
+  int adcWeightDeltaFullpower;
+
   // when in fullpower mode fan activate if tbottom >= T
-  double tbottomGTEFanOn;  
+  double tbottomGTEFanOn;
 
   // serialize this config in json format using overridable Printer write method
   void Save(Print &prn, bool forWebapi = false);

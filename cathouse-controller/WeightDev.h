@@ -8,7 +8,7 @@ extern uint16_t *adcWeightArray;
 extern int adcWeightArrayOff;
 extern int adcWeightArraySize;
 extern int adcWeightArrayFillCnt;
-extern int adcWeightArrayOffLastEvent;
+//extern int adcWeightArrayOffLastEvent;
 
 void EvalAdcWeight();
 

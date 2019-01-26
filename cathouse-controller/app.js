@@ -24,29 +24,33 @@ requirejs.config({
 function showSpin() {
     $('.j-spin').removeClass("collapse");
 }
+
 function hideSpin() {
     $('.j-spin').addClass("collapse");
 }
 
 function showSpinInfo() {
-//    $('.j-spin-info').removeClass("collapse");
+    //    $('.j-spin-info').removeClass("collapse");
 }
+
 function hideSpinInfo() {
-//    $('.j-spin-info').addClass("collapse");
+    //    $('.j-spin-info').addClass("collapse");
 }
 
 function showSpinChart() {
     $('.j-spin-chart').removeClass("collapse");
 }
+
 function hideSpinChart() {
     $('.j-spin-chart').addClass("collapse");
 }
 
 function showSpinTemp() {
-//    $('.j-spin-temp').removeClass("collapse");
+    //    $('.j-spin-temp').removeClass("collapse");
 }
+
 function hideSpinTemp() {
-//    $('.j-spin-temp').addClass("collapse");
+    //    $('.j-spin-temp').addClass("collapse");
 }
 
 function showHome() {
@@ -261,35 +265,63 @@ async function reloadInfo() {
                     y: val
                 });
             });
-            let meanw = _.reduce(ary, function (memo, num) {
-                return memo + num;
-            }, 0) / valcnt;
-            let meanwlatest = 0.0; {
-                let i = valcnt - 1;
-                let c = 0;
-                while (i >= 0 && c < 20) {
-                    meanwlatest += ary[i];
-                    ++c;
+
+            dtsmeanLastBut = [];
+            dtsmeanLast = [];
+
+            if (valcnt > 40) {
+                let meanwlatestbut = 0.0; {
+                    let i = valcnt - 20 - 1;
+                    let c = 0;
+                    while (i >= 0 && c < 20) {
+                        meanwlatestbut += ary[i--];
+                        ++c;
+                    }
+                    meanwlatestbut /= 20;
                 }
-                meanwlatest /= 20;
+                let meanwlatest = 0.0; {
+                    let i = valcnt - 1;
+                    let c = 0;
+                    while (i >= 0 && c < 20) {
+                        meanwlatest += ary[i--];
+                        ++c;
+                    }
+                    meanwlatest /= 20;
+                }
+                $('.adc-weight-latest-but')[0].innerText = meanwlatestbut.toFixed(0);
+                $('.adc-weight-latest')[0].innerText = meanwlatest.toFixed(0) + ' ( ' +
+                ((meanwlatest > meanwlatestbut) ? '+' : '') + (meanwlatest - meanwlatestbut).toFixed(0) + ' )';
+
+                dtsmeanLastBut.push({
+                    t: moment(dtnow).subtract(40 * interval_sec, 'seconds'),
+                    y: meanwlatestbut
+                });
+                dtsmeanLastBut.push({
+                    t: moment(dtnow).subtract(20 * interval_sec, 'seconds'),
+                    y: meanwlatestbut
+                });
+
+                dtsmeanLast.push({
+                    t: moment(dtnow).subtract(20 * interval_sec, 'seconds'),
+                    y: meanwlatest
+                });
+                dtsmeanLast.push({
+                    t: moment(dtnow),
+                    y: meanwlatest
+                });
             }
-            $('.adc-weight')[0].innerText = meanw.toFixed(0);
-            $('.adc-weight-latest')[0].innerText = meanwlatest.toFixed(0);
-            dtsmean = [];
-            dtsmean.push({
-                t: moment(dtnow).subtract((valcnt - 1) * interval_sec, 'seconds'),
-                y: meanw
-            });
-            dtsmean.push({
-                t: moment(dtnow),
-                y: meanw
-            });
 
             dss.push({
-                borderColor: '#00ff00',
+                borderColor: 'blue',
                 fill: false,
-                label: 'mean',
-                data: dtsmean,
+                label: 'meanLastBut',
+                data: dtsmeanLastBut,
+                pointRadius: 0
+            }, {
+                borderColor: 'red',
+                fill: false,
+                label: 'meanLast',
+                data: dtsmeanLast,
                 pointRadius: 0
             }, {
                 borderColor: '#00aa00',
@@ -835,12 +867,13 @@ async function reloadConfig() {
     $('#config-texternId')[0].value = res["texternId"];
     $('#config-manualMode').prop('checked', res["manualMode"]);
     $('#config-adcWeightDeltaCat')[0].value = res["adcWeightDeltaCat"];
+    $('#config-adcWeightDeltaFullpower')[0].value = res["adcWeightDeltaFullpower"];
     $('#config-tbottomLimit')[0].value = res["tbottomLimit"];
     $('#config-twoodLimit')[0].value = res["twoodLimit"];
     $('#config-tambientLimit')[0].value = res["tambientLimit"];
-    $('#config-cooldownTimeMs-min')[0].value = res["cooldownTimeMs"] / 1000.0 / 60.0;    
+    $('#config-cooldownTimeMs-min')[0].value = res["cooldownTimeMs"] / 1000.0 / 60.0;
     $('#config-texternGTESysOff')[0].value = res["texternGTESysOff"];
-    $('#config-tbottomGTEFanOn')[0].value = res["tbottomGTEFanOn"];    
+    $('#config-tbottomGTEFanOn')[0].value = res["tbottomGTEFanOn"];
 }
 
 var infoLastLoad;
@@ -986,12 +1019,13 @@ async function saveConfig() {
         texternId: $('#config-texternId')[0].value,
         manualMode: $('#config-manualMode').is(":checked"),
         adcWeightDeltaCat: $('#config-adcWeightDeltaCat')[0].value,
+        adcWeightDeltaFullpower: $('#config-adcWeightDeltaFullpower')[0].value,
         tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value),
         twoodLimit: parseFloat($('#config-twoodLimit')[0].value),
         tambientLimit: parseFloat($('#config-tambientLimit')[0].value),
-        cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60,        
+        cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60,
         texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value),
-        tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value)        
+        tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value)
     };
 
     while (!finished) {
