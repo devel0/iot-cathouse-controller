@@ -38,6 +38,10 @@ font-style: italic; \
 .fstrong { \
 font-weight: bold; \
 } \
+.f-danger { \
+color: white; \
+background-color: red; \
+} \
 </style> \
 </head> \
  \
