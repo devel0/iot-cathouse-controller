@@ -147,11 +147,13 @@ class=\"h3\">W</span></td> \
 </tr> \
 <tr> \
 <td class=\"text-right text-nowrap align-middle\">Freeram current / min</td> \
-<td class=\"align-middle\"><span class='free-ram ml-3'></span> / <span class='free-ram-min ml-3'></span></td> \
+<td class=\"align-middle\"><span class='free-ram ml-3'></span> / <span class='free-ram-min'></span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right text-nowrap align-middle\">ADC weight mean last but / last</td> \
-<td class=\"align-middle\"><span class='adc-weight-latest-but ml-3'></span> / <span class='adc-weight-latest ml-3'></span></td> \
+<td class=\"text-right text-nowrap align-middle\">ADC weight mean last but / \
+last</td> \
+<td class=\"align-middle\"><span class='adc-weight-latest-but ml-3'></span> / \
+<span class='adc-weight-latest'></span></td> \
 </tr> \
 <tr> \
 <td class=\"text-right text-nowrap align-middle\">Temperature history \
@@ -268,7 +270,8 @@ ingress/egress of the cat</td> \
 <td class='cfg-lbl-pink align-middle'>ADC weight delta fullpower</td> \
 <td><input type='text' maxlength=\"16\" class='form-control' id='config-adcWeightDeltaFullpower'></input></td> \
 <td></td> \
-<td class='cfg-notes'>adc weight quantity delta between no ports enabled and all ports enabled to compensate noise</td> \
+<td class='cfg-notes'>adc weight quantity delta between no ports enabled and all \
+ports enabled to compensate noise</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Temperature sensor ID ( bottom )</td> \
