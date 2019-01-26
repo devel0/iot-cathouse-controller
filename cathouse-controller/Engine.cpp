@@ -158,7 +158,7 @@ enum TTrendTypes
 };
 TTrendTypes getTBottomTrend()
 {
-    auto diff = tbottom - (eeJsonConfig.tbottomLimit - 2);
+    auto diff = tbottom - (eeJsonConfig.tbottomLimit);
 
     /*
     auto idxCur = tbottomLastSamplesIdx;
@@ -199,8 +199,11 @@ void engineProcess()
         }
     }
 
+    if (eeJsonConfig.manualMode && currentCycle != manual)
+        setManual();
+
     // disable ports if textern exceed
-    if (textern_assigned && textern >= eeJsonConfig.texternGTESysOff)
+    if (!eeJsonConfig.manualMode && textern_assigned && textern >= eeJsonConfig.texternGTESysOff)
     {
         if (currentCycle != disabled)
             setCurrentCycle(disabled);
