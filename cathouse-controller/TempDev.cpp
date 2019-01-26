@@ -138,7 +138,7 @@ void readTemperatures()
             temperatures[i] = temp;
         }
     }
-    Serial.printf("tbottom [%f] ; twood [%f] ; tambient [%f] ; textern [%f]\n", tbottom, twood, tambient, textern);
+    //Serial.printf("tbottom [%f] ; twood [%f] ; tambient [%f] ; textern [%f]\n", tbottom, twood, tambient, textern);
 
     lastTemperatureRead = millis();
 }
