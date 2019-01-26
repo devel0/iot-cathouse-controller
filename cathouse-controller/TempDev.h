@@ -17,6 +17,8 @@ extern uint16_t temperatureHistoryFillCnt;
 extern uint16_t temperatureHistoryOff;
 extern unsigned long lastTemperatureHistoryRecord;
 
+extern int tempReadFailure;
+
 // computed : nr of sample foreach temperature device
 extern uint16_t temperatureHistorySize;
 

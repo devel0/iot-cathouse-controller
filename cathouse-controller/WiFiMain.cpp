@@ -315,6 +315,9 @@ bool manageWifi()
             client.print(F(", \"temperatureHistoryOff\":"));
             client.print(temperatureHistoryOff);
 
+            client.print(F(", \"temp_read_failure\":"));
+            client.print(tempReadFailure);
+
             client.print(F(", \"manualMode\":"));
             client.print(eeJsonConfig.manualMode ? "true" : "false");
 

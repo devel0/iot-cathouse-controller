@@ -237,6 +237,7 @@ async function reloadInfo() {
     $('.free-ram')[0].innerText = human_readable_filesize(res.freeram);
     $('.free-ram-min')[0].innerText = human_readable_filesize(res.freeram_min);
     $('.temp-history-interval-min')[0].innerText = res.temp_history_interval_min.toFixed(1);
+    $('.temp-read-failure')[0].innerText = res.temp_read_failure;
     $('.cycle-prev-current')[0].innerText = res.prev_cycle + "/" + res.current_cycle;
     $('.cat-is-in-there')[0].innerText = res.catIsInThere ? 'yes' : 'no';
     if (res.catIsInThere)

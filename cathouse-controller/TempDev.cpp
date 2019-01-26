@@ -8,6 +8,8 @@
 
 int temperatureDeviceCount = 0;
 
+int tempReadFailure = 0;
+
 DeviceAddress *tempDevAddress; // DeviceAddress defined as uint8_t[8]
 char **tempDevHexAddress;
 
@@ -31,7 +33,7 @@ DallasTemperature DS18B20(&tempOneWire);
 void setupTemperatureDevices()
 {
     DS18B20.begin();
-    temperatureDeviceCount = DS18B20.getDeviceCount();                
+    temperatureDeviceCount = DS18B20.getDeviceCount();
     Serial.printf("temperature device count = %d\n", temperatureDeviceCount);
     if (temperatureDeviceCount > 0)
     {
@@ -53,7 +55,7 @@ void setupTemperatureDevices()
                     tempDevAddress[i][6],
                     tempDevAddress[i][7]);
 
-            Serial.printf("sensor [%d] address = %s\n", i, tempDevHexAddress[i]);            
+            Serial.printf("sensor [%d] address = %s\n", i, tempDevHexAddress[i]);
 
             DS18B20.setResolution(9);
         }
@@ -63,7 +65,7 @@ void setupTemperatureDevices()
         auto threshold = FREERAM_THRESHOLD_MIN_BYTES;
 
         auto wifiramsize = 3 * 1024;
-        auto adcweightramsize = (int)( ADCWEIGHT_HISTORY_BACKLOG_KB * 1024);
+        auto adcweightramsize = (int)(ADCWEIGHT_HISTORY_BACKLOG_KB * 1024);
 
         auto ramsize = freeMemorySum() - threshold - adcweightramsize - wifiramsize;
         auto _temperatureHistorySize = ramsize / temperatureDeviceCount / sizeof(float);
@@ -105,31 +107,36 @@ void readTemperatures()
     for (int i = 0; i < temperatureDeviceCount; ++i)
     {
         auto id = tempDevHexAddress[i];
-        auto temp = DS18B20.getTempC(tempDevAddress[i]);        
+        auto temp = DS18B20.getTempC(tempDevAddress[i]);
+        if (temp == DEVICE_DISCONNECTED_C)
+            ++tempReadFailure;
+        else
+        {
 
-        if (strncmp(id, eeStaticConfig.tbottomId, DS18B20_ID_STRLENMAX) == 0)
-        {
-            tbottom = temp;
-            tbottom_assigned = true;
-        }
-        else if (strncmp(id, eeStaticConfig.twoodId, DS18B20_ID_STRLENMAX) == 0)
-        {
-            twood = temp;
-            twood_assigned = true;
-        }
-        else if (strncmp(id, eeStaticConfig.tambientId, DS18B20_ID_STRLENMAX) == 0)
-        {
-            tambient = temp;
-            tambient_assigned = true;
-        }
-        else if (strncmp(id, eeStaticConfig.texternId, DS18B20_ID_STRLENMAX) == 0)
-        {
-            textern = temp;
-            textern_assigned = true;
-        }
+            if (strncmp(id, eeStaticConfig.tbottomId, DS18B20_ID_STRLENMAX) == 0)
+            {
+                tbottom = temp;
+                tbottom_assigned = true;
+            }
+            else if (strncmp(id, eeStaticConfig.twoodId, DS18B20_ID_STRLENMAX) == 0)
+            {
+                twood = temp;
+                twood_assigned = true;
+            }
+            else if (strncmp(id, eeStaticConfig.tambientId, DS18B20_ID_STRLENMAX) == 0)
+            {
+                tambient = temp;
+                tambient_assigned = true;
+            }
+            else if (strncmp(id, eeStaticConfig.texternId, DS18B20_ID_STRLENMAX) == 0)
+            {
+                textern = temp;
+                textern_assigned = true;
+            }
 
-        //Serial.printf("temperature sensor [%d] = %f\n", i, temp);        
-        temperatures[i] = temp;
+            //Serial.printf("temperature sensor [%d] = %f\n", i, temp);
+            temperatures[i] = temp;
+        }
     }
     Serial.printf("tbottom [%f] ; twood [%f] ; tambient [%f] ; textern [%f]\n", tbottom, twood, tambient, textern);
 
