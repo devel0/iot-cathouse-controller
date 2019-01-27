@@ -321,6 +321,9 @@ bool manageWifi()
             client.print(F(", \"manualMode\":"));
             client.print(eeJsonConfig.manualMode ? "true" : "false");
 
+            client.print(F(", \"adcWeightLastSampleCnt\":"));
+            client.print(ADCWEIGHT_LASTSAMPLES_CNT);
+
             client.print(F(", \"adcWeightArraySize\":"));
             client.print(adcWeightArraySize);
 
@@ -538,7 +541,7 @@ bool manageWifi()
             {
               changed = !catInThere;
               catInThere = true;
-            }      
+            }
 
             Serial.printf("engine> override catInThere = %d\n", catInThere ? 1 : 0);
 

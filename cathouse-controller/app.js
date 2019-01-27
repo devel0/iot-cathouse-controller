@@ -16,6 +16,7 @@ var LED_PORT = 5;
 var sensorDesc = [];
 
 var decimalSep = '.';
+var adcWeightLastSampleCnt = 0;
 
 requirejs.config({
     "moment": "://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"
@@ -246,6 +247,7 @@ async function reloadInfo() {
         $('.cat-is-in-there').addClass('port-on');
     else
         $('.cat-is-in-there').removeClass('port-on');
+    adcWeightLastSampleCnt = res.adcWeightLastSampleCnt;
 
     // adc weight array chart
     // cat in there chart
@@ -272,40 +274,40 @@ async function reloadInfo() {
             dtsmeanLastBut = [];
             dtsmeanLast = [];
 
-            if (valcnt > 40) {
+            if (adcWeightLastSampleCnt > 0 && valcnt > adcWeightLastSampleCnt * 2) {
                 let meanwlatestbut = 0.0; {
-                    let i = valcnt - 20 - 1;
+                    let i = valcnt - adcWeightLastSampleCnt - 1;
                     let c = 0;
-                    while (i >= 0 && c < 20) {
+                    while (i >= 0 && c < adcWeightLastSampleCnt) {
                         meanwlatestbut += ary[i--];
                         ++c;
                     }
-                    meanwlatestbut /= 20;
+                    meanwlatestbut /= adcWeightLastSampleCnt;
                 }
                 let meanwlatest = 0.0; {
                     let i = valcnt - 1;
                     let c = 0;
-                    while (i >= 0 && c < 20) {
+                    while (i >= 0 && c < adcWeightLastSampleCnt) {
                         meanwlatest += ary[i--];
                         ++c;
                     }
-                    meanwlatest /= 20;
+                    meanwlatest /= adcWeightLastSampleCnt;
                 }
                 $('.adc-weight-latest-but')[0].innerText = meanwlatestbut.toFixed(0);
                 $('.adc-weight-latest')[0].innerText = meanwlatest.toFixed(0) + ' ( ' +
                     ((meanwlatest > meanwlatestbut) ? '+' : '') + (meanwlatest - meanwlatestbut).toFixed(0) + ' )';
 
                 dtsmeanLastBut.push({
-                    t: moment(dtnow).subtract(40 * interval_sec, 'seconds'),
+                    t: moment(dtnow).subtract(adcWeightLastSampleCnt * 2 * interval_sec, 'seconds'),
                     y: meanwlatestbut
                 });
                 dtsmeanLastBut.push({
-                    t: moment(dtnow).subtract(20 * interval_sec, 'seconds'),
+                    t: moment(dtnow).subtract(adcWeightLastSampleCnt * interval_sec, 'seconds'),
                     y: meanwlatestbut
                 });
 
                 dtsmeanLast.push({
-                    t: moment(dtnow).subtract(20 * interval_sec, 'seconds'),
+                    t: moment(dtnow).subtract(adcWeightLastSampleCnt * interval_sec, 'seconds'),
                     y: meanwlatest
                 });
                 dtsmeanLast.push({

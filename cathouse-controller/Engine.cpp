@@ -279,10 +279,8 @@ void engineProcess()
                 {
                     auto trend = getTBottomTrend();
 
-                    if (trend == increasing ||
-                        timeDiff(lastStandbyTrendEval, millis()) > ENGINE_STANDBY_REACTION_INTERVAL_MS)
+                    if (timeDiff(lastStandbyTrendEval, millis()) > ENGINE_STANDBY_REACTION_INTERVAL_MS)
                     {
-
                         auto ports = getPorts();
                         switch (trend)
                         {
