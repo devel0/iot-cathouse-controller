@@ -255,19 +255,6 @@ void engineProcess()
                                       tbottom, eeJsonConfig.tbottomGTEFanOn);
                     }
 
-                    if (twood >= eeJsonConfig.twoodGTEFanOn && pfan == LOW)
-                    {
-                        digitalWrite(FAN_PIN, HIGH);
-                        Serial.printf("engine> enable fan because twood %f>=%f\n",
-                                      tbottom, eeJsonConfig.twoodGTEFanOn);
-                    }
-                    else if (twood < eeJsonConfig.twoodGTEFanOn - 1 && pfan == HIGH)
-                    {
-                        digitalWrite(FAN_PIN, LOW);
-                        Serial.printf("engine> disable fan because twood %f<%f-1 in fullpower cycle\n",
-                                      tbottom, eeJsonConfig.twoodGTEFanOn);
-                    }
-
                     auto tFromLimit = eeJsonConfig.tbottomLimit - tbottom;
                     if (tFromLimit <= ENGINE_STANDBY_TARGET_TEMP_DISTANCE)
                     {
@@ -290,6 +277,22 @@ void engineProcess()
 
             case standby:
             {
+                if (twood_assigned)
+                {
+                    if (twood >= eeJsonConfig.twoodGTEFanOn && pfan == LOW)
+                    {
+                        digitalWrite(FAN_PIN, HIGH);
+                        Serial.printf("engine> enable fan because twood %f>=%f\n",
+                                      twood, eeJsonConfig.twoodGTEFanOn);
+                    }
+                    else if (twood < eeJsonConfig.twoodGTEFanOn - 1 && pfan == HIGH)
+                    {
+                        digitalWrite(FAN_PIN, LOW);
+                        Serial.printf("engine> disable fan because twood %f<%f-1 in fullpower cycle\n",
+                                      twood, eeJsonConfig.twoodGTEFanOn);
+                    }
+                }
+
                 if (tbottom_assigned)
                 {
                     auto trend = getTBottomTrend();
