@@ -62,7 +62,7 @@ void EvalAdcWeight()
             catExitedStart = millis();
         }
 
-        if (timeDiff(catExitedStart, millis()) >= ((unsigned long)eeJsonConfig.catExitThresholdMin) * 60 * 1000)
+        if (catInThere && timeDiff(catExitedStart, millis()) >= ((unsigned long)eeJsonConfig.catExitThresholdMin) * 60 * 1000)
         {
             Serial.printf("engine> cat exited because weight < %f for more than %d minutes\n",
                           eeJsonConfig.adcWeightMeanCatInMinimum,
