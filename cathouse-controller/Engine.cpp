@@ -279,6 +279,7 @@ void engineProcess()
             {
                 if (twood_assigned)
                 {
+                    auto pfan = digitalRead(FAN_PIN);
                     if (twood >= eeJsonConfig.twoodGTEFanOn && pfan == LOW)
                     {
                         digitalWrite(FAN_PIN, HIGH);
