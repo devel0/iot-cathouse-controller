@@ -255,13 +255,13 @@ void engineProcess()
                                       tbottom, eeJsonConfig.tbottomGTEFanOn);
                     }
 
-                    if (tbottom >= eeJsonConfig.twoodGTEFanOn && pfan == LOW)
+                    if (twood >= eeJsonConfig.twoodGTEFanOn && pfan == LOW)
                     {
                         digitalWrite(FAN_PIN, HIGH);
                         Serial.printf("engine> enable fan because twood %f>=%f\n",
                                       tbottom, eeJsonConfig.twoodGTEFanOn);
                     }
-                    else if (tbottom < eeJsonConfig.twoodGTEFanOn - 1 && pfan == HIGH)
+                    else if (twood < eeJsonConfig.twoodGTEFanOn - 1 && pfan == HIGH)
                     {
                         digitalWrite(FAN_PIN, LOW);
                         Serial.printf("engine> disable fan because twood %f<%f-1 in fullpower cycle\n",
