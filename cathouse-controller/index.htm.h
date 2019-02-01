@@ -154,10 +154,8 @@ class=\"h3\">W</span></td> \
 <td class=\"align-middle\"><span class='free-ram ml-3'></span> / <span class='free-ram-min'></span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right text-nowrap align-middle\">ADC weight mean last but / \
-last</td> \
-<td class=\"align-middle\"><span class='adc-weight-latest-but ml-3'></span> / \
-<span class='adc-weight-latest'></span></td> \
+<td class=\"text-right text-nowrap align-middle\">ADC weight mean last</td> \
+<td class=\"align-middle\"><span class='adc-weight-latest ml-3'></span></td> \
 </tr> \
 <tr> \
 <td class=\"text-right text-nowrap align-middle\">Temperature history \
@@ -263,19 +261,16 @@ class='cat-is-in-there ml-3'></span></button> \
 <td></td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl-pink align-middle'>ADC weight delta cat</td> \
-<td><input type='text' maxlength=\"16\" class='form-control' id='config-adcWeightDeltaCat'></input></td> \
+<td class='cfg-lbl-pink align-middle'>ADC weight mean cat in minimum</td> \
+<td><input type='text' maxlength=\"16\" class='form-control' id='config-adcWeightMeanCatInMinimum'></input></td> \
 <td></td> \
-<td class='cfg-notes'>adc weight quantity delta between mean values (last 20sec) to \
-detect \
-ingress/egress of the cat</td> \
+<td class='cfg-notes'>adc weight mean (minimum) required to consider cat in there</td> \
 </tr> \
 <tr> \
-<td class='cfg-lbl-pink align-middle'>ADC weight delta fullpower</td> \
-<td><input type='text' maxlength=\"16\" class='form-control' id='config-adcWeightDeltaFullpower'></input></td> \
+<td class='cfg-lbl-pink align-middle'>cat exit threshold minutes</td> \
+<td><input type='text' maxlength=\"16\" class='form-control' id='config-catExitThresholdMin'></input></td> \
 <td></td> \
-<td class='cfg-notes'>adc weight quantity delta between no ports enabled and all \
-ports enabled to compensate noise</td> \
+<td class='cfg-notes'>minutes to wait before confirm cat out there</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl align-middle'>Temperature sensor ID ( bottom )</td> \
@@ -307,6 +302,12 @@ ports enabled to compensate noise</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tbottomGTEFanOn'></input></td> \
 <td class='align-middle'>C</td> \
 <td class='cfg-notes'>when in fullpower mode fan activate if tbottom >= T</td> \
+</tr> \
+<tr> \
+<td class='cfg-lbl-hot align-middle'>TWood >= T fan on</td> \
+<td><input type='number' step='0.1' class='form-control' id='config-twoodGTEFanOn'></input></td> \
+<td class='align-middle'>C</td> \
+<td class='cfg-notes'>when twood >= T activate fan</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl-cool align-middle'>Cooldown time</td> \

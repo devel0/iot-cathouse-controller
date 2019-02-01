@@ -15,6 +15,8 @@ unsigned long currentCycleBegin = millis();
 
 unsigned long lastEngineProcessExec = millis();
 
+bool catInThereOverriden = false;
+
 // retrieve port in order of preference from 1 to 4
 int getPortPref(int pref)
 {
@@ -249,8 +251,21 @@ void engineProcess()
                     else if (tbottom < eeJsonConfig.tbottomGTEFanOn - 1 && pfan == HIGH)
                     {
                         digitalWrite(FAN_PIN, LOW);
-                        Serial.printf("engine> disable fan because tbottom %f<%f in fullpower cycle\n",
+                        Serial.printf("engine> disable fan because tbottom %f<%f-1 in fullpower cycle\n",
                                       tbottom, eeJsonConfig.tbottomGTEFanOn);
+                    }
+
+                    if (tbottom >= eeJsonConfig.twoodGTEFanOn && pfan == LOW)
+                    {
+                        digitalWrite(FAN_PIN, HIGH);
+                        Serial.printf("engine> enable fan because twood %f>=%f\n",
+                                      tbottom, eeJsonConfig.twoodGTEFanOn);
+                    }
+                    else if (tbottom < eeJsonConfig.twoodGTEFanOn - 1 && pfan == HIGH)
+                    {
+                        digitalWrite(FAN_PIN, LOW);
+                        Serial.printf("engine> disable fan because twood %f<%f-1 in fullpower cycle\n",
+                                      tbottom, eeJsonConfig.twoodGTEFanOn);
                     }
 
                     auto tFromLimit = eeJsonConfig.tbottomLimit - tbottom;

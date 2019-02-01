@@ -319,10 +319,7 @@ bool manageWifi()
             client.print(tempReadFailure);
 
             client.print(F(", \"manualMode\":"));
-            client.print(eeJsonConfig.manualMode ? "true" : "false");
-
-            client.print(F(", \"adcWeightLastSampleCnt\":"));
-            client.print(ADCWEIGHT_LASTSAMPLES_CNT);
+            client.print(eeJsonConfig.manualMode ? "true" : "false");            
 
             client.print(F(", \"adcWeightArraySize\":"));
             client.print(adcWeightArraySize);
@@ -536,11 +533,13 @@ bool manageWifi()
             {
               changed = catInThere;
               catInThere = false;
+              catInThereOverriden = false;
             }
             else
             {
               changed = !catInThere;
               catInThere = true;
+              catInThereOverriden = true;
             }
 
             Serial.printf("engine> override catInThere = %d\n", catInThere ? 1 : 0);

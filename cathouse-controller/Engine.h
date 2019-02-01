@@ -24,6 +24,7 @@ enum CycleTypes
 
 extern CycleTypes prevCycle;
 extern CycleTypes currentCycle;
+extern bool catInThereOverriden;
 
 int getPorts();
 void engineProcess();

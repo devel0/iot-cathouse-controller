@@ -16,7 +16,6 @@ var LED_PORT = 5;
 var sensorDesc = [];
 
 var decimalSep = '.';
-var adcWeightLastSampleCnt = 0;
 
 requirejs.config({
     "moment": "://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"
@@ -246,8 +245,7 @@ async function reloadInfo() {
     if (res.catIsInThere)
         $('.cat-is-in-there').addClass('port-on');
     else
-        $('.cat-is-in-there').removeClass('port-on');
-    adcWeightLastSampleCnt = res.adcWeightLastSampleCnt;
+        $('.cat-is-in-there').removeClass('port-on');    
 
     // adc weight array chart
     // cat in there chart
@@ -269,66 +267,9 @@ async function reloadInfo() {
                     t: tt,
                     y: val
                 });
-            });
-
-            dtsmeanLastBut = [];
-            dtsmeanLast = [];
-
-            if (adcWeightLastSampleCnt > 0 && valcnt > adcWeightLastSampleCnt * 2) {
-                let meanwlatestbut = 0.0; {
-                    let i = valcnt - adcWeightLastSampleCnt - 1;
-                    let c = 0;
-                    while (i >= 0 && c < adcWeightLastSampleCnt) {
-                        meanwlatestbut += ary[i--];
-                        ++c;
-                    }
-                    meanwlatestbut /= adcWeightLastSampleCnt;
-                }
-                let meanwlatest = 0.0; {
-                    let i = valcnt - 1;
-                    let c = 0;
-                    while (i >= 0 && c < adcWeightLastSampleCnt) {
-                        meanwlatest += ary[i--];
-                        ++c;
-                    }
-                    meanwlatest /= adcWeightLastSampleCnt;
-                }
-                $('.adc-weight-latest-but')[0].innerText = meanwlatestbut.toFixed(0);
-                $('.adc-weight-latest')[0].innerText = meanwlatest.toFixed(0) + ' ( ' +
-                    ((meanwlatest > meanwlatestbut) ? '+' : '') + (meanwlatest - meanwlatestbut).toFixed(0) + ' )';
-
-                dtsmeanLastBut.push({
-                    t: moment(dtnow).subtract(adcWeightLastSampleCnt * 2 * interval_sec, 'seconds'),
-                    y: meanwlatestbut
-                });
-                dtsmeanLastBut.push({
-                    t: moment(dtnow).subtract(adcWeightLastSampleCnt * interval_sec, 'seconds'),
-                    y: meanwlatestbut
-                });
-
-                dtsmeanLast.push({
-                    t: moment(dtnow).subtract(adcWeightLastSampleCnt * interval_sec, 'seconds'),
-                    y: meanwlatest
-                });
-                dtsmeanLast.push({
-                    t: moment(dtnow),
-                    y: meanwlatest
-                });
-            }
+            });                        
 
             dss.push({
-                borderColor: 'blue',
-                fill: false,
-                label: 'meanLastBut',
-                data: dtsmeanLastBut,
-                pointRadius: 0
-            }, {
-                borderColor: 'red',
-                fill: false,
-                label: 'meanLast',
-                data: dtsmeanLast,
-                pointRadius: 0
-            }, {
                 borderColor: '#00aa00',
                 fill: true,
                 label: 'adc Weight',
@@ -871,14 +812,15 @@ async function reloadConfig() {
     $('#config-tambientId')[0].value = res["tambientId"];
     $('#config-texternId')[0].value = res["texternId"];
     $('#config-manualMode').prop('checked', res["manualMode"]);
-    $('#config-adcWeightDeltaCat')[0].value = res["adcWeightDeltaCat"];
-    $('#config-adcWeightDeltaFullpower')[0].value = res["adcWeightDeltaFullpower"];
+    $('#config-adcWeightMeanCatInMinimum')[0].value = res["adcWeightMeanCatInMinimum"];
+    $('#config-catExitThresholdMin')[0].value = res["catExitThresholdMin"];
     $('#config-tbottomLimit')[0].value = res["tbottomLimit"];
     $('#config-twoodLimit')[0].value = res["twoodLimit"];
     $('#config-tambientLimit')[0].value = res["tambientLimit"];
     $('#config-cooldownTimeMs-min')[0].value = res["cooldownTimeMs"] / 1000.0 / 60.0;
     $('#config-texternGTESysOff')[0].value = res["texternGTESysOff"];
     $('#config-tbottomGTEFanOn')[0].value = res["tbottomGTEFanOn"];
+    $('#config-twoodGTEFanOn')[0].value = res["twoodGTEFanOn"];
 }
 
 var infoLastLoad;
@@ -1023,14 +965,15 @@ async function saveConfig() {
         tambientId: $('#config-tambientId')[0].value,
         texternId: $('#config-texternId')[0].value,
         manualMode: $('#config-manualMode').is(":checked"),
-        adcWeightDeltaCat: $('#config-adcWeightDeltaCat')[0].value,
-        adcWeightDeltaFullpower: $('#config-adcWeightDeltaFullpower')[0].value,
+        adcWeightMeanCatInMinimum: $('#config-adcWeightMeanCatInMinimum')[0].value,
+        catExitThresholdMin: $('#config-catExitThresholdMin')[0].value,
         tbottomLimit: parseFloat($('#config-tbottomLimit')[0].value),
         twoodLimit: parseFloat($('#config-twoodLimit')[0].value),
         tambientLimit: parseFloat($('#config-tambientLimit')[0].value),
         cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60,
         texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value),
-        tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value)
+        tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value),
+        twoodGTEFanOn: parseFloat($('#config-twoodGTEFanOn')[0].value)
     };
 
     while (!finished) {

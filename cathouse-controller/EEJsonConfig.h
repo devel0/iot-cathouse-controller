@@ -35,14 +35,17 @@ public:
   // if textern >= texternGTESysOff system enter disable state
   double texternGTESysOff;
 
-  // adc weight quantity delta between mean values (last 20sec) to detect ingress/egress of the cat
-  int adcWeightDeltaCat;
+  // adc weight minimum required to consider cat in there
+  int adcWeightMeanCatInMinimum;
 
-  // adc weight quantity delta between no ports enabled and all ports enabled to compensate noise
-  int adcWeightDeltaFullpower;
+  // minutes to wait before confirm cat out there
+  int catExitThresholdMin;
 
   // when in fullpower mode fan activate if tbottom >= T
   double tbottomGTEFanOn;
+
+  // when twood >= T activate fan
+  double twoodGTEFanOn;
 
   // serialize this config in json format using overridable Printer write method
   void Save(Print &prn, bool forWebapi = false);

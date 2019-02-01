@@ -33,10 +33,11 @@ void EEJsonConfig::Save(Print &prn, bool forWebapi)
         .property("tambientLimit", tambientLimit)
         .property("cooldownTimeMs", cooldownTimeMs)
         .property("texternGTESysOff", texternGTESysOff)
-        .property("adcWeightDeltaCat", adcWeightDeltaCat)
-        .property("adcWeightDeltaFullpower", adcWeightDeltaFullpower)
+        .property("adcWeightMeanCatInMinimum", adcWeightMeanCatInMinimum)
+        .property("catExitThresholdMin", catExitThresholdMin)
         .property("manualMode", manualMode)
-        .property("tbottomGTEFanOn", tbottomGTEFanOn);
+        .property("tbottomGTEFanOn", tbottomGTEFanOn)
+        .property("twoodGTEFanOn", twoodGTEFanOn);
 
     if (forWebapi) // saveconfig webapi includes view of these variabiles coming from eeStaticConfig
     {
@@ -103,9 +104,10 @@ void EEJsonConfig::Clear()
     tambientLimit = FACTORY_TAMBIENT_LIMIT;
     cooldownTimeMs = FACTORY_COOLDOWN_TIME_MS;
     texternGTESysOff = FACTORY_TEXTERN_GTE_SYS_OFF;
-    adcWeightDeltaCat = FACTORY_ADC_WEIGHT_DELTA_CAT;
-    adcWeightDeltaFullpower = FACTORY_ADC_WEIGHT_DELTA_FULLPOWER;
+    adcWeightMeanCatInMinimum = FACTORY_ADC_WEIGHT_MEAN_CATIN_MINIMUM;
+    catExitThresholdMin = FACTORY_CATEXIT_THRESHOLD_MIN;
     tbottomGTEFanOn = FACTORY_TBOTTOM_GTE_FAN_ON;
+    twoodGTEFanOn = FACTORY_TWOOD_GTE_FAN_ON;
     manualMode = FACTORY_MANULA_MODE;
 }
 
@@ -258,12 +260,14 @@ void EEJsonConfigParseListener::value(String value)
         eeJsonConfig.cooldownTimeMs = atol(value.c_str());
     else if (lastKey == "texternGTESysOff")
         eeJsonConfig.texternGTESysOff = atof(value.c_str());
-    else if (lastKey == "adcWeightDeltaCat")
-        eeJsonConfig.adcWeightDeltaCat = atoi(value.c_str());
-    else if (lastKey == "adcWeightDeltaFullpower")
-        eeJsonConfig.adcWeightDeltaFullpower = atoi(value.c_str());
+    else if (lastKey == "adcWeightMeanCatInMinimum")
+        eeJsonConfig.adcWeightMeanCatInMinimum = atoi(value.c_str());
+    else if (lastKey == "catExitThresholdMin")
+        eeJsonConfig.catExitThresholdMin = atoi(value.c_str());
     else if (lastKey == "tbottomGTEFanOn")
         eeJsonConfig.tbottomGTEFanOn = atof(value.c_str());
+    else if (lastKey == "twoodGTEFanOn")
+        eeJsonConfig.twoodGTEFanOn = atof(value.c_str());
     else if (lastKey == "manualMode")
         eeJsonConfig.manualMode = (value == "true") ? true : false;
 
