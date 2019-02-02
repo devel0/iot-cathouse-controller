@@ -179,7 +179,7 @@ void engineProcess()
         (twood_assigned && twood >= eeJsonConfig.twoodLimit) ||
         (tambient_assigned && tambient >= eeJsonConfig.tambientLimit))
     {
-        if (currentCycle != cooldown)
+        if (currentCycle != cooldown && currentCycle != none)
         {
             setCurrentCycle(cooldown);
             Serial.printf("engine> cooldown because tbottom %f>=%f or twood %f>=%f or tambient %f>=%f\n",
