@@ -46,7 +46,7 @@ void EvalAdcWeight()
 
         if (!catInThere)
         {
-            Serial.printf("engine> cat entered because weight >= %f\n",
+            Serial.printf("engine> cat entered because weight >= %d\n",
                           eeJsonConfig.adcWeightMeanCatInMinimum);
             catInThere = true;
             // if cat in there overriden we waited cat entered truly allow deactivation
@@ -64,7 +64,7 @@ void EvalAdcWeight()
 
         if (catInThere && timeDiff(catExitedStart, millis()) >= ((unsigned long)eeJsonConfig.catExitThresholdMin) * 60 * 1000)
         {
-            Serial.printf("engine> cat exited because weight < %f for more than %d minutes\n",
+            Serial.printf("engine> cat exited because weight < %d for more than %d minutes\n",
                           eeJsonConfig.adcWeightMeanCatInMinimum,
                           eeJsonConfig.catExitThresholdMin);
             catInThere = false;
