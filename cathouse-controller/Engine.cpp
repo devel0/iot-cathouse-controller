@@ -251,23 +251,23 @@ void engineProcess()
                     auto diffBottom = tbottom - (eeJsonConfig.tbottomLimit - eeJsonConfig.targetTempFromLimit);
                     auto diffWood = twood - (eeJsonConfig.twoodLimit - eeJsonConfig.targetTempFromLimit);
 
-                    if ((abs(diffBottom) > TBOTTOM_TREND_DELTA_C || abs(diffWood) > TBOTTOM_TREND_DELTA_C) &&
-                        timeDiff(lastStandbyTrendEval, millis()) > ENGINE_STANDBY_REACTION_INTERVAL_MS)
+                    if (timeDiff(lastStandbyTrendEval, millis()) > ENGINE_STANDBY_REACTION_INTERVAL_MS)
                     {
                         auto ports = getPorts();
-                        auto diff = min(diffBottom, diffWood);
                         auto portsToSet = -1;
 
-                        if (diff > 0)
+                        if (max(diffBottom, diffWood) > -TBOTTOM_TREND_DELTA_C)
                         {
                             if (ports > 0)
                             {
-                                portsToSet = 0;                                
+                                portsToSet = 0;
                             }
                         }
                         else
                         {
-                            int pq = (int)max(diff / TBOTTOM_TREND_DELTA_C, 4.0);
+                            auto distance = -max(diffBottom, diffWood);
+
+                            int pq = (int)(min(distance / TBOTTOM_TREND_DELTA_C, 4.0));
                             if (pq != ports)
                             {
                                 portsToSet = pq;
