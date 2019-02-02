@@ -277,8 +277,8 @@ void engineProcess()
                         {
                             setPorts(portsToSet);
                             Serial.printf("engine> tbottom=%f (target=%f) and twood=%f (target=%f) makes %d ports active\n",
-                                          tbottom, tbottom - eeJsonConfig.targetTempFromLimit,
-                                          twood, twood - eeJsonConfig.targetTempFromLimit,
+                                          tbottom, eeJsonConfig.tbottomLimit - eeJsonConfig.targetTempFromLimit,
+                                          twood, eeJsonConfig.twoodLimit - eeJsonConfig.targetTempFromLimit,
                                           portsToSet);
                         }
 
