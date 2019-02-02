@@ -43,19 +43,20 @@ void EvalAdcWeight()
     if (adcWeight >= eeJsonConfig.adcWeightMeanCatInMinimum)
     {
         catExitedStarted = false;
+        // if cat in there overriden we waited cat entered truly allow deactivation
+        catInThereOverriden = false;
 
         if (!catInThere)
         {
             Serial.printf("engine> cat entered because weight >= %d\n",
                           eeJsonConfig.adcWeightMeanCatInMinimum);
             catInThere = true;
-            // if cat in there overriden we waited cat entered truly allow deactivation
-            catInThereOverriden = false;
+
             printAdcInfo();
         }
     }
     else if (!catInThereOverriden)
-    {        
+    {
         if (!catExitedStarted)
         {
             catExitedStarted = true;
