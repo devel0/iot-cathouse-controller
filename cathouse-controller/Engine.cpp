@@ -296,7 +296,10 @@ void engineProcess()
                         {
                             int pq = (int)max(diff / TBOTTOM_TREND_DELTA_C, 4.0);
                             if (pq != ports)
+                            {
+                                setPorts(pq);
                                 Serial.printf("engine> set %d ports quantity\n", pq);
+                            }
                         }
 
                         lastStandbyTrendEval = millis();
