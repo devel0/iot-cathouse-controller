@@ -154,10 +154,6 @@ class=\"h3\">W</span></td> \
 <td class=\"align-middle\"><span class='free-ram ml-3'></span> / <span class='free-ram-min'></span></td> \
 </tr> \
 <tr> \
-<td class=\"text-right text-nowrap align-middle\">ADC weight mean last</td> \
-<td class=\"align-middle\"><span class='adc-weight-latest ml-3'></span></td> \
-</tr> \
-<tr> \
 <td class=\"text-right text-nowrap align-middle\">Temperature history \
 interval (min)</td> \
 <td class=\"align-middle\"><span class='temp-history-interval-min ml-3'></span></td> \
@@ -264,7 +260,7 @@ class='cat-is-in-there ml-3'></span></button> \
 <td class='cfg-lbl-pink align-middle'>ADC weight mean cat in minimum</td> \
 <td><input type='text' maxlength=\"16\" class='form-control' id='config-adcWeightMeanCatInMinimum'></input></td> \
 <td></td> \
-<td class='cfg-notes'>adc weight mean (minimum) required to consider cat in there</td> \
+<td class='cfg-notes'>adc weight minimum required to consider cat in there</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl-pink align-middle'>cat exit threshold minutes</td> \

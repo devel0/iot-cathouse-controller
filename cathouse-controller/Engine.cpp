@@ -147,24 +147,6 @@ void backPrevCycle()
     prevCycleBegin = cb;
 }
 
-enum TTrendTypes
-{
-    increasing,
-    stable,
-    decreasing
-};
-TTrendTypes getTBottomTrend()
-{
-    auto diff = tbottom - (eeJsonConfig.tbottomLimit - ENGINE_STANDBY_TARGET_TEMP_DISTANCE);
-
-    if (diff > TBOTTOM_TREND_DELTA_C)
-        return increasing;
-    else if (diff < -TBOTTOM_TREND_DELTA_C)
-        return decreasing;
-
-    return stable;
-}
-
 unsigned long lastStandbyTrendEval = millis();
 
 void engineProcess()
@@ -296,32 +278,27 @@ void engineProcess()
 
                 if (tbottom_assigned)
                 {
-                    auto trend = getTBottomTrend();
-
-                    if (timeDiff(lastStandbyTrendEval, millis()) > ENGINE_STANDBY_REACTION_INTERVAL_MS)
+                    auto diff = tbottom - (eeJsonConfig.tbottomLimit - ENGINE_STANDBY_TARGET_TEMP_DISTANCE);
+                    if (abs(diff) > TBOTTOM_TREND_DELTA_C &&
+                        timeDiff(lastStandbyTrendEval, millis()) > ENGINE_STANDBY_REACTION_INTERVAL_MS)
                     {
                         auto ports = getPorts();
-                        switch (trend)
-                        {
-                        case increasing:
+
+                        if (diff > 0)
                         {
                             if (ports > 0)
                             {
-                                setPorts(ports - 1);
-                                Serial.printf("engine> set %d ports quantity due to increasing tbottom trend\n", ports - 1);
+                                Serial.printf("engine> set 0 ports quantity because exceeded target temp\n");
+                                setPorts(0);
                             }
                         }
-                        break;
-                        case decreasing:
+                        else
                         {
-                            if (ports < 4)
-                            {
-                                setPorts(ports + 1);
-                                Serial.printf("engine> set %d ports quantity due to decreasing tbottom trend\n", ports + 1);
-                            }
+                            int pq = (int)max(diff / TBOTTOM_TREND_DELTA_C, 4.0);
+                            if (pq != ports)
+                                Serial.printf("engine> set %d ports quantity\n", pq);
                         }
-                        break;
-                        }
+
                         lastStandbyTrendEval = millis();
                     }
                     break;

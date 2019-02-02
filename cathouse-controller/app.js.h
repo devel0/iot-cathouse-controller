@@ -9,7 +9,6 @@ var LED_PORT = 5; \
 var sensorDesc = []; \
  \
 var decimalSep = '.'; \
-var adcWeightLastSampleCnt = 0; \
  \
 requirejs.config({ \
 \"moment\": \"://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js\" \
@@ -229,7 +228,6 @@ if (res.catIsInThere) \
 $('.cat-is-in-there').addClass('port-on'); \
 else \
 $('.cat-is-in-there').removeClass('port-on'); \
-adcWeightLastSampleCnt = res.adcWeightLastSampleCnt; \
  \
 { \
 var ctx = document.getElementById(\"weightChart\").getContext('2d'); \
@@ -251,38 +249,7 @@ y: val \
 }); \
 }); \
  \
-dtsmeanLastBut = []; \
-dtsmeanLast = []; \
- \
-if (adcWeightLastSampleCnt > 0 && valcnt > adcWeightLastSampleCnt) { \
-let meanwlatest = 0.0; { \
-let i = valcnt - 1; \
-let c = 0; \
-while (i >= 0 && c < adcWeightLastSampleCnt) { \
-meanwlatest += ary[i--]; \
-++c; \
-} \
-meanwlatest /= adcWeightLastSampleCnt; \
-} \
-$('.adc-weight-latest')[0].innerText = meanwlatest.toFixed(0); \
- \
-dtsmeanLast.push({ \
-t: moment(dtnow).subtract(adcWeightLastSampleCnt * interval_sec, 'seconds'), \
-y: meanwlatest \
-}); \
-dtsmeanLast.push({ \
-t: moment(dtnow), \
-y: meanwlatest \
-}); \
-} \
- \
 dss.push({ \
-borderColor: 'red', \
-fill: false, \
-label: 'meanLast', \
-data: dtsmeanLast, \
-pointRadius: 0 \
-}, { \
 borderColor: '#00aa00', \
 fill: true, \
 label: 'adc Weight', \
