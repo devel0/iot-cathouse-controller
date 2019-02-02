@@ -8,10 +8,8 @@ enum CycleTypes
     // initial
     none,
 
-    // heat first phase
-    fullpower,
-    // heat continuous
-    standby,
+    // active mode
+    active,    
 
     // tbottom or twood or tambient exceeded
     cooldown,

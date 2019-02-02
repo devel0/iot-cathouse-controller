@@ -78,10 +78,8 @@ String getCycleStr(CycleTypes cycle)
     {
     case none:
         return "none";
-    case fullpower:
-        return "fullpower";
-    case standby:
-        return "standby";
+    case active:
+        return "active";
     case cooldown:
         return "cooldown";
     case disabled:
@@ -148,6 +146,7 @@ void backPrevCycle()
 }
 
 unsigned long lastStandbyTrendEval = millis();
+unsigned long lastFanActivation = millis();
 
 void engineProcess()
 {
@@ -209,87 +208,61 @@ void engineProcess()
         }
         else // CAT IS IN THERE
         {
-            // initiate fullpower
+            // initiate active cycle
             if (currentCycle != disabled && currentCycle != cooldown &&
-                currentCycle != fullpower && currentCycle != standby)
+                currentCycle != active)
             {
-                setCurrentCycle(fullpower);
+                setCurrentCycle(active);
+            }
+
+            // manage fan
+            {
+                if (tbottom_assigned && twood_assigned)
+                {
+                    auto pfan = digitalRead(FAN_PIN);
+
+                    if (pfan == LOW &&
+                        (tbottom >= eeJsonConfig.tbottomGTEFanOn || twood >= eeJsonConfig.twoodGTEFanOn))
+                    {
+                        lastFanActivation = millis();
+                        digitalWrite(FAN_PIN, HIGH);
+                        Serial.printf("engine> enable fan because tbottom %f>=%f or twood %f>=%f\n",
+                                      tbottom, eeJsonConfig.tbottomGTEFanOn,
+                                      twood, eeJsonConfig.twoodGTEFanOn);
+                    }
+                    else if (pfan == HIGH &&
+                             timeDiff(lastFanActivation, millis()) >= ((unsigned long)ENGINE_FAN_DEACTIVATION_THRESHOLD_MIN) * 1000 * 60 &&
+                             tbottom < eeJsonConfig.tbottomGTEFanOn && twood < eeJsonConfig.twoodGTEFanOn)
+                    {
+                        digitalWrite(FAN_PIN, LOW);
+                        Serial.printf("engine> disable fan\n");
+                    }
+                }
             }
 
             switch (currentCycle)
             {
-            case fullpower:
+
+            case active:
             {
-                if (tbottom_assigned)
-                {
-                    // manage fan
-                    auto pfan = digitalRead(FAN_PIN);
-                    if (tbottom >= eeJsonConfig.tbottomGTEFanOn && pfan == LOW)
-                    {
-                        digitalWrite(FAN_PIN, HIGH);
-                        Serial.printf("engine> enable fan because tbottom %f>=%f in fullpower cycle\n",
-                                      tbottom, eeJsonConfig.tbottomGTEFanOn);
-                    }
-                    else if (tbottom < eeJsonConfig.tbottomGTEFanOn - 1 && pfan == HIGH)
-                    {
-                        digitalWrite(FAN_PIN, LOW);
-                        Serial.printf("engine> disable fan because tbottom %f<%f-1 in fullpower cycle\n",
-                                      tbottom, eeJsonConfig.tbottomGTEFanOn);
-                    }
 
-                    auto tFromLimit = eeJsonConfig.tbottomLimit - tbottom;
-                    if (tFromLimit <= ENGINE_STANDBY_TARGET_TEMP_DISTANCE)
-                    {
-                        Serial.printf("engine> switch to standby cycle disabling fan if any\n");
-                        setCurrentCycle(standby);
-                        setPorts(2);
-                        digitalWrite(FAN_PIN, LOW);
-                    }
-                    else
-                    {
-                        if (getPorts() != 4)
-                        {
-                            Serial.printf("engine> enable fullpower cycle ports\n");
-                            setPorts(4);
-                        }
-                    }
-                }
-            }
-            break;
-
-            case standby:
-            {
-                if (twood_assigned)
+                if (tbottom_assigned && twood_assigned)
                 {
-                    auto pfan = digitalRead(FAN_PIN);
-                    if (twood >= eeJsonConfig.twoodGTEFanOn && pfan == LOW)
-                    {
-                        digitalWrite(FAN_PIN, HIGH);
-                        Serial.printf("engine> enable fan because twood %f>=%f\n",
-                                      twood, eeJsonConfig.twoodGTEFanOn);
-                    }
-                    else if (twood < eeJsonConfig.twoodGTEFanOn - 1 && pfan == HIGH)
-                    {
-                        digitalWrite(FAN_PIN, LOW);
-                        Serial.printf("engine> disable fan because twood %f<%f-1 in fullpower cycle\n",
-                                      twood, eeJsonConfig.twoodGTEFanOn);
-                    }
-                }
+                    auto diffBottom = tbottom - (eeJsonConfig.tbottomLimit - eeJsonConfig.targetTempFromLimit);
+                    auto diffWood = twood - (eeJsonConfig.twoodLimit - eeJsonConfig.targetTempFromLimit);
 
-                if (tbottom_assigned)
-                {
-                    auto diff = tbottom - (eeJsonConfig.tbottomLimit - ENGINE_STANDBY_TARGET_TEMP_DISTANCE);
-                    if (abs(diff) > TBOTTOM_TREND_DELTA_C &&
+                    if ((abs(diffBottom) > TBOTTOM_TREND_DELTA_C || abs(diffWood) > TBOTTOM_TREND_DELTA_C) &&
                         timeDiff(lastStandbyTrendEval, millis()) > ENGINE_STANDBY_REACTION_INTERVAL_MS)
                     {
                         auto ports = getPorts();
+                        auto diff = min(diffBottom, diffWood);
+                        auto portsToSet = -1;
 
                         if (diff > 0)
                         {
                             if (ports > 0)
                             {
-                                Serial.printf("engine> set 0 ports quantity because exceeded target temp\n");
-                                setPorts(0);
+                                portsToSet = 0;                                
                             }
                         }
                         else
@@ -297,9 +270,16 @@ void engineProcess()
                             int pq = (int)max(diff / TBOTTOM_TREND_DELTA_C, 4.0);
                             if (pq != ports)
                             {
-                                setPorts(pq);
-                                Serial.printf("engine> set %d ports quantity\n", pq);
+                                portsToSet = pq;
                             }
+                        }
+                        if (portsToSet != -1)
+                        {
+                            setPorts(portsToSet);
+                            Serial.printf("engine> tbottom=%f (target=%f) and twood=%f (target=%f) makes %d ports active\n",
+                                          tbottom, tbottom - eeJsonConfig.targetTempFromLimit,
+                                          twood, twood - eeJsonConfig.targetTempFromLimit,
+                                          portsToSet);
                         }
 
                         lastStandbyTrendEval = millis();

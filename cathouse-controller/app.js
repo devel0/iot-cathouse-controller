@@ -821,6 +821,7 @@ async function reloadConfig() {
     $('#config-texternGTESysOff')[0].value = res["texternGTESysOff"];
     $('#config-tbottomGTEFanOn')[0].value = res["tbottomGTEFanOn"];
     $('#config-twoodGTEFanOn')[0].value = res["twoodGTEFanOn"];
+    $('#config-targetTempFromLimit')[0].value = res['targetTempFromLimit'];
 }
 
 var infoLastLoad;
@@ -973,7 +974,8 @@ async function saveConfig() {
         cooldownTimeMs: parseFloat($('#config-cooldownTimeMs-min')[0].value) * 1000 * 60,
         texternGTESysOff: parseFloat($('#config-texternGTESysOff')[0].value),
         tbottomGTEFanOn: parseFloat($('#config-tbottomGTEFanOn')[0].value),
-        twoodGTEFanOn: parseFloat($('#config-twoodGTEFanOn')[0].value)
+        twoodGTEFanOn: parseFloat($('#config-twoodGTEFanOn')[0].value),
+        targetTempFromLimit: parseFloat($('#config-targetTempFromLimit')[0].value)
     };
 
     while (!finished) {

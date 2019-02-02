@@ -37,7 +37,8 @@ void EEJsonConfig::Save(Print &prn, bool forWebapi)
         .property("catExitThresholdMin", catExitThresholdMin)
         .property("manualMode", manualMode)
         .property("tbottomGTEFanOn", tbottomGTEFanOn)
-        .property("twoodGTEFanOn", twoodGTEFanOn);
+        .property("twoodGTEFanOn", twoodGTEFanOn)
+        .property("targetTempFromLimit", targetTempFromLimit);
 
     if (forWebapi) // saveconfig webapi includes view of these variabiles coming from eeStaticConfig
     {
@@ -108,6 +109,7 @@ void EEJsonConfig::Clear()
     catExitThresholdMin = FACTORY_CATEXIT_THRESHOLD_MIN;
     tbottomGTEFanOn = FACTORY_TBOTTOM_GTE_FAN_ON;
     twoodGTEFanOn = FACTORY_TWOOD_GTE_FAN_ON;
+    targetTempFromLimit = FACTORY_TARGET_TEMP_FROM_LIMIT;
     manualMode = FACTORY_MANULA_MODE;
 }
 
@@ -268,6 +270,8 @@ void EEJsonConfigParseListener::value(String value)
         eeJsonConfig.tbottomGTEFanOn = atof(value.c_str());
     else if (lastKey == "twoodGTEFanOn")
         eeJsonConfig.twoodGTEFanOn = atof(value.c_str());
+    else if (lastKey == "targetTempFromLimit")
+        eeJsonConfig.targetTempFromLimit = atof(value.c_str());
     else if (lastKey == "manualMode")
         eeJsonConfig.manualMode = (value == "true") ? true : false;
 

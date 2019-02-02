@@ -21,6 +21,11 @@ text-align: right; \
 font-weight: bold; \
 color:mediumvioletred; \
 } \
+.cfg-lbl-target { \
+text-align: right; \
+font-weight: bold; \
+color: rgb(194, 103, 0); \
+} \
 .cfg-lbl-pink { \
 text-align: right; \
 font-weight: bold; \
@@ -294,10 +299,17 @@ class='cat-is-in-there ml-3'></span></button> \
 </tr> \
  \
 <tr> \
+<td class='cfg-lbl-target align-middle'>Target T from limit</td> \
+<td><input type='number' step='0.1' class='form-control' id='config-targetTempFromLimit'></input></td> \
+<td class='align-middle'>C</td> \
+<td class='cfg-notes'>temperature target from tbottom/twood limits distance</td> \
+</tr> \
+ \
+<tr> \
 <td class='cfg-lbl-hot align-middle'>TBottom >= T fan on</td> \
 <td><input type='number' step='0.1' class='form-control' id='config-tbottomGTEFanOn'></input></td> \
 <td class='align-middle'>C</td> \
-<td class='cfg-notes'>when in fullpower mode fan activate if tbottom >= T</td> \
+<td class='cfg-notes'>when tbottom >= T activate fan</td> \
 </tr> \
 <tr> \
 <td class='cfg-lbl-hot align-middle'>TWood >= T fan on</td> \

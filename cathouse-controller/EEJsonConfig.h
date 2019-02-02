@@ -41,11 +41,14 @@ public:
   // minutes to wait before confirm cat out there
   int catExitThresholdMin;
 
-  // when in fullpower mode fan activate if tbottom >= T
+  // when tbottom >= T activate fan
   double tbottomGTEFanOn;
 
   // when twood >= T activate fan
   double twoodGTEFanOn;
+
+  // temperature target from tbottom/twood limits distance
+  double targetTempFromLimit;
 
   // serialize this config in json format using overridable Printer write method
   void Save(Print &prn, bool forWebapi = false);
