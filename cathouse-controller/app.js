@@ -245,7 +245,7 @@ async function reloadInfo() {
     if (res.catIsInThere)
         $('.cat-is-in-there').addClass('port-on');
     else
-        $('.cat-is-in-there').removeClass('port-on');    
+        $('.cat-is-in-there').removeClass('port-on');
 
     // adc weight array chart
     // cat in there chart
@@ -255,6 +255,9 @@ async function reloadInfo() {
         var dtnow = moment();
         let ary = res["adcWeightArray"];
         let interval_sec = res["statIntervalSec"];
+
+        if (ary.length > 0)
+            $('.adc-pressure-val')[0].innerText = ary[ary.length - 1];
 
         var i = 0;
         var dss = []; {
@@ -267,7 +270,7 @@ async function reloadInfo() {
                     t: tt,
                     y: val
                 });
-            });                        
+            });
 
             dss.push({
                 borderColor: '#00aa00',
