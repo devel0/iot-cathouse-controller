@@ -110,7 +110,7 @@ void EEJsonConfig::Clear()
     tbottomGTEFanOn = FACTORY_TBOTTOM_GTE_FAN_ON;
     twoodGTEFanOn = FACTORY_TWOOD_GTE_FAN_ON;
     targetTempFromLimit = FACTORY_TARGET_TEMP_FROM_LIMIT;
-    manualMode = FACTORY_MANULA_MODE;
+    manualMode = FACTORY_MANUAL_MODE;
 }
 
 //-----------------------------------------
