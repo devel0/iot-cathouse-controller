@@ -294,7 +294,10 @@ bool manageWifi()
 
             client.print('{');
 
-            client.print(F("\"statIntervalSec\":"));
+            client.print(F("\"wifiSignalStrength\":"));
+            client.print(WiFi.RSSI());
+
+            client.print(F(", \"statIntervalSec\":"));
             client.print(UPDATE_STATS_INTERVAL_MS / 1000);
 
             client.print(F(", \"freeram\":"));

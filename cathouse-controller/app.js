@@ -247,6 +247,49 @@ async function reloadInfo() {
     else
         $('.cat-is-in-there').removeClass('port-on');
 
+    {
+        let wifiCanvas = $("#wifiCanvas")[0];
+        let w = wifiCanvas.width;
+        let h = wifiCanvas.height;
+        let ctx = wifiCanvas.getContext("2d");
+        //ctx.fillStyle = "#ff0000";
+        //ctx.fillRect(0,0,w,h);
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.strokeStyle = "#000000";
+        ctx.strokeRect(0, 0, w, h);
+
+        let bars = 0;
+        let signal = res["wifiSignalStrength"];
+        // https://eyesaas.com/wi-fi-signal-strength/
+        if (signal >= -90) ++bars;
+        if (signal >= -80) ++bars;
+        if (signal >= -70) ++bars;
+        if (signal >= -67) ++bars;
+        if (signal >= -60) ++bars;
+        if (signal >= -50) ++bars;
+        if (signal >= -30) ++bars;
+
+        let barw = w / 7 - 1;
+        let barstep = w / 7;
+
+        let x = 0;
+        for (i = 0; i < bars; ++i) {
+            ctx.fillStyle = "#4682b5";
+            ctx.fillRect(x, 0, barw, h);
+
+            x += barstep;
+        }
+
+        $("#wifi-signal-percent")[0].innerText = (100.0 * bars / 7.0).toFixed(0) + "%";
+
+        /*
+        ctx.moveTo(0,0);
+        ctx.lineTo(w-1, 0);
+        ctx.lineTo(w-1, h-1);
+        ctx.lineTo(0, h-1);*/
+    }
+
     // adc weight array chart
     // cat in there chart
     {
@@ -950,6 +993,10 @@ async function myfn() {
         let dss = dss1.concat(dss2);
         exportDataSet(dss, 'full.csv');
     });
+
+    var wifiCanvas = $("#wifiCanvas")[0];
+    wifiCanvas.width = 50;
+    wifiCanvas.height = 15;
 
     autorefreshInProgress = false;
 }

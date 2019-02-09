@@ -79,8 +79,12 @@ crossorigin=\"anonymous\"> \
 <div class=\"col-auto\"> \
 <h2>Charts</h2> \
 </div> \
-<div class=\"col-auto\"> \
+<div class=\"col-auto d-flex align-items-center\"> \
 <input type=\"button\" class=\"btn btn-link\" id=\"bitExport\" value='Download CSV' /> \
+</div> \
+<div class=\"col-auto d-flex align-items-center\"> \
+Wifi signal<canvas class=\"ml-1\" id=\"wifiCanvas\"></canvas> \
+<span class=\"ml-1\" id=\"wifi-signal-percent\"></span> \
 </div> \
 <div class=\"col\"><small><i class=\"fas fa-sync-alt j-spin-chart collapse\"></i></small></div> \
 </div> \
@@ -170,6 +174,10 @@ interval (min)</td> \
 <tr> \
 <td class=\"text-right text-nowrap align-middle\">Cycle (prev/current)</td> \
 <td class=\"align-middle\"><span class='cycle-prev-current ml-3'></span></td> \
+</tr> \
+<tr> \
+<td class=\"text-right text-nowrap align-middle\">ADC pressure value</td> \
+<td class=\"align-middle\"><span class='adc-pressure-val ml-3'></span></td> \
 </tr> \
 <tr> \
 <td class=\"text-right text-nowrap align-middle\">Cat is in there</td> \
