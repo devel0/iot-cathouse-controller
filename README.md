@@ -67,24 +67,16 @@ write correspondent temperature IDs in fields ( 16 hex char foreach device )
 
 ## heat modes
 
-![img](doc/cycles.png)
-
 ### auto mode
 
-- when cat enters all ports enabled until reaches 1C before tbottom limit then it goes to standby mode
-    - during fullpower mode if tbottom great or equals than `TBottom >= T fan on` fan enables to speed up ambient t increase
-- in standby mode last 100sec of bottom temperature samples are evaluted to balance
-    - if tbottom trend increase 1 port will disabled
-    - if tbottom trend decrease 1 port will enabled
-    - ports are selected in order of preference as from [Config.h](cathouse-controller/Config.h) PORT_PREF
-    - trend delta can be configured in [Config.h](cathouse-controller/Config.h) TBOTTOM_TREND_DELTA_C
-
-- if some limit condition occurs
-    - bottom temperature great or equals `Bottom temperature limit`
-    - wood temperature great or equals `Wood temperature limit`
-    - ambient temperature great or equals `Ambient temperature limit`
-- then the system goes off for given `Cooldown time`
-- if external temperature great or equals `Extern >= T sys OFF` then system goes off independently cat is in there or not
+- when cat enters all ports enabled until reaches **Target T from limit** value from either one of bottom toward **Bottom temperature limit** or wood toward **Wood temperature limit**
+- if some limit condition occurs system goes off for given cooldown time
+  - bottom temp great or equals bottom temp limit
+  - wood temp great or equals wood temp limit
+  - ambient temp great or equals ambient temp limit
+- if external temp great or equals 'Extern >= T sys OFF' then system goes off independently cat is in there or not
+- ports are selected in order of preference as from [Config.h](cathouse-controller/Config.h) PORT_PREF
+- trend delta can be configured in [Config.h](cathouse-controller/Config.h) TBOTTOM_TREND_DELTA_C
 
 ### manual mode
 
@@ -98,14 +90,14 @@ write correspondent temperature IDs in fields ( 16 hex char foreach device )
 |---|---|---|
 | `/tempdevices` | json | `{"tempdevices":["28b03724070000c8","28f00a3b05000038","28e2cc23070000d8","28d12b5b0500001c"]}` |
 | `/temp/devid` | text | retrieve temperature C of given `devid` device |
-| `/info` | json | `{"statIntervalSec":2, "freeram":10896, "freeram_min":4008, "history_size":1517, "history_interval_sec":113, "temperatureHistoryFillCnt":1517, "temperatureHistoryOff":545, "manualMode":false, "adcWeightArraySize":2048, "adcWeightArrayOff":681, "adcWeightArrayFillCnt":2048, "adcWeightArray":[222,219],"catIsInThere":false, "p1": false, "p2": false, "p3": false, "p4": false, "led": false, "fan": false, "runtime_hr": 112.552439, "Wh": 2731.811464}` |
+| `/info` | json | `{"wifiSignalStrength":-59, "statIntervalSec":2, "freeram":11464, "freeram_min":4168, "history_size":1455, "history_interval_sec":118, "temperatureHistoryFillCnt":1455, "temperatureHistoryOff":806, "temp_read_failure":915, "manualMode":false, "adcWeightArraySize":2048, "adcWeightArrayOff":273, "adcWeightArrayFillCnt":2048, "adcWeightArray":[848,847,849,848,...,850], "catIsInThere":true, "p1": false, "p2": true, "p3": false, "p4": true, "led": false, "fan": false, "temp_history_interval_min": 1.966667, "prev_cycle": "none", "current_cycle": "active", "runtime_hr": 82.190266, "Wh": 1087.330255}` |
 | `/temphistory` | json | `[{"28b03724070000c8":[8.00,9.00]},{"28f00a3b05000038":[4.44,4]}]` |
 | `/bithistories` | json | `{"catInThereHistory":[0,1,1],"p1History":[0,1,1],"p2History":[0,0,0],"p3History":[0,0,0],"p4History":[0,1,1],"fanHistory":[0,0,0],"disabledHistory":[0,0,0],"cooldownHistory":[0,0,0]}` |
 | `/port/get/X` | text | `0` |
 | `/port/set/X/{0,1}` | text | `OK` or `DENIED` if manualMode false |
 | `/port/toggle/X` | text | `OK` or `DENIED` if manualMode false |
 | `/setcatinthere/{0,1}` | text | `OK` |
-| `/getconfig` | json | `{"tbottomLimit":40.00,"twoodLimit":50.00,"tambientLimit":17.00,"cooldownTimeMs":120000,"standbyDurationMs":1800000,"standbyPort":2,"fullpowerDurationMs":1200000,"texternGTESysOff":14.00,"adcWeightDeltaCat":18,"manualMode":false,"fanlessMode":true,"portDurationMs":600000,"portOverlapDurationMs":420000,"tbottomGTEFanOn":20.00,"firmwareVersion":"cathouse-0.82","wifiSSID":"labwlan","tbottomId":"28b03724070000c8","twoodId":"28e2cc23070000d8","tambientId":"28f00a3b05000038","texternId":"28d12b5b0500001c"}` |
+| `/getconfig` | json | `{"tbottomLimit":45.00,"twoodLimit":60.00,"tambientLimit":17.00,"cooldownTimeMs":120000,"texternGTESysOff":14.00,"adcWeightMeanCatInMinimum":600,"catExitThresholdMin":3,"manualMode":false,"tbottomGTEFanOn":42.00,"twoodGTEFanOn":57.00,"targetTempFromLimit":4.00,"firmwareVersion":"cathouse-0.87","wifiSSID":"labwlan","tbottomId":"28b03724070000c8","twoodId":"28e2cc23070000d8","tambientId":"28f00a3b05000038","texternId":"28d12b5b0500001c"}` |
 | `/saveconfig` | json POST | |
 
 notes
